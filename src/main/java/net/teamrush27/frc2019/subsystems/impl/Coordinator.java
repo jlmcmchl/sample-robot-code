@@ -20,10 +20,7 @@ public class Coordinator extends Subsystem {
 	}
 	
 	private final Drivetrain drivetrain = Drivetrain.getInstance();
-	private final Gripper gripper = Gripper.getInstance();
-	//private final Elevator elevator = Elevator.getInstance();
 	private final LED leds = LED.getInstance();
-	//private final Forklift forks = Forklift.getInstance();
 	private boolean flashLEDs = false;
 	private int ledCycle = 0;
 	
@@ -90,8 +87,8 @@ public class Coordinator extends Subsystem {
 	
 	private SystemState handleAimTowardsCube() {
 		
-		if(Gripper.SystemState.HOLD.equals(gripper.getSystemState())){
-			wantedState = WantedState.IDLE;
+		if(false) {
+		  wantedState = WantedState.IDLE;
 			return defaultStateTransfer();
 		}
 		
@@ -110,12 +107,6 @@ public class Coordinator extends Subsystem {
 			forwardCommand = Math.min(y*.3,.3);
 		} else {
 			forwardCommand = 0;
-		}
-		
-		if(y < 25){
-			gripper.setWantedState(Gripper.WantedState.INTAKE);
-		} else {
-			gripper.setWantedState(Gripper.WantedState.OFF);
 		}
 		
 		double leftCommand = forwardCommand + turnCommand;
@@ -150,28 +141,6 @@ public class Coordinator extends Subsystem {
 	}
 	
 	private void setLEDS() {
-		/*if(forks.getDeployed()){
-			leds.setWantedState(LED.WantedState.FORKS_DEPLOYED);
-			return;
-		}*/
-
-		Gripper.SystemState gripperState = gripper.getSystemState();
-
-		if(Gripper.SystemState.EXHAUST.equals(gripperState)){
-			leds.setWantedState(LED.WantedState.EXHAUSTING_CUBE);
-			return;
-		}
-
-		if(Gripper.SystemState.INTAKE.equals(gripperState)){
-			leds.setWantedState(LED.WantedState.HARVESTING);
-			return;
-		}
-
-		if(Gripper.SystemState.HOLD.equals(gripperState)){
-			leds.setWantedState(LED.WantedState.HOLDING_CUBE);
-			return;
-		}
-		
 		if(flashLEDs){
 			limelightTable.getEntry("ledMode").setNumber(2);
 			if(ledCycle++ < 20){
