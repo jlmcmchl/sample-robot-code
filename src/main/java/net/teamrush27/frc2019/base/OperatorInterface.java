@@ -8,7 +8,6 @@ public interface OperatorInterface {
     DriveCommand getTankCommand();
     
     // OPERATOR CONTROLS
-
 	ArmInput getArmInput();
 
 }

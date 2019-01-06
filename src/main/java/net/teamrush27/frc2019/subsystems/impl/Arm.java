@@ -153,9 +153,9 @@ public class Arm extends Subsystem {
 	public void test() {
 	}
 	
-	public void setOpenLoopInput(double extension, double rotation){
+	public void setOpenLoopInput(ArmInput armInput){
 		synchronized (openLoopInput){
-			openLoopInput = new ArmInput(extension,rotation);
+			openLoopInput = armInput;
 		}
 	}
 	

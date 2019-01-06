@@ -10,12 +10,15 @@ package net.teamrush27.frc2019;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
+import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Arm.WantedState;
 
 public class Robot extends IterativeRobot {
   
   private Arm arm = Arm.getInstance();
+  private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
 
   @Override
   public void robotInit() {
@@ -40,10 +43,7 @@ public class Robot extends IterativeRobot {
   
   @Override
   public void teleopPeriodic() {
-  
-  
-  
-  
+    arm.setOpenLoopInput(operatorInterface.getArmInput());
   }
 
   @Override
