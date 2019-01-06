@@ -421,11 +421,11 @@ public class Drivetrain extends Subsystem {
 	}
 	
 	public synchronized void resetEncoders() {
-		leftMaster.setSelectedSensorPosition(0, 0, 5);
-		rightMaster.setSelectedSensorPosition(0, 0, 5);
-		leftSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		//leftMaster.setSelectedSensorPosition(0, 0, 5);
+		//rightMaster.setSelectedSensorPosition(0, 0, 5);
+		//leftSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		//leftSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-		rightSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		//rightSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		//rightSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 	}
 	
