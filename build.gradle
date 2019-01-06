@@ -3,7 +3,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2019.1.1"
 }
 
-def ROBOT_MAIN_CLASS = "frc.robot.Main"
+def ROBOT_MAIN_CLASS = "net.teamrush27.frc2019.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project EmbeddedTools.
@@ -14,14 +14,14 @@ deploy {
             // or from command line. If not found an exception will be thrown.
             // You can use getTeamOrDefault(team) instead of getTeamNumber if you
             // want to store a team number in this file.
-            team = frc.getTeamNumber()
+            team = 27;
         }
     }
     artifacts {
         frcJavaArtifact('frcJava') {
             targets << "roborio"
             // Debug can be overridden by command line, for use with VSCode
-            debug = frc.getDebugOrDefault(false)
+            debug = false;
         }
         // Built in artifact to deploy arbitrary files to the roboRIO.
         fileTreeArtifact('frcStaticFileDeploy') {
@@ -40,6 +40,14 @@ def includeDesktopSupport = false
 // Maven central needed for JUnit
 repositories {
     mavenCentral()
+
+    maven {
+        url 'http://devsite.ctr-electronics.com/maven/release/'
+    }
+
+    maven {
+        url 'http://www.kauailabs.com/maven2/'
+    }
 }
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
@@ -47,6 +55,9 @@ repositories {
 dependencies {
     compile wpi.deps.wpilib()
     compile wpi.deps.vendor.java()
+    compile 'com.ctre.phoenix:api-java:5.12.0'
+    compile 'com.ctre.phoenix:wpiapi-java:5.12.0'
+    compile 'com.kauailabs.navx.frc:navx-java:3.1.344'
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 }
