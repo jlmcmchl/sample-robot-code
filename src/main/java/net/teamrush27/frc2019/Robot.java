@@ -7,17 +7,21 @@
 
 package net.teamrush27.frc2019;
 
-import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Arm.WantedState;
+import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
+import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 
-public class Robot extends IterativeRobot {
+public class Robot extends TimedRobot {
   
   private Arm arm = Arm.getInstance();
+  private Drivetrain drivetrain = Drivetrain.getInstance();
   private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
 
   @Override
@@ -39,11 +43,13 @@ public class Robot extends IterativeRobot {
   @Override
   public void teleopInit(){
     arm.setWantedState(WantedState.OPEN_LOOP);
+    drivetrain.setOpenLoop(DriveCommand.defaultCommand());
   }
   
   @Override
   public void teleopPeriodic() {
     arm.setOpenLoopInput(operatorInterface.getArmInput());
+    drivetrain.setOpenLoop(operatorInterface.getTankCommand());
   }
 
   @Override

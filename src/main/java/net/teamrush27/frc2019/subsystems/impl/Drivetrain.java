@@ -19,6 +19,7 @@ import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
 import net.teamrush27.frc2019.util.follow.Lookahead;
@@ -88,7 +89,7 @@ public class Drivetrain extends Subsystem {
 		@Override
 		public void onStart(double timestamp) {
 			synchronized (Drivetrain.this) {
-				setOpenLoop(0, 0);
+				setOpenLoop(DriveCommand.defaultCommand());
 				setBrakeMode(false);
 				//setVelocitySetpoint(0, 0);
 				navX.reset();
@@ -390,7 +391,7 @@ public class Drivetrain extends Subsystem {
 	@Override
 	public void stop() {
 		
-		setOpenLoop(0, 0);
+		setOpenLoop(DriveCommand.defaultCommand());
 	}
 	
 	/**
@@ -399,18 +400,18 @@ public class Drivetrain extends Subsystem {
 	 * @author team254
 	 * @author cyocom
 	 */
-	public synchronized void setOpenLoop(double leftDrive, double rightDrive, boolean brakeMode) {
+	public synchronized void setOpenLoop(DriveCommand driveCommand, boolean brakeMode) {
 		if (driveMode != DriveMode.OPEN_LOOP) {// && driveMode != DriveMode.CLIMB) {
 			driveMode = DriveMode.OPEN_LOOP;
 			setBrakeMode(brakeMode);
 			setCurrentLimiting(true);
 		}
-		leftMaster.set(ControlMode.PercentOutput, -leftDrive);
-		rightMaster.set(ControlMode.PercentOutput, -rightDrive);
+		leftMaster.set(ControlMode.PercentOutput, -driveCommand.getLeftDriveInput());
+		rightMaster.set(ControlMode.PercentOutput, -driveCommand.getRightDriveInput());
 	}
 	
-	public synchronized void setOpenLoop(double leftDrive, double rightDrive) {
-		setOpenLoop(leftDrive, rightDrive, false);
+	public synchronized void setOpenLoop(DriveCommand driveCommand) {
+		setOpenLoop(driveCommand, false);
 	}
 	
 	@Override

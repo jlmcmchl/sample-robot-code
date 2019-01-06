@@ -7,6 +7,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 
 public class Coordinator extends Subsystem {
 
@@ -114,7 +115,7 @@ public class Coordinator extends Subsystem {
 		
 		System.out.println(String.format("y : %s - l : %s - r : %s",y,leftCommand,rightCommand));
 		
-		drivetrain.setOpenLoop(-leftCommand,-rightCommand);
+		drivetrain.setOpenLoop(new DriveCommand( -leftCommand,-rightCommand));
 		
 		return defaultStateTransfer();
 	}
