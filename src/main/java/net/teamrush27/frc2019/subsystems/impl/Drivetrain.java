@@ -48,11 +48,9 @@ public class Drivetrain extends Subsystem {
 	
 	private final TalonSRX leftMaster;
 	private final TalonSRX leftSlave1;
-	private final TalonSRX leftSlave2;
 
 	private final TalonSRX rightMaster;
 	private final TalonSRX rightSlave1;
-	private final TalonSRX rightSlave2;
 
 
 	// new
@@ -177,11 +175,12 @@ public class Drivetrain extends Subsystem {
 		leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 		
 		
-		leftSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_2_CAN_ID,
+		/*leftSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_2_CAN_ID,
 			RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
 		leftSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
 		leftSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
 		leftSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+		*/
 		
 		rightMaster = CANTalonFactory.createDefaultTalon(RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
 		rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
@@ -207,12 +206,13 @@ public class Drivetrain extends Subsystem {
 		rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rightSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 		
-		rightSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_2_CAN_ID,
+		/*rightSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_2_CAN_ID,
 			RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
 		rightSlave2.setInverted(true);
 		rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
 		rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rightSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+		*/
 		
 		setCurrentLimiting(false);
 		reloadGains();
@@ -252,10 +252,10 @@ public class Drivetrain extends Subsystem {
 	private void setCurrentLimiting(boolean shouldCurrentLimit) {
 		leftMaster.enableCurrentLimit(shouldCurrentLimit);
 		leftSlave1.enableCurrentLimit(shouldCurrentLimit);
-		leftSlave2.enableCurrentLimit(shouldCurrentLimit);
+		//leftSlave2.enableCurrentLimit(shouldCurrentLimit);
 		rightMaster.enableCurrentLimit(shouldCurrentLimit);
 		rightSlave1.enableCurrentLimit(shouldCurrentLimit);
-		rightSlave2.enableCurrentLimit(shouldCurrentLimit);
+		//rightSlave2.enableCurrentLimit(shouldCurrentLimit);
 	}
 	
 	/*protected void updateTurnToHeading(double timestamp) {
@@ -296,10 +296,10 @@ public class Drivetrain extends Subsystem {
 			brakeMode = requestedBrakeMode;
 			rightMaster.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
 			rightSlave1.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
-			rightSlave2.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
+			//rightSlave2.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
 			leftMaster.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
 			leftSlave1.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
-			leftSlave2.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
+			//leftSlave2.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
 		}
 	}
 	
@@ -424,9 +424,9 @@ public class Drivetrain extends Subsystem {
 		leftMaster.setSelectedSensorPosition(0, 0, 5);
 		rightMaster.setSelectedSensorPosition(0, 0, 5);
 		leftSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-		leftSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		//leftSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rightSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-		rightSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		//rightSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 	}
 	
 	public static Drivetrain getInstance() {
