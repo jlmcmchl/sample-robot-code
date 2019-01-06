@@ -161,3 +161,7 @@ bin/
 
 .vscode/
 .idea/
+
+
+#Intellij files
+*.iml
