@@ -7,32 +7,32 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import jaci.pathfinder.Pathfinder;
-import jaci.pathfinder.Trajectory;
+//import jaci.pathfinder.Pathfinder;
+//import jaci.pathfinder.Trajectory;
 import java.util.Objects;
-import net.teamrush27.frc2018.base.RobotMap;
-import net.teamrush27.frc2018.base.RobotState;
-import net.teamrush27.frc2018.constants.ChezyConstants;
-import net.teamrush27.frc2018.constants.DriveConstants;
-import net.teamrush27.frc2018.constants.FollowingConstants;
-import net.teamrush27.frc2018.constants.RobotConstants;
-import net.teamrush27.frc2018.loops.Loop;
-import net.teamrush27.frc2018.loops.Looper;
-import net.teamrush27.frc2018.subsystems.Subsystem;
-import net.teamrush27.frc2018.subsystems.impl.enumerated.DriveMode;
-import net.teamrush27.frc2018.subsystems.impl.util.DriveUtils;
-import net.teamrush27.frc2018.util.follow.Lookahead;
-import net.teamrush27.frc2018.util.follow.Path;
-import net.teamrush27.frc2018.util.follow.PathFollower;
-import net.teamrush27.frc2018.util.follow.PathFollower254Impl;
-import net.teamrush27.frc2018.util.interpolate.InterpolatingTrajectory;
-import net.teamrush27.frc2018.util.math.KinematicsUtils;
-import net.teamrush27.frc2018.util.math.RigidTransform2d;
-import net.teamrush27.frc2018.util.math.Rotation2d;
-import net.teamrush27.frc2018.util.math.Twist2d;
-import net.teamrush27.frc2018.util.motion.DistancePathFollower;
-import net.teamrush27.frc2018.wrappers.CANTalonFactory;
-import net.teamrush27.frc2018.wrappers.NavX;
+import net.teamrush27.frc2019.base.RobotMap;
+//import net.teamrush27.frc2019.base.RobotState;
+import net.teamrush27.frc2019.constants.ChezyConstants;
+import net.teamrush27.frc2019.constants.DriveConstants;
+import net.teamrush27.frc2019.constants.FollowingConstants;
+import net.teamrush27.frc2019.constants.RobotConstants;
+import net.teamrush27.frc2019.loops.Loop;
+import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
+import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
+import net.teamrush27.frc2019.util.follow.Lookahead;
+import net.teamrush27.frc2019.util.follow.Path;
+import net.teamrush27.frc2019.util.follow.PathFollower;
+import net.teamrush27.frc2019.util.follow.PathFollower254Impl;
+//import net.teamrush27.frc2019.util.interpolate.InterpolatingTrajectory;
+import net.teamrush27.frc2019.util.math.KinematicsUtils;
+import net.teamrush27.frc2019.util.math.RigidTransform2d;
+import net.teamrush27.frc2019.util.math.Rotation2d;
+import net.teamrush27.frc2019.util.math.Twist2d;
+import net.teamrush27.frc2019.util.motion.DistancePathFollower;
+import net.teamrush27.frc2019.wrappers.CANTalonFactory;
+import net.teamrush27.frc2019.wrappers.NavX;
 
 /**
  * Drivetrain Subsystem (Adapted from 254 Drive.java)
@@ -47,30 +47,32 @@ public class Drivetrain extends Subsystem {
 	
 	private final TalonSRX leftMaster;
 	private final TalonSRX leftSlave1;
+	private final TalonSRX leftSlave2;
+
 	private final TalonSRX rightMaster;
 	private final TalonSRX rightSlave1;
-	
-	// new
-	private final TalonSRX leftSlave2;
 	private final TalonSRX rightSlave2;
+
+
+	// new
 	private double timeSinceModeSwitch;
 	
 	
 	private final NavX navX;
 	
 	private DriveMode driveMode;
-	private RobotState robotState = RobotState.getInstance();
+	//private RobotState robotState = RobotState.getInstance();
 	private final DistancePathFollower leftEncoderFollower;
 	private final DistancePathFollower rightEncoderFollower;
-	private Trajectory trajectory = null;
+	//private Trajectory trajectory = null;
 	
 	private boolean brakeMode;
 	
 	private Rotation2d targetHeading = new Rotation2d();
 	private boolean isOnTarget = false;
 	
-	private final DoubleSolenoid ptoSolenoid;
-	private final DoubleSolenoid ratchetSolenoid;
+	//private final DoubleSolenoid ptoSolenoid;
+	//private final DoubleSolenoid ratchetSolenoid;
 	
 	private boolean modeChanged = false;
 	private boolean isTrajectoryInverted = false;
@@ -88,7 +90,7 @@ public class Drivetrain extends Subsystem {
 			synchronized (Drivetrain.this) {
 				setOpenLoop(0, 0);
 				setBrakeMode(false);
-				setVelocitySetpoint(0, 0);
+				//setVelocitySetpoint(0, 0);
 				navX.reset();
 			}
 		}
@@ -111,7 +113,7 @@ public class Drivetrain extends Subsystem {
 				switch (driveMode) {
 					case OPEN_LOOP:
 						break;
-					case VELOCITY_SETPOINT:
+					/*case VELOCITY_SETPOINT:
 						break;
 					case PATH_FOLLOWING:
 						if (leftEncoderFollower != null) {
@@ -126,7 +128,7 @@ public class Drivetrain extends Subsystem {
 						break;
 					case CHEZY_PATH_FOLLOWING:
 						updateChezyPathFollower(timestamp);
-						break;
+						break;*/
 					default:
 						System.out.println("Unexpected drive mode: " + driveMode);
 						break;
@@ -237,12 +239,12 @@ public class Drivetrain extends Subsystem {
 			FollowingConstants.A
 		);
 		
-		ptoSolenoid = new DoubleSolenoid(RobotMap.PTO_MODULE, RobotMap.PTO_ENGAGED_CHANNEL,
+		/*ptoSolenoid = new DoubleSolenoid(RobotMap.PTO_MODULE, RobotMap.PTO_ENGAGED_CHANNEL,
 			RobotMap.PTO_DISENGAGED_CHANNEL);
 		ratchetSolenoid = new DoubleSolenoid(RobotMap.RATCHET_MODULE,
 			RobotMap.RATCHET_ENGAGED_CHANNEL, RobotMap.RATCHET_DISENGAGED_CHANNEL);
 		ptoSolenoid.set(Value.kReverse);
-		ratchetSolenoid.set(Value.kReverse);
+		ratchetSolenoid.set(Value.kReverse);*/
 		
 	}
 	
@@ -255,7 +257,7 @@ public class Drivetrain extends Subsystem {
 		rightSlave2.enableCurrentLimit(shouldCurrentLimit);
 	}
 	
-	protected void updateTurnToHeading(double timestamp) {
+	/*protected void updateTurnToHeading(double timestamp) {
 		
 		if(modeChanged){
 			leftMaster.selectProfileSlot(2,0);
@@ -283,7 +285,7 @@ public class Drivetrain extends Subsystem {
 				.inverseKinematics(new Twist2d(0, 0, robot_to_target.getRadians()));
 		updatePositionSetpoint(wheel_delta.leftVelocity + getLeftDistanceInches(),
 				wheel_delta.rightVelocity + getRightDistanceInches());
-	}
+	}*/
 	
 	/**
 	 * @author team254
@@ -374,7 +376,7 @@ public class Drivetrain extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
-		SmartDashboard.putBoolean("climb",DriveMode.CLIMB.equals(driveMode));
+//		SmartDashboard.putBoolean("climb",DriveMode.CLIMB.equals(driveMode));
 //		double currentleftMax = Math.max(leftMaster.getOutputCurrent(),leftMax);
 //		double currentRightMax = Math.max(rightMaster.getOutputCurrent(),rightMax);
 //
@@ -398,7 +400,7 @@ public class Drivetrain extends Subsystem {
 	 * @author cyocom
 	 */
 	public synchronized void setOpenLoop(double leftDrive, double rightDrive, boolean brakeMode) {
-		if (driveMode != DriveMode.OPEN_LOOP && driveMode != DriveMode.CLIMB) {
+		if (driveMode != DriveMode.OPEN_LOOP) {// && driveMode != DriveMode.CLIMB) {
 			driveMode = DriveMode.OPEN_LOOP;
 			setBrakeMode(brakeMode);
 			setCurrentLimiting(true);
@@ -435,7 +437,7 @@ public class Drivetrain extends Subsystem {
 	
 	private double startPitch = 0;
 	
-	private void handleClimb(double timestamp) {
+/*	private void handleClimb(double timestamp) {
 		if(modeChanged){
 			startPitch = navX.getPitch();
 			setCurrentLimiting(false);
@@ -457,7 +459,7 @@ public class Drivetrain extends Subsystem {
 		}
 		
 		setOpenLoop(Math.min(leftVal, 0), Math.min(rightVal, 0), false);
-	}
+	}*/
 	
 	
 	/**
@@ -466,7 +468,7 @@ public class Drivetrain extends Subsystem {
 	 * setpoints.
 	 */
 	// JACI'S PATHFINDER
-	private void updatePathFollower(double timestamp) {
+/*	private void updatePathFollower(double timestamp) {
 		double leftSensorPosition =
 			(isTrajectoryInverted ? -1 : 1) *
 			DriveUtils.encoderCountToInches(
@@ -528,18 +530,18 @@ public class Drivetrain extends Subsystem {
 		} else {
 			updateVelocitySetpoint(0, 0);
 		}
-	}
+	}*/
 	
 	
 	/**
 	 * Start up velocity mode. This sets the drive train in high gear as well.
 	 */
-	public synchronized void setVelocitySetpoint(double leftInchesPerSecond,
+/*	public synchronized void setVelocitySetpoint(double leftInchesPerSecond,
 		double rightInchesPerSecond) {
 		configureTalonsForSpeedControl();
 		driveMode = DriveMode.VELOCITY_SETPOINT;
 		updateVelocitySetpoint(leftInchesPerSecond, rightInchesPerSecond);
-	}
+	}*/
 	
 	/**
 	 * Configures talons for position control <p><i>(Modified for new DriveMode enum)</i></p>
@@ -560,7 +562,7 @@ public class Drivetrain extends Subsystem {
 	 * @param leftInches
 	 * @param rightInches
 	 */
-	private synchronized void updatePositionSetpoint(double leftInches, double rightInches) {
+/*	private synchronized void updatePositionSetpoint(double leftInches, double rightInches) {
 		if (ControlMode.MotionMagic.equals(driveMode.getRequestedControlMode())) {
 			leftMaster.set(
 				ControlMode.MotionMagic,
@@ -572,7 +574,7 @@ public class Drivetrain extends Subsystem {
 			System.out.println("Hit a bad position control state");
 			setOpenLoop(0,0);
 		}
-	}
+	}*/
 	
 	
 	/**
@@ -581,19 +583,19 @@ public class Drivetrain extends Subsystem {
 	 * @author cyocom
 	 * @author team254
 	 */
-	private void configureTalonsForSpeedControl() {
+/*	private void configureTalonsForSpeedControl() {
 		if (driveMode == null || !Objects
 			.equals(driveMode.getRequestedControlMode(), ControlMode.Velocity)) {
 			// We entered a velocity control state.
 			setBrakeMode(true);
 		}
-	}
+	}*/
 	
 	/**
 	 * Adjust Velocity setpoint (if already in velocity mode) <p><i>(Modified for new DriveMode
 	 * enum)</i></p>
 	 */
-	private synchronized void updateVelocitySetpoint(double leftInchesPerSecond,
+/*	private synchronized void updateVelocitySetpoint(double leftInchesPerSecond,
 		double rightInchesPerSecond) {
 		
 		if (driveMode.getRequestedControlMode().equals(ControlMode.Velocity)) {
@@ -614,7 +616,7 @@ public class Drivetrain extends Subsystem {
 			leftMaster.set(ControlMode.Velocity, 0);
 			rightMaster.set(ControlMode.Velocity, 0);
 		}
-	}
+	}*/
 	
 	public double getLeftVelocityInchesPerSec() {
 		return DriveUtils.encoderCountToInches(leftMaster.getSelectedSensorVelocity(0)) * 10;
@@ -654,7 +656,7 @@ public class Drivetrain extends Subsystem {
 		navX.setAngleAdjustment(rotation);
 	}
 	
-	public synchronized boolean isDoneWithPath() {
+/*	public synchronized boolean isDoneWithPath() {
 //		System.out.println(String.format("Mode: %s\tLeft: %s\tRight: %s", driveMode, leftEncoderFollower.isFinished(), rightEncoderFollower.isFinished()));
 		
 		if (driveMode == DriveMode.PATH_FOLLOWING && leftEncoderFollower != null) {
@@ -665,14 +667,14 @@ public class Drivetrain extends Subsystem {
 				System.out.println("Robot is not in path following mode");
 				return true;
 		}
-	}
+	}*/
 	
-	public synchronized void setWantClimb() {
+/*	public synchronized void setWantClimb() {
 		driveMode = DriveMode.CLIMB;
 		
-	}
+	}*/
 	
-	private void updateChezyPathFollower(double timestamp) {
+/*	private void updateChezyPathFollower(double timestamp) {
 		if(modeChanged){
 			reloadChezyGains();
 		}
@@ -695,14 +697,14 @@ public class Drivetrain extends Subsystem {
 		} else {
 			updateVelocitySetpoint(0, 0);
 		}
-	}
+	}*/
 	
 	
-	public synchronized void setWantClimbUp(double climbVal){
+/*	public synchronized void setWantClimbUp(double climbVal){
 		this.climbVal = climbVal;
-	}
+	}*/
 	
-	public synchronized void setWantDrivePath(InterpolatingTrajectory centerTrajectory,
+/*	public synchronized void setWantDrivePath(InterpolatingTrajectory centerTrajectory,
 		InterpolatingTrajectory leftTrajectory, InterpolatingTrajectory rightTrajectory,
 		boolean inverted) {
 		if (!Objects.equals(trajectory,centerTrajectory) || driveMode != DriveMode.PATH_FOLLOWING) {
@@ -719,23 +721,23 @@ public class Drivetrain extends Subsystem {
 		} else {
 			setVelocitySetpoint(0, 0);
 		}
-	}
+	}*/
 	
 	public void defaultState() {
-		ptoSolenoid.set(Value.kReverse);
-		ratchetSolenoid.set(Value.kReverse);
+		//ptoSolenoid.set(Value.kReverse);
+		//ratchetSolenoid.set(Value.kReverse);
 		leftMaster.setNeutralMode(NeutralMode.Coast);
 		rightMaster.setNeutralMode(NeutralMode.Coast);
 	}
 	
-	public boolean isClimb() {
+/*	public boolean isClimb() {
 		return DriveMode.CLIMB.equals(driveMode);
-	}
+	}*/
 	
-	public synchronized void setWantDrivePath(Path path, boolean reversed, double acceleration) {
+/*	public synchronized void setWantDrivePath(Path path, boolean reversed, double acceleration) {
 		if (!Objects.equals(currentPath,path) || driveMode != DriveMode.CHEZY_PATH_FOLLOWING) {
 			configureTalonsForSpeedControl();
-			RobotState.getInstance().resetDistanceDriven();
+			//RobotState.getInstance().resetDistanceDriven();
 			pathFollower = new PathFollower254Impl(path, reversed,
 				new PathFollower254Impl.Parameters(
 					new Lookahead(
@@ -759,9 +761,9 @@ public class Drivetrain extends Subsystem {
 		} else {
 			setVelocitySetpoint(0, 0);
 		}
-	}
+	}*/
 
-	public synchronized void startRotation(Rotation2d heading) {
+/*	public synchronized void startRotation(Rotation2d heading) {
 		this.driveMode = DriveMode.TURN_TO_HEADING;
 		this.targetHeading = heading;
 		this.isOnTarget = false;
@@ -774,7 +776,7 @@ public class Drivetrain extends Subsystem {
 			System.out.println("Robot is not in turn to heading mode");
 			return false;
 		}
-	}
+	}*/
 	
 	@Override
 	public void test() {

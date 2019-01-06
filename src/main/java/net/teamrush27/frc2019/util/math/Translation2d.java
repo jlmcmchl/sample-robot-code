@@ -1,7 +1,7 @@
 package net.teamrush27.frc2019.util.math;
 
 import java.text.DecimalFormat;
-import net.teamrush27.frc2018.util.interpolate.Interpolable;
+import net.teamrush27.frc2019.util.interpolate.Interpolable;
 
 
 public class Translation2d implements Interpolable<Translation2d> {

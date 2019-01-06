@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.util.motion;
 
-import jaci.pathfinder.Trajectory;
+//import jaci.pathfinder.Trajectory;
 
 /**
  * The EncoderFollower is an object designed to follow a trajectory based on encoder input. This class can be used
@@ -20,21 +20,21 @@ public class EncoderPathFollower {
 	double lastError, heading;
 	
 	int segment;
-	Trajectory trajectory;
+	//Trajectory trajectory;
 	
-	public EncoderPathFollower(Trajectory traj) {
+	/*public EncoderPathFollower(Trajectory traj) {
 		this.trajectory = traj;
-	}
+	}*/
 	
 	public EncoderPathFollower() { }
 	
 	/**
 	 * Set a new trajectory to follow, and reset the cumulative errors and segment counts
 	 */
-	public void setTrajectory(Trajectory traj) {
+	/*public void setTrajectory(Trajectory traj) {
 		this.trajectory = traj;
 		reset();
-	}
+	}*/
 	
 	/**
 	 * Configure the PID/VA Variables for the Follower
@@ -80,7 +80,7 @@ public class EncoderPathFollower {
 	 */
 	public double calculate(int encoderTicks) {
 		// Number of Revolutions * Wheel Circumference
-		double displacement = ((double)(encoderTicks - encoderOffset) / encoderTickCount) * wheelCircumference;
+		/*double displacement = ((double)(encoderTicks - encoderOffset) / encoderTickCount) * wheelCircumference;
 		if (segment < trajectory.length()) {
 			Trajectory.Segment seg = trajectory.get(segment);
 			double error = seg.position - displacement;
@@ -93,7 +93,7 @@ public class EncoderPathFollower {
 			segment++;
 			
 			return calculatedValue;
-		} else return 0;
+		} else */return 0;
 	}
 	
 	/**
@@ -106,14 +106,14 @@ public class EncoderPathFollower {
 	/**
 	 * @return the current segment being operated on
 	 */
-	public Trajectory.Segment getSegment() {
+	/*public Trajectory.Segment getSegment() {
 		return trajectory.get(segment);
-	}
+	}*/
 	
 	/**
 	 * @return whether we have finished tracking this trajectory or not.
 	 */
-	public boolean isFinished() {
+	/*public boolean isFinished() {
 		return segment >= trajectory.length();
 	}
 	
@@ -123,5 +123,5 @@ public class EncoderPathFollower {
 	
 	public double getLastError() {
 		return lastError;
-	}
+	}*/
 }

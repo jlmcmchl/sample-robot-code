@@ -1,14 +1,14 @@
 package net.teamrush27.frc2019.util.motion;
 
-import jaci.pathfinder.Pathfinder;
-import jaci.pathfinder.Trajectory;
+//import jaci.pathfinder.Pathfinder;
+//import jaci.pathfinder.Trajectory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import net.teamrush27.frc2018.constants.FollowingConstants;
-import net.teamrush27.frc2018.constants.TrackingConstants;
-import net.teamrush27.frc2018.util.interpolate.InterpolatingSegment;
-import net.teamrush27.frc2018.util.interpolate.InterpolatingTrajectory;
+import net.teamrush27.frc2019.constants.FollowingConstants;
+import net.teamrush27.frc2019.constants.TrackingConstants;
+//import net.teamrush27.frc2019.util.interpolate.InterpolatingSegment;
+//import net.teamrush27.frc2019.util.interpolate.InterpolatingTrajectory;
 
 public class DistancePathFollower {
 	private double p, i, d, v, a;
@@ -16,7 +16,7 @@ public class DistancePathFollower {
 	private double lastError, heading;
 	
 	private int segment;
-	private InterpolatingTrajectory trajectory;
+	//private InterpolatingTrajectory trajectory;
 	
 	private final FileWriter fileWriter;
 
@@ -25,7 +25,7 @@ public class DistancePathFollower {
 	private boolean within_tolerance;
 	
 	
-	public DistancePathFollower(InterpolatingTrajectory traj) {
+	/*public DistancePathFollower(InterpolatingTrajectory traj) {
 		this.trajectory = traj;
 		try {
 			fileWriter = new FileWriter(new File("/tmp/pathDebug.csv"));
@@ -34,7 +34,7 @@ public class DistancePathFollower {
 			throw new RuntimeException("could not open file");
 		}
 		
-	}
+	}*/
 	
 	public DistancePathFollower(boolean thing) {
 		try {
@@ -48,10 +48,10 @@ public class DistancePathFollower {
 	/**
 	 * Set a new trajectory to follow, and reset the cumulative errors and segment counts
 	 */
-	public void setTrajectory(InterpolatingTrajectory traj) {
+	/*public void setTrajectory(InterpolatingTrajectory traj) {
 		this.trajectory = traj;
 		reset();
-	}
+	}*/
 	
 	/**
 	 * Configure the PID/VA Variables for the Follower
@@ -79,7 +79,7 @@ public class DistancePathFollower {
 	}
 
 	private int getLatestSegment(double distanceCovered) {
-		Trajectory.Segment seg;
+		/*Trajectory.Segment seg;
 
 		//new segment between current segment and final segment
 		for(int i = segment + 1; i < trajectory.length(); i++) {
@@ -88,7 +88,8 @@ public class DistancePathFollower {
 				return Math.min(i, trajectory.length() - 1);
 			}
 		}
-		return trajectory.length();
+		return trajectory.length();*/
+		return 0;
 	}
 	
 	/**
@@ -99,7 +100,7 @@ public class DistancePathFollower {
 	 * @return                  The desired output for your motor controller
 	 */
 	public double calculate(final double distance, final double velocity) {
-        final int lastSegment = segment;
+        /*final int lastSegment = segment;
         segment = getLatestSegment(distance);
         
         int last = trajectory.length() - 1;
@@ -131,7 +132,8 @@ public class DistancePathFollower {
 				+ (Double.isNaN(seg.acceleration) ? 0.0 : FollowingConstants.FEED_FORWARD_ACCELERATION * seg.acceleration);
 		} else {
 			return 0;
-		}
+		}*/
+        return 0;
 	}
 	
 	/**
@@ -144,8 +146,8 @@ public class DistancePathFollower {
 	/**
 	 * @return the current segment being operated on
 	 */
-	public Trajectory.Segment getSegment() {
-		return trajectory.get(segment);
+	public Object getSegment() {//Trajectory.Segment getSegment() {
+		return null;//return trajectory.get(segment);
 	}
 	
 	/**
@@ -153,7 +155,7 @@ public class DistancePathFollower {
 	 */
 	public boolean isFinished() {
 //	    System.out.println(String.format("Segment: %s, Length: %s", segment, trajectory.length()));
-		if (within_tolerance || segment >= trajectory.length()) {
+		if (within_tolerance || segment >= 1000) {//trajectory.length()) {
 			try {
 				fileWriter.flush();
 			} catch (IOException e) {
@@ -165,8 +167,8 @@ public class DistancePathFollower {
 	}
 	
 	
-	public Trajectory getTrajectory() {
-		return trajectory;
+	public Object getTrajectory() {
+		return null;//trajectory;
 	}
 	
 	public int getSegmentNumber(){

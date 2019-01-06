@@ -1,8 +1,8 @@
 package net.teamrush27.frc2019.util.interpolate;
 
-import jaci.pathfinder.Trajectory;
+//import jaci.pathfinder.Trajectory;
 
-public class InterpolatingTrajectory extends Trajectory {
+/*public class InterpolatingTrajectory extends Trajectory {
 
     InterpolatingSegment[] segments;
 
@@ -83,3 +83,4 @@ public class InterpolatingTrajectory extends Trajectory {
         return segLow.interpolate(segHigh, part / whole);
     }
 }
+*/

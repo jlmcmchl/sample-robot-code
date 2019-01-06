@@ -4,9 +4,9 @@ package net.teamrush27.frc2019.subsystems.impl;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import net.teamrush27.frc2018.loops.Loop;
-import net.teamrush27.frc2018.loops.Looper;
-import net.teamrush27.frc2018.subsystems.Subsystem;
+import net.teamrush27.frc2019.loops.Loop;
+import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.subsystems.Subsystem;
 
 public class Coordinator extends Subsystem {
 
@@ -21,9 +21,9 @@ public class Coordinator extends Subsystem {
 	
 	private final Drivetrain drivetrain = Drivetrain.getInstance();
 	private final Gripper gripper = Gripper.getInstance();
-	private final Elevator elevator = Elevator.getInstance();
+	//private final Elevator elevator = Elevator.getInstance();
 	private final LED leds = LED.getInstance();
-	private final Forklift forks = Forklift.getInstance();
+	//private final Forklift forks = Forklift.getInstance();
 	private boolean flashLEDs = false;
 	private int ledCycle = 0;
 	
@@ -150,10 +150,10 @@ public class Coordinator extends Subsystem {
 	}
 	
 	private void setLEDS() {
-		if(forks.getDeployed()){
+		/*if(forks.getDeployed()){
 			leds.setWantedState(LED.WantedState.FORKS_DEPLOYED);
 			return;
-		}
+		}*/
 
 		Gripper.SystemState gripperState = gripper.getSystemState();
 

@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.subsystems.impl.util;
 
-import net.teamrush27.frc2018.constants.RobotConstants;
+import net.teamrush27.frc2019.constants.RobotConstants;
 
 /**
  * Moved utility methods to own class

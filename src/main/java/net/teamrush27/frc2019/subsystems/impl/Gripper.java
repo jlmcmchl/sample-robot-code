@@ -13,19 +13,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
-import net.teamrush27.frc2018.base.RobotMap;
-import net.teamrush27.frc2018.constants.RobotConstants;
-import net.teamrush27.frc2018.loops.Loop;
-import net.teamrush27.frc2018.loops.Looper;
-import net.teamrush27.frc2018.subsystems.Subsystem;
-import net.teamrush27.frc2018.util.math.CircularBuffer;
-import net.teamrush27.frc2018.wrappers.CANTalonFactory;
-import net.teamrush27.frc2018.wrappers.InvertableDigitalInput;
+import net.teamrush27.frc2019.base.RobotMap;
+import net.teamrush27.frc2019.constants.RobotConstants;
+import net.teamrush27.frc2019.loops.Loop;
+import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.util.math.CircularBuffer;
+import net.teamrush27.frc2019.wrappers.CANTalonFactory;
+import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
 
 public class Gripper extends Subsystem {
     
     private static Gripper INSTANCE = null;
-    private final Elevator elevator = Elevator.getInstance();
+//    private final Elevator elevator = Elevator.getInstance();
     private final PowerDistributionPanel pdp = new PowerDistributionPanel();
 	
 	
@@ -204,11 +204,11 @@ public class Gripper extends Subsystem {
     }
 	
 	private SystemState handleRetract(double timestamp) {
-		if(elevator.isAtHome() && !up){
+/*		if(elevator.isAtHome() && !up){
 			up = true;
 			System.out.println("putting gripper up");
 			gripperSolenoid.set(Value.kReverse);
-		}
+		}*/
 		running = false;
 		runGripper(0);
 		
@@ -232,9 +232,9 @@ public class Gripper extends Subsystem {
     		if(!firstRun) {
     			firstRun = true;
     			if(!noRise) {
-    				if(elevator.isAtHome()) {
-						elevator.wantHoldPosition();
-					}
+//    				if(elevator.isAtHome()) {
+//						elevator.wantHoldPosition();
+//					}
 				} else {
     				noRise = false;
 				}

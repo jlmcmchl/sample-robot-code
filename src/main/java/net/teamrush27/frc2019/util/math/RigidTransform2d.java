@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.util.math;
 
-import net.teamrush27.frc2018.util.interpolate.Interpolable;
+import net.teamrush27.frc2019.util.interpolate.Interpolable;
 
 /**
  * Represents a 2d pose (rigid transform) containing translational and rotational elements.

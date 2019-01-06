@@ -1,7 +1,7 @@
 package net.teamrush27.frc2019.util.math;
 
-import net.teamrush27.frc2018.constants.ChezyConstants;
-import net.teamrush27.frc2018.constants.RobotConstants;
+import net.teamrush27.frc2019.constants.ChezyConstants;
+import net.teamrush27.frc2019.constants.RobotConstants;
 
 /**
  * Provides forward and inverse kinematics equations for the robot modeling the wheelbase as a differential drive (with

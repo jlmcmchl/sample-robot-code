@@ -3,9 +3,9 @@ package net.teamrush27.frc2019.util.follow;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import net.teamrush27.frc2018.constants.FollowingConstants;
-import net.teamrush27.frc2018.util.math.Translation2d;
-import net.teamrush27.frc2018.util.motion.MotionState;
+import net.teamrush27.frc2019.constants.FollowingConstants;
+import net.teamrush27.frc2019.util.math.Translation2d;
+import net.teamrush27.frc2019.util.motion.MotionState;
 
 /**
  * Class representing the robot's autonomous path.

@@ -1,7 +1,7 @@
 package net.teamrush27.frc2019.util.math;
 
 import java.text.DecimalFormat;
-import net.teamrush27.frc2018.util.interpolate.Interpolable;
+import net.teamrush27.frc2019.util.interpolate.Interpolable;
 
 /**
  * A rotation in a 2d coordinate frame represented a point on the unit circle (cosine and sine).
