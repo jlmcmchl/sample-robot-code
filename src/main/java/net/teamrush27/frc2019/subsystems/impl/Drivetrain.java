@@ -30,10 +30,10 @@ public class Drivetrain extends Subsystem {
 	private static Drivetrain instance = new Drivetrain();
 	
 	private final TalonSRX leftMaster;
-	private final TalonSRX leftSlave1;
+	private final TalonSRX leftSlave;
 
 	private final TalonSRX rightMaster;
-	private final TalonSRX rightSlave1;
+	private final TalonSRX rightSlave;
 
 	// new
 	private double timeSinceModeSwitch;
@@ -109,11 +109,11 @@ public class Drivetrain extends Subsystem {
 		leftMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 		
 		
-		leftSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID,
+		leftSlave = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID,
 			RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
-		leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-		leftSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-		leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+		leftSlave.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+		leftSlave.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+		leftSlave.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 		
 		
 		rightMaster = CANTalonFactory.createDefaultTalon(RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
@@ -122,12 +122,12 @@ public class Drivetrain extends Subsystem {
 		rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rightMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 		
-		rightSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_1_CAN_ID,
+		rightSlave = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_1_CAN_ID,
 			RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-		rightSlave1.setInverted(true);
-		rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-		rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-		rightSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+		rightSlave.setInverted(true);
+		rightSlave.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+		rightSlave.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+		rightSlave.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 		
 		setCurrentLimiting(false);
 		
@@ -157,9 +157,9 @@ public class Drivetrain extends Subsystem {
 	
 	private void setCurrentLimiting(boolean shouldCurrentLimit) {
 		leftMaster.enableCurrentLimit(shouldCurrentLimit);
-		leftSlave1.enableCurrentLimit(shouldCurrentLimit);
+		leftSlave.enableCurrentLimit(shouldCurrentLimit);
 		rightMaster.enableCurrentLimit(shouldCurrentLimit);
-		rightSlave1.enableCurrentLimit(shouldCurrentLimit);
+		rightSlave.enableCurrentLimit(shouldCurrentLimit);
 	}
 	
 	/**
@@ -169,9 +169,9 @@ public class Drivetrain extends Subsystem {
 		if (brakeMode != requestedBrakeMode) {
 			brakeMode = requestedBrakeMode;
 			rightMaster.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
-			rightSlave1.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
+			rightSlave.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
 			leftMaster.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
-			leftSlave1.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
+			leftSlave.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
 		}
 	}
 	
