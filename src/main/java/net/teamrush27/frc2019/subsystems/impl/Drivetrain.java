@@ -3,6 +3,8 @@ package net.teamrush27.frc2019.subsystems.impl;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix.sensors.PigeonIMU.GeneralStatus;
 import edu.wpi.first.wpilibj.SPI;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.constants.DriveConstants;
@@ -34,6 +36,8 @@ public class Drivetrain extends Subsystem {
 
 	private final TalonSRX rightMaster;
 	private final TalonSRX rightSlave;
+	
+	private final PigeonIMU pidgey;
 
 	// new
 	private double timeSinceModeSwitch;
@@ -47,6 +51,7 @@ public class Drivetrain extends Subsystem {
 	private boolean brakeMode;
 	
 	private boolean modeChanged = false;
+	private double startZ = 0d;
 	
 	private final Loop loop = new Loop() {
 		
@@ -136,6 +141,8 @@ public class Drivetrain extends Subsystem {
 		brakeMode = true;
 		setBrakeMode(false);
 		
+		pidgey = new PigeonIMU(leftSlave);
+		
 		leftEncoderFollower = new DistancePathFollower(true);
 		leftEncoderFollower.configurePIDVA(
 			FollowingConstants.P,
@@ -153,6 +160,9 @@ public class Drivetrain extends Subsystem {
 			FollowingConstants.V,
 			FollowingConstants.A
 		);
+		double[] yawPitchRoll = new double[3];
+		pidgey.getYawPitchRoll(yawPitchRoll);
+		startZ = yawPitchRoll[2];
 	}
 	
 	private void setCurrentLimiting(boolean shouldCurrentLimit) {
@@ -177,6 +187,8 @@ public class Drivetrain extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
+		double[] yawPitchRoll = new double[3];
+		pidgey.getYawPitchRoll(yawPitchRoll);
 	}
 	
 	@Override

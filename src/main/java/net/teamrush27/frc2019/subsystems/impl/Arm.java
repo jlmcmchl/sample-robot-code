@@ -4,9 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import java.util.Map.Entry;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
@@ -46,6 +44,12 @@ public class Arm extends Subsystem {
 	
 	private boolean stateChanged = false;
 	private double currentStateStartTime;
+	
+	
+	private static double MAX_ROTATION = 339.12;
+	private static double MIN_ROTATION = 46.58;
+	private static double MAX_EXTENSION = 108.78;
+	private static double MIN_EXTENSION = 35.83;
 	
 	private ArmInput openLoopInput = new ArmInput(0d,0d);
 	
@@ -99,13 +103,30 @@ public class Arm extends Subsystem {
     
     @Override
     public void outputToSmartDashboard() {
-		SmartDashboard.putNumber("armPot",rotationPot.get());
-		SmartDashboard.putNumber("extPot",extensionPot.get());
+		SmartDashboard.putNumber("armPot",getArmAngle());
+		SmartDashboard.putNumber("extPot",getArmExtension());
     }
 	
 	private SystemState handleOpenLoop(double timestamp) {
-		extensionMotor.set(ControlMode.PercentOutput,openLoopInput.getExtensionInput());
-		rotationMotor.set(ControlMode.PercentOutput,openLoopInput.getRotationInput());
+		
+		Double rotationInput = openLoopInput.getRotationInput();
+		Double extensionInput = openLoopInput.getExtensionInput();
+		
+		if(getArmAngle() <= 28d){
+			rotationInput = Math.min(0, rotationInput);
+		}
+		
+		if(getArmExtension() >= 36d){
+			extensionInput = Math.max(0, extensionInput);
+		} else if(getArmExtension() <= 2d){
+			extensionInput = Math.min(0, extensionInput);
+		}
+		
+		
+		System.out.println("rot : " + getArmAngle() + " rot 2 : " + rotationInput + " - ext : " + getArmExtension());
+		
+		extensionMotor.set(ControlMode.PercentOutput,extensionInput);
+		rotationMotor.set(ControlMode.PercentOutput,rotationInput);
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -153,6 +174,14 @@ public class Arm extends Subsystem {
 	public void test() {
 	}
 	
+	public double getDistanceOutsideFramePerimeter(){
+		double a = 0d;
+		double b = 0d;
+		double c = 0d;
+		
+		return 0d;
+	}
+	
 	public void setOpenLoopInput(ArmInput armInput){
 		synchronized (openLoopInput){
 			openLoopInput = armInput;
@@ -161,6 +190,15 @@ public class Arm extends Subsystem {
 	
 	public SystemState getSystemState() {
 		return systemState;
+	}
+	
+	
+	private double getArmAngle(){
+		return (rotationPot.get() * MAX_ROTATION) - MIN_ROTATION;
+	}
+	
+	private double getArmExtension(){
+		return (extensionPot.get() * MAX_EXTENSION) - MIN_EXTENSION;
 	}
 	
 }
