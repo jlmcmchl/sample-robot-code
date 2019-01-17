@@ -1,14 +1,14 @@
 package net.teamrush27.frc2019.util.follow;
 
 import java.util.Optional;
-import net.teamrush27.frc2018.constants.FollowingConstants;
-import net.teamrush27.frc2018.util.math.Rotation2d;
-import net.teamrush27.frc2018.util.math.Translation2d;
-import net.teamrush27.frc2018.util.motion.MotionProfile;
-import net.teamrush27.frc2018.util.motion.MotionProfileConstraints;
-import net.teamrush27.frc2018.util.motion.MotionProfileGenerator;
-import net.teamrush27.frc2018.util.motion.MotionProfileGoal;
-import net.teamrush27.frc2018.util.motion.MotionState;
+import net.teamrush27.frc2019.constants.FollowingConstants;
+import net.teamrush27.frc2019.util.math.Rotation2d;
+import net.teamrush27.frc2019.util.math.Translation2d;
+import net.teamrush27.frc2019.util.motion.MotionProfile;
+import net.teamrush27.frc2019.util.motion.MotionProfileConstraints;
+import net.teamrush27.frc2019.util.motion.MotionProfileGenerator;
+import net.teamrush27.frc2019.util.motion.MotionProfileGoal;
+import net.teamrush27.frc2019.util.motion.MotionState;
 
 /**
  * Class representing a segment of the robot's autonomous path.
@@ -127,7 +127,8 @@ public class PathSegment {
         MotionProfileConstraints motionConstraints = new MotionProfileConstraints(maxSpeed,
                 FollowingConstants.MAX_ACCELERATION);
         MotionProfileGoal goalState = new MotionProfileGoal(getLength(), endSpeed);
-        speedController = MotionProfileGenerator.generateProfile(motionConstraints, goalState, startState);
+        speedController = MotionProfileGenerator
+            .generateProfile(motionConstraints, goalState, startState);
         // System.out.println(speedController);
     }
 
@@ -219,7 +220,7 @@ public class PathSegment {
     /**
      * Gets the remaining distance left on the segment from point <code>point</code>
      * 
-     * @param point
+     * @param position
      *            result of <code>getClosestPoint()</code>
      * @return distance remaining
      */

@@ -1,9 +1,11 @@
 package net.teamrush27.frc2019.util.math;
 
+import java.text.DecimalFormat;
+
 /**
  * A movement along an arc at constant curvature and velocity. We can use ideas from "differential calculus" to create
  * new RigidTransform2d's from a Twist2d and visa versa.
- * 
+ *
  * A Twist can be used to represent a difference between two poses, a velocity, an acceleration, etc.
  */
 public class Twist2d {
@@ -26,9 +28,23 @@ public class Twist2d {
     public Twist2d scaled(double scale) {
         return new Twist2d(deltaX * scale, deltaY * scale, deltaTheta * scale);
     }
-    
+
+    public double norm() {
+        // Common case of dy == 0
+        if (deltaY == 0.0)
+            return Math.abs(deltaX);
+        return Math.hypot(deltaX, deltaY);
+    }
+
+    public double curvature() {
+        if (Math.abs(deltaTheta) < MathUtils.DEFAULT_MAX_ERROR && norm() < MathUtils.DEFAULT_MAX_ERROR)
+            return 0.0;
+        return deltaTheta / norm();
+    }
+
     @Override
-	public String toString(){
-    	return String.format("X: %s Y: %s theta: %s",deltaX,deltaY,deltaTheta);
-	}
+    public String toString() {
+        final DecimalFormat fmt = new DecimalFormat("#0.000");
+        return "(" + fmt.format(deltaX) + "," + fmt.format(deltaY) + "," + fmt.format(Math.toDegrees(deltaTheta)) + " deg)";
+    }
 }

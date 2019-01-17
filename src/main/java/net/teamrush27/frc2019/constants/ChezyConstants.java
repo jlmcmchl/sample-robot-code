@@ -81,4 +81,19 @@ public class ChezyConstants {
     // Talon Parameters
     public static int TALON_CONFIG_TIMEOUT = 0; // 100ms
 
+    // Drive Motion Constants
+    public static double kDriveKv;
+    public static double kDriveWheelRadiusInches;
+    public static double kRobotLinearInertia;
+    public static double kDriveKa;
+    public static double kDriveVIntercept;
+    public static double kRobotAngularInertia;
+    public static double kRobotAngularDrag;
+    public static double kDriveWheelDiameterInches = kDriveWheelRadiusInches * 2;
+    public static double kDriveWheelTrackWidthInches;
+    public static double kTrackScrubFactor;
+    public static double kPathLookaheadTime;
+    public static double kPathMinLookaheadDistance;
+    public static double kPathKX;
+
 }

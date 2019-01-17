@@ -25,6 +25,10 @@ public class MathUtils {
         return Math.min(max, Math.max(min, input));
     }
 
+    public static boolean epsilonEquals(double a, double b) {
+        return epsilonEquals(a, b, DEFAULT_MAX_ERROR);
+    }
+
     public static boolean epsilonEquals(double a, double b, double epsilon) {
         return (a - epsilon <= b) && (a + epsilon >= b);
     }
@@ -35,6 +39,11 @@ public class MathUtils {
             result &= epsilonEquals(value_in, value, epsilon);
         }
         return result;
+    }
+
+    public static double interpolate(double a, double b, double x) {
+        x = limit(x, 0.0, 1.0);
+        return a + (b - a) * x;
     }
 
 }

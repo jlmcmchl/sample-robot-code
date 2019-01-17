@@ -3,9 +3,9 @@ package net.teamrush27.frc2019.util.follow;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import net.teamrush27.frc2018.constants.FollowingConstants;
-import net.teamrush27.frc2018.util.math.Translation2d;
-import net.teamrush27.frc2018.util.motion.MotionState;
+import net.teamrush27.frc2019.constants.FollowingConstants;
+import net.teamrush27.frc2019.util.math.Translation2d;
+import net.teamrush27.frc2019.util.motion.MotionState;
 
 /**
  * Class representing the robot's autonomous path.
@@ -14,7 +14,7 @@ import net.teamrush27.frc2018.util.motion.MotionState;
  * is at the bottom left corner of the field. For angles, 0 degrees is facing right (1, 0) and angles increase as you
  * turn counter clockwise.
  */
-
+//TODO tear out List<PathSegment> in favor of Trajectory<TimedState<Pose2dWithCurvature>>
 public class Path {
     List<PathSegment> segments;
     PathSegment prevSegment;

@@ -1,7 +1,7 @@
 package net.teamrush27.frc2019.util.math;
 
-import net.teamrush27.frc2018.constants.ChezyConstants;
-import net.teamrush27.frc2018.constants.RobotConstants;
+import net.teamrush27.frc2019.constants.ChezyConstants;
+import net.teamrush27.frc2019.constants.RobotConstants;
 
 /**
  * Provides forward and inverse kinematics equations for the robot modeling the wheelbase as a differential drive (with
@@ -41,7 +41,7 @@ public class KinematicsUtils {
     }
 
     /** Append the result of forward kinematics to a previous pose. */
-    public static RigidTransform2d integrateForwardKinematics(RigidTransform2d currentPose, double leftWheelDelta,
+    public static Pose2d integrateForwardKinematics(Pose2d currentPose, double leftWheelDelta,
             double rightWheelDelta, Rotation2d currentHeading) {
         Twist2d withGyro = forwardKinematics(currentPose.getRotation(), leftWheelDelta, rightWheelDelta,
                 currentHeading);
@@ -51,9 +51,9 @@ public class KinematicsUtils {
     /**
      * For convenience, integrate forward kinematics with a Twist2d and previous rotation.
      */
-    public static RigidTransform2d integrateForwardKinematics(RigidTransform2d currentPose,
+    public static Pose2d integrateForwardKinematics(Pose2d currentPose,
             Twist2d forwardKinematics) {
-        return currentPose.transformBy(RigidTransform2d.exp(forwardKinematics));
+        return currentPose.transformBy(Pose2d.exp(forwardKinematics));
     }
 
     /**

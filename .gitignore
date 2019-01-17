@@ -161,3 +161,5 @@ bin/
 
 .vscode/
 .idea/
+
+*.iml
