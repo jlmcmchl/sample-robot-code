@@ -1,7 +1,6 @@
 package net.teamrush27.frc2019.util.follow;
 
-import net.teamrush27.frc2018.util.math.RigidTransform2d;
-import net.teamrush27.frc2018.util.math.Twist2d;
+import net.teamrush27.frc2019.util.math.Twist2d;
 
 public interface PathFollower {
 	

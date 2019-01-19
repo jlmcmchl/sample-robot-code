@@ -1,8 +1,8 @@
 package net.teamrush27.frc2019.constants;
 
-import net.teamrush27.frc2018.util.interpolate.InterpolatingDouble;
-import net.teamrush27.frc2018.util.interpolate.InterpolatingTreeMap;
-import net.teamrush27.frc2018.util.math.PolynomialRegression;
+import net.teamrush27.frc2019.util.interpolate.InterpolatingDouble;
+import net.teamrush27.frc2019.util.interpolate.InterpolatingTreeMap;
+import net.teamrush27.frc2019.util.math.PolynomialRegression;
 
 public class ShooterConstants {
 	public static boolean IS_TUNING = false;

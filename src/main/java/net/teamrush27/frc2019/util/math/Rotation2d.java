@@ -1,6 +1,7 @@
 package net.teamrush27.frc2019.util.math;
 
 import java.text.DecimalFormat;
+
 /**
  * A rotation in a 2d coordinate frame represented a point on the unit circle (cosine and sine).
  * 

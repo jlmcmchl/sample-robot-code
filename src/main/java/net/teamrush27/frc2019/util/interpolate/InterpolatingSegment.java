@@ -1,8 +1,8 @@
 package net.teamrush27.frc2019.util.interpolate;
 
-import jaci.pathfinder.Trajectory.Segment;
+//import jaci.pathfinder.Trajectory.Segment;
 
-public class InterpolatingSegment extends Segment implements Interpolable<InterpolatingSegment> {
+/*public class InterpolatingSegment extends Segment implements Interpolable<InterpolatingSegment> {
     public InterpolatingSegment(double dt, double x, double y, double position, double velocity, double acceleration, double jerk, double heading) {
         super(dt, x, y, position, velocity, acceleration, jerk, heading);
     }
@@ -31,3 +31,4 @@ public class InterpolatingSegment extends Segment implements Interpolable<Interp
         return new InterpolatingSegment(dt, x, y, pos, vel, acc, jerk, head);
     }
 }
+*/

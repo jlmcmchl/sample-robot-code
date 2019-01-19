@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.util.motion;
 
-import net.teamrush27.frc2018.util.math.MathUtils;
+import net.teamrush27.frc2019.util.math.MathUtils;
 
 /**
  * A MotionProfileGoal defines a desired position and maximum velocity (at this position), along with the behavior that

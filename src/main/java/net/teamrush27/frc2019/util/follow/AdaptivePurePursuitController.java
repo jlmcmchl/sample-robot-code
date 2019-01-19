@@ -1,9 +1,8 @@
 package net.teamrush27.frc2019.util.follow;
 
-import net.teamrush27.frc2018.util.math.RigidTransform2d;
-import net.teamrush27.frc2018.util.math.Rotation2d;
-import net.teamrush27.frc2018.util.math.Translation2d;
-import net.teamrush27.frc2018.util.math.Twist2d;
+import net.teamrush27.frc2019.util.math.Rotation2d;
+import net.teamrush27.frc2019.util.math.Translation2d;
+import net.teamrush27.frc2019.util.math.Twist2d;
 
 /**
  * Implements an adaptive pure pursuit controller. See:
@@ -51,7 +50,7 @@ public class AdaptivePurePursuitController {
     }
 
     /**
-     * Gives the RigidTransform2d.Delta that the robot should take to follow the path
+     * Gives the Pose2d.Delta that the robot should take to follow the path
      * 
      * @param pose
      *            robot pose

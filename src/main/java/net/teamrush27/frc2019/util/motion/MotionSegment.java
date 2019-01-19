@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.util.motion;
 
-import net.teamrush27.frc2018.util.math.MathUtils;
+import net.teamrush27.frc2019.util.math.MathUtils;
 
 /**
  * A MotionSegment is a movement from a start MotionState to an end MotionState with a constant acceleration.

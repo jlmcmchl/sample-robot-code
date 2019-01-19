@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.util.motion;
 
-import net.teamrush27.frc2018.util.motion.MotionProfileGoal.CompletionBehavior;
+import net.teamrush27.frc2019.util.motion.MotionProfileGoal.CompletionBehavior;
 
 /**
  * A controller for tracking a profile generated to attain a MotionProfileGoal. The controller uses feedforward on

@@ -91,7 +91,7 @@ public class Pose2d implements IPose2d<Pose2d> {
   }
 
   /**
-   * Transforming this RigidTransform2d means first translating by other.translation and then rotating by
+   * Transforming this Pose2d means first translating by other.translation and then rotating by
    * other.rotation
    *
    * @param other The other transform.

@@ -1,13 +1,12 @@
 package net.teamrush27.frc2019.util.follow;
 
-import net.teamrush27.frc2018.subsystems.impl.Elevator;
-import net.teamrush27.frc2018.util.math.RigidTransform2d;
-import net.teamrush27.frc2018.util.math.Twist2d;
-import net.teamrush27.frc2018.util.motion.MotionProfileConstraints;
-import net.teamrush27.frc2018.util.motion.MotionProfileGoal;
-import net.teamrush27.frc2018.util.motion.MotionProfileGoal.CompletionBehavior;
-import net.teamrush27.frc2018.util.motion.MotionState;
-import net.teamrush27.frc2018.util.motion.ProfileFollower;
+//import net.teamrush27.frc2019.subsystems.impl.Elevator;
+import net.teamrush27.frc2019.util.math.Twist2d;
+import net.teamrush27.frc2019.util.motion.MotionProfileConstraints;
+import net.teamrush27.frc2019.util.motion.MotionProfileGoal;
+import net.teamrush27.frc2019.util.motion.MotionProfileGoal.CompletionBehavior;
+import net.teamrush27.frc2019.util.motion.MotionState;
+import net.teamrush27.frc2019.util.motion.ProfileFollower;
 
 /**
  * A PathFollower follows a predefined path using a combination of feedforward
@@ -25,7 +24,7 @@ public class PathFollower254Impl implements PathFollower {
     private boolean overrideFinished = false;
     private boolean doneSteering = false;
     private DebugOutput debugOutput = new DebugOutput();
-    private final Elevator elevator = Elevator.getInstance();
+//    private final Elevator elevator = Elevator.getInstance();
 
     private double maxProfileVelocity;
     private double maxProfileAcceleration;
@@ -80,7 +79,7 @@ public class PathFollower254Impl implements PathFollower {
             lastSteeringDelta = steeringCommand.delta;
             
             
-            double maxAcceleration = elevator.isHigh() ? 100 : maxProfileAcceleration;
+            double maxAcceleration = 100;//elevator.isHigh() ? 100 : maxProfileAcceleration;
             
             velocityController.setGoalAndConstraints(
                     new MotionProfileGoal(displacement + steeringCommand.delta.deltaX,

@@ -1,6 +1,6 @@
 package net.teamrush27.frc2019.subsystems.impl.util;
 
-import net.teamrush27.frc2018.constants.RobotConstants;
+import net.teamrush27.frc2019.constants.RobotConstants;
 
 /**
  * Moved utility methods to own class
@@ -24,7 +24,7 @@ public class DriveUtils {
 	}
 
 	public static int inchesPerSecondToEncoderCountPer100ms(double inches_per_second) {
-		return new Double(rotationsToEncoderCount(inchesPerSecondToRotationsPer100ms(inches_per_second))).intValue();
+		return Double.valueOf(rotationsToEncoderCount(inchesPerSecondToRotationsPer100ms(inches_per_second))).intValue();
 	}
 	
 	public static double rotationsToEncoderCount(double rotations) {
