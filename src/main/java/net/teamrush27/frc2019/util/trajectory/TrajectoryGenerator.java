@@ -1,9 +1,13 @@
 package net.teamrush27.frc2019.util.trajectory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.teamrush27.frc2019.util.math.Pose2d;
 import net.teamrush27.frc2019.util.math.Pose2dWithCurvature;
+import net.teamrush27.frc2019.util.math.Rotation2d;
 import net.teamrush27.frc2019.util.motion.DriveMotionPlanner;
+import net.teamrush27.frc2019.util.trajectory.timing.CentripetalAccelerationConstraint;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
 import net.teamrush27.frc2019.util.trajectory.timing.TimingConstraint;
 
@@ -76,6 +80,8 @@ public class TrajectoryGenerator {
   // +x is towards the center of the field.
   // +y is to the left.
   // ALL POSES DEFINED FOR THE CASE THAT ROBOT STARTS ON RIGHT! (mirrored about +x axis for LEFT)
+  public static final Pose2d originPose = new Pose2d(0.0, 0.0, Rotation2d.identity());
+  public static final Pose2d justStraightPose = new Pose2d(60.0, 0.0, Rotation2d.identity());
   /*public static final Pose2d kSideStartPose = new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(180.0));
   public static final Pose2d kNearScaleEmptyPose = new Pose2d(new Translation2d(253.0, 28.0),
       Rotation2d
@@ -232,6 +238,8 @@ public class TrajectoryGenerator {
     public final MirroredTrajectory scaleToFenceRight;
     public final MirroredTrajectory fenceToScaleRight;*/
 
+    public final MirroredTrajectory justStraight;
+
     private TrajectorySet() {
       /*sideStartToNearScale = new MirroredTrajectory(getSideStartToNearScale());
       nearScaleToNearFence = new MirroredTrajectory(getNearScaleToNearFence());
@@ -270,6 +278,7 @@ public class TrajectoryGenerator {
       scaleToFenceRight = new MirroredTrajectory(getScaleToFenceRight());
       fenceToScaleRight = new MirroredTrajectory(getFenceToScaleRight());
 */
+      justStraight = new MirroredTrajectory(getJustStraight());
     }
 
     /*
@@ -644,6 +653,16 @@ public class TrajectoryGenerator {
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }*/
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getJustStraight() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(originPose);
+      waypoints.add(justStraightPose);
+
+      return generateTrajectory(true, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+    }
 
   }
 }

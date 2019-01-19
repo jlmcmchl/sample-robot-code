@@ -1,5 +1,6 @@
 package net.teamrush27.frc2019.util.follow;
 
+import net.teamrush27.frc2019.util.math.Pose2d;
 import net.teamrush27.frc2019.util.math.Rotation2d;
 import net.teamrush27.frc2019.util.math.Translation2d;
 import net.teamrush27.frc2019.util.math.Twist2d;
@@ -56,9 +57,9 @@ public class AdaptivePurePursuitController {
      *            robot pose
      * @return movement command for the robot to follow
      */
-    public Command update(RigidTransform2d pose) {
+    public Command update(Pose2d pose) {
         if (reversed) {
-            pose = new RigidTransform2d(pose.getTranslation(),
+            pose = new Pose2d(pose.getTranslation(),
                     pose.getRotation().rotateBy(Rotation2d.fromRadians(Math.PI)));
         }
 
@@ -99,7 +100,7 @@ public class AdaptivePurePursuitController {
         public double radius;
         public double length;
 
-        public Arc(RigidTransform2d pose, Translation2d point) {
+        public Arc(Pose2d pose, Translation2d point) {
             center = getCenter(pose, point);
             radius = new Translation2d(center, point).norm();
             length = getLength(pose, point, center, radius);
@@ -115,11 +116,11 @@ public class AdaptivePurePursuitController {
      *            lookahead point
      * @return center of the circle joining the lookahead point and robot pose
      */
-    public static Translation2d getCenter(RigidTransform2d pose, Translation2d point) {
+    public static Translation2d getCenter(Pose2d pose, Translation2d point) {
         final Translation2d poseToPointHalfway = pose.getTranslation().interpolate(point, 0.5);
         final Rotation2d normal = pose.getTranslation().inverse().translateBy(poseToPointHalfway).direction().normal();
-        final RigidTransform2d perpendicularBisector = new RigidTransform2d(poseToPointHalfway, normal);
-        final RigidTransform2d normalFromPose = new RigidTransform2d(pose.getTranslation(),
+        final Pose2d perpendicularBisector = new Pose2d(poseToPointHalfway, normal);
+        final Pose2d normalFromPose = new Pose2d(pose.getTranslation(),
                 pose.getRotation().normal());
         if (normalFromPose.isColinear(perpendicularBisector.normal())) {
             // Special case: center is poseToPointHalfway.
@@ -137,7 +138,7 @@ public class AdaptivePurePursuitController {
      *            lookahead point
      * @return radius of the circle joining the lookahead point and robot pose
      */
-    public static double getRadius(RigidTransform2d pose, Translation2d point) {
+    public static double getRadius(Pose2d pose, Translation2d point) {
         Translation2d center = getCenter(pose, point);
         return new Translation2d(center, point).norm();
     }
@@ -151,13 +152,13 @@ public class AdaptivePurePursuitController {
      *            lookahead point
      * @return the length of the arc joining the lookahead point and robot pose
      */
-    public static double getLength(RigidTransform2d pose, Translation2d point) {
+    public static double getLength(Pose2d pose, Translation2d point) {
         final double radius = getRadius(pose, point);
         final Translation2d center = getCenter(pose, point);
         return getLength(pose, point, center, radius);
     }
 
-    public static double getLength(RigidTransform2d pose, Translation2d point, Translation2d center, double radius) {
+    public static double getLength(Pose2d pose, Translation2d point, Translation2d center, double radius) {
         if (radius < REALLY_BIG_NUMBER) {
             final Translation2d centerToPoint = new Translation2d(center, point);
             final Translation2d centerToPose = new Translation2d(center, pose.getTranslation());
@@ -182,7 +183,7 @@ public class AdaptivePurePursuitController {
      *            lookahead point
      * @return the direction the robot should turn: -1 is left, +1 is right
      */
-    public static int getDirection(RigidTransform2d pose, Translation2d point) {
+    public static int getDirection(Pose2d pose, Translation2d point) {
         Translation2d poseToPoint = new Translation2d(pose.getTranslation(), point);
         Translation2d robot = pose.getRotation().toTranslation();
         double cross = robot.x() * poseToPoint.y() - robot.y() * poseToPoint.x();

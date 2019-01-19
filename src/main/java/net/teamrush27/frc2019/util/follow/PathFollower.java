@@ -1,10 +1,11 @@
 package net.teamrush27.frc2019.util.follow;
 
+import net.teamrush27.frc2019.util.math.Pose2d;
 import net.teamrush27.frc2019.util.math.Twist2d;
 
 public interface PathFollower {
 	
-	Twist2d update(double time, RigidTransform2d pose, double displacement, double velocity);
+	Twist2d update(double time, Pose2d pose, double displacement, double velocity);
 	
 	double getCrossTrackError();
 	

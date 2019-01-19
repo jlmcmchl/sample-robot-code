@@ -9,6 +9,10 @@ public class Units {
     return rads_per_sec * 60.0 / (2.0 * Math.PI);
   }
 
+  public static double rads_per_sec_to_tp100ms(double rads_per_sec) {
+    return rads_per_sec / (Math.PI * 2.0) * 4096.0 / 10.0;
+  }
+
   public static double inches_to_meters(double inches) {
     return inches * 0.0254;
   }

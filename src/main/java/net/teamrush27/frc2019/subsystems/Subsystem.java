@@ -11,7 +11,14 @@ public abstract class Subsystem {
     public abstract void zeroSensors();
 
     public abstract void registerEnabledLoops(Looper enabledLooper);
-    
+
     public abstract void test();
-	
+
+    // Optional design pattern for caching periodic reads to avoid hammering the HAL/CAN.
+    public void readPeriodicInputs() {
+    }
+
+    // Optional design pattern for caching periodic writes to avoid hammering the HAL/CAN.
+    public void writePeriodicOutputs() {
+    }
 }

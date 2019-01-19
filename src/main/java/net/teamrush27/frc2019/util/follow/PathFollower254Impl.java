@@ -1,6 +1,7 @@
 package net.teamrush27.frc2019.util.follow;
 
 //import net.teamrush27.frc2019.subsystems.impl.Elevator;
+import net.teamrush27.frc2019.util.math.Pose2d;
 import net.teamrush27.frc2019.util.math.Twist2d;
 import net.teamrush27.frc2019.util.motion.MotionProfileConstraints;
 import net.teamrush27.frc2019.util.motion.MotionProfileGoal;
@@ -65,7 +66,7 @@ public class PathFollower254Impl implements PathFollower {
      * @return The velocity command to apply
      */
     @Override
-    public synchronized Twist2d update(double time, RigidTransform2d pose, double displacement,
+    public synchronized Twist2d update(double time, Pose2d pose, double displacement,
         double velocity) {
         if (!steeringController.isFinished()) { // if we're still in a turn
             final AdaptivePurePursuitController.Command steeringCommand = steeringController.update(pose);

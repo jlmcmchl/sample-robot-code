@@ -1,5 +1,4 @@
 package net.teamrush27.frc2019.util.crash;
-
 /**
  * Runnable class with reports all uncaught throws to CrashTracker
  */
