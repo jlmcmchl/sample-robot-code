@@ -69,7 +69,7 @@ public class Drivetrain extends Subsystem {
 
   private final NavX navX;
 
-  private DriveMode driveMode;
+  private DriveMode driveMode = DriveMode.OPEN_LOOP;
   private RobotState robotState = RobotState.getInstance();
   private Trajectory trajectory = null;
   private DriveMotionPlanner motionPlanner;
@@ -173,36 +173,31 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.configVelocityMeasurementWindow(32, RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.setSensorPhase(true);
+    leftMaster.setInverted(true);
 
-    leftMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    leftMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10 * 12),
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15 * 12),
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10*12), RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15*12), RobotConstants.TALON_CONFIG_TIMEOUT);
 
     leftSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID,
         RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
-    leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.setInverted(true);
+
+
 
     leftSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
-    leftSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.setInverted(true);
+
 
     rightMaster = CANTalonFactory.createDefaultTalon(RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
@@ -213,43 +208,32 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.configVelocityMeasurementWindow(32, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.setSensorPhase(true);
-    rightMaster.setInverted(true);
-    rightMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    //rightMaster.setInverted(true);
+    rightMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    rightMaster
-        .configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10 * 12),
-            RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15 * 12),
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10*12), RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15*12), RobotConstants.TALON_CONFIG_TIMEOUT);
 
     rightSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_1_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-    rightSlave1.setInverted(true);
-    rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    //rightSlave1.setInverted(true);
+    rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 
     rightSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-    rightSlave2.setInverted(true);
-    rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
+    //rightSlave2.setInverted(true);
+    rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
 
     setCurrentLimiting(false);
     reloadGains();
 
+    periodicIO = new PeriodicIO();
     navX = new NavX(SPI.Port.kMXP);
 
     brakeMode = true;
@@ -828,8 +812,17 @@ public class Drivetrain extends Subsystem {
       rightMaster.set(
           ControlMode.MotionMagic,
           DriveUtils.inchesToEncoderCount(periodicIO.right_turn));
+    } else if (driveMode == DriveMode.VELOCITY_SETPOINT) {
+      leftMaster.set(
+          ControlMode.Velocity,
+          periodicIO.left_demand);
+
+      rightMaster.set(
+          ControlMode.Velocity,
+          periodicIO.right_demand);
+
     } else {
-      System.out.println(String.format("Hit a bad velocity control state %s %s",
+      System.out.println(String.format("Hit a bad control state %s %s",
           driveMode.getRequestedControlMode(), driveMode));
     }
   }

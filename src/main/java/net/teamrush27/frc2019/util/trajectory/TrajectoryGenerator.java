@@ -26,12 +26,12 @@ public class TrajectoryGenerator {
   private static final double kSimpleSwitchMaxCentripetalAccel = 80.0;
   private static final double kSimpleSwitchMaxVelocity = 120.0;
 
-  private static TrajectoryGenerator mInstance = new TrajectoryGenerator();
+  private static TrajectoryGenerator INSTANCE = new TrajectoryGenerator();
   private final DriveMotionPlanner mMotionPlanner;
   private TrajectorySet mTrajectorySet = null;
 
   public static TrajectoryGenerator getInstance() {
-    return mInstance;
+    return INSTANCE;
   }
 
   private TrajectoryGenerator() {
@@ -199,86 +199,28 @@ public class TrajectoryGenerator {
       public final Trajectory<TimedState<Pose2dWithCurvature>> right;
     }
 
-    /*public final MirroredTrajectory sideStartToNearScale;
-    public final MirroredTrajectory sideStartToFarScale;
-    public final MirroredTrajectory sideStartToNearSwitch;
-    public final MirroredTrajectory sideStartToFarSwitch;
-    public final MirroredTrajectory nearScaleToNearFence;
-    public final MirroredTrajectory nearScaleToNearFence2;
-    public final MirroredTrajectory nearScaleToNearFence3;
-    public final MirroredTrajectory nearFenceToNearScale;
-    public final MirroredTrajectory nearFence2ToNearScale;
-    public final MirroredTrajectory nearFence3ToNearScale;
-    public final MirroredTrajectory nearFence3ToEndPose;
-    public final MirroredTrajectory farScaleToFarFence;
-    public final MirroredTrajectory farScaleToFarFence2;
-    public final MirroredTrajectory farScaleToFarFence3;
-    public final MirroredTrajectory farFenceToFarScale;
-    public final MirroredTrajectory farFence2ToFarScale;
-    public final MirroredTrajectory farFence3ToFarScale;
-
-    public final Trajectory<TimedState<Pose2dWithCurvature>> centerStartToLeftSwitch;
-    public final Trajectory<TimedState<Pose2dWithCurvature>> centerStartToRightSwitch;
-    public final Trajectory<TimedState<Pose2dWithCurvature>> simpleStartToLeftSwitch;
-    public final Trajectory<TimedState<Pose2dWithCurvature>> simpleStartToRightSwitch;
-    public final MirroredTrajectory switchToPyramidCube;
-    public final MirroredTrajectory pyramidCubeToSwitch;
-    public final MirroredTrajectory switchToPyramidCube1;
-    public final MirroredTrajectory pyramidCube1ToSwitch;
-    public final MirroredTrajectory switchToPyramidCube2;
-    public final MirroredTrajectory pyramidCube2ToCenterField;
-
-    public final MirroredTrajectory switchToCenterPyramidCube;
-
-    public final MirroredTrajectory centerPyramidCubeToScaleLeft;
-    public final MirroredTrajectory scaleToFenceLeft;
-    public final MirroredTrajectory fenceToScaleLeft;
-
-    public final MirroredTrajectory centerPyramidCubeToScaleRight;
-    public final MirroredTrajectory scaleToFenceRight;
-    public final MirroredTrajectory fenceToScaleRight;*/
+    // For Trajectories that can run from either side, use MirroredTrajectory
+    // For Trajectories that do not have a mirrored version (e.g. 1st stage switch autons),
+    //    use Trajectory<TimedState<Pose2dWithCurvature>>
 
     public final MirroredTrajectory justStraight;
 
     private TrajectorySet() {
-      /*sideStartToNearScale = new MirroredTrajectory(getSideStartToNearScale());
-      nearScaleToNearFence = new MirroredTrajectory(getNearScaleToNearFence());
-      nearScaleToNearFence2 = new MirroredTrajectory(getNearScaleToNearFence2());
-      nearScaleToNearFence3 = new MirroredTrajectory(getNearScaleToNearFence3());
-      sideStartToFarScale = new MirroredTrajectory(getSideStartToFarScale());
-      nearFenceToNearScale = new MirroredTrajectory(getNearFenceToNearScale());
-      nearFence2ToNearScale = new MirroredTrajectory(getNearFence2ToNearScale());
-      nearFence3ToNearScale = new MirroredTrajectory(getNearFence3ToNearScale());
-      nearFence3ToEndPose = new MirroredTrajectory(getNearFence3ToEndPose());
-      farScaleToFarFence = new MirroredTrajectory(getFarScaleToFarFence());
-      farScaleToFarFence2 = new MirroredTrajectory(getFarScaleToFarFence2());
-      farScaleToFarFence3 = new MirroredTrajectory(getFarScaleToFarFence3());
-      farFenceToFarScale = new MirroredTrajectory(getFarFenceToFarScale());
-      farFence2ToFarScale = new MirroredTrajectory(getFarFence2ToFarScale());
-      farFence3ToFarScale = new MirroredTrajectory(getFarFence3ToFarScale());
-      sideStartToNearSwitch = new MirroredTrajectory(getSideStartToNearSwitch());
-      sideStartToFarSwitch = new MirroredTrajectory(getSideStartToFarSwitch());
+      // For Non-Mirrored Trajectories, just call the helper fn
+      // For Mirrored Trajectories, wrap in `new MirroredTrajectory`
 
-      centerStartToLeftSwitch = getCenterStartToLeftSwitch();
-      centerStartToRightSwitch = getCenterStartToRightSwitch();
-      simpleStartToLeftSwitch = getSimpleStartToLeftSwitch();
-      simpleStartToRightSwitch = getSimpleStartToRightSwitch();
-      switchToPyramidCube = new MirroredTrajectory(getSwitchToPyramidCube());
-      pyramidCubeToSwitch = new MirroredTrajectory(getPyramidCubeToSwitch());
-      switchToPyramidCube1 = new MirroredTrajectory(getSwitchToPyramidCube1());
-      pyramidCube1ToSwitch = new MirroredTrajectory(getPyramidCube1ToSwitch());
-      switchToPyramidCube2 = new MirroredTrajectory(getSwitchToPyramidCube2());
-      pyramidCube2ToCenterField = new MirroredTrajectory(getPyramidCube2ToCenterField());
-
-      switchToCenterPyramidCube = new MirroredTrajectory(getSwitchToCenterPyramidCube());
-      centerPyramidCubeToScaleLeft = new MirroredTrajectory(getCenterPyramidCubeToScaleLeft());
-      scaleToFenceLeft = new MirroredTrajectory(getScaleToFenceLeft());
-      fenceToScaleLeft = new MirroredTrajectory(getFenceToScaleLeft());
-      centerPyramidCubeToScaleRight = new MirroredTrajectory(getCenterPyramidCubeToScaleRight());
-      scaleToFenceRight = new MirroredTrajectory(getScaleToFenceRight());
-      fenceToScaleRight = new MirroredTrajectory(getFenceToScaleRight());
-*/
       justStraight = new MirroredTrajectory(getJustStraight());
+    }
+
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getJustStraight() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(originPose);
+      waypoints.add(justStraightPose);
+
+      return generateTrajectory(true, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
 
     /*
@@ -653,16 +595,6 @@ public class TrajectoryGenerator {
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }*/
-
-    private Trajectory<TimedState<Pose2dWithCurvature>> getJustStraight() {
-      List<Pose2d> waypoints = new ArrayList<>();
-      waypoints.add(originPose);
-      waypoints.add(justStraightPose);
-
-      return generateTrajectory(true, waypoints,
-          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
-          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
-    }
 
   }
 }

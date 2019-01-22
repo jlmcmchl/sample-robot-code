@@ -89,6 +89,7 @@ public class TimingUtil {
           final TimingConstraint.MinMaxAcceleration min_max_accel = constraint.getMinMaxAcceleration(
               constraint_state.state,
               (reverse ? -1.0 : 1.0) * constraint_state.max_velocity);
+
           if (!min_max_accel.valid()) {
             // This should never happen if constraints are well-behaved.
             throw new RuntimeException();

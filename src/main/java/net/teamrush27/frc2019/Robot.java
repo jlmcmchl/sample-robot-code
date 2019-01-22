@@ -11,10 +11,16 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import net.teamrush27.frc2019.auto.AutoModeExecutor;
+import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.base.RobotState;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Arm.WantedState;
@@ -23,15 +29,18 @@ import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 import net.teamrush27.frc2019.util.crash.CrashTracker;
 import net.teamrush27.frc2019.util.math.Pose2d;
+import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
 public class Robot extends TimedRobot {
 
   private Arm arm = Arm.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
-  private final SubsystemManager subsystemManager = new SubsystemManager(arm, drivetrain);
+  private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain);
   private final Looper enabledLooper = new Looper();
   private final Looper disabledLooper = new Looper();
+
+  private AutoModeExecutor autoModeExecutor;
 
 
   @Override
@@ -39,6 +48,7 @@ public class Robot extends TimedRobot {
     subsystemManager.registerEnabledLoops(enabledLooper);
     subsystemManager.registerDisabledLoops(disabledLooper);
 
+    TrajectoryGenerator.getInstance().generateTrajectories();
   }
 
   @Override
@@ -51,6 +61,10 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     disabledLooper.stop();
     enabledLooper.start();
+
+    autoModeExecutor = new AutoModeExecutor();
+    autoModeExecutor.setAutoMode(new TestMode());
+    autoModeExecutor.start();
   }
 
   @Override

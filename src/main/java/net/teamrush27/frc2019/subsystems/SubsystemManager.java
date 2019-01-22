@@ -21,6 +21,9 @@ public class SubsystemManager implements ILooper {
     Collections.addAll(this.subsystems, subsystems);
   }
 
+  public SubsystemManager(List subsystems) {
+  }
+
   public void outputToSmartDashboard() {
     subsystems.forEach((s) -> s.outputToSmartDashboard());
   }
