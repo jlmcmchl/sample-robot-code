@@ -53,6 +53,8 @@ public class Drivetrain extends Subsystem {
 
   private static Drivetrain instance = new Drivetrain();
 
+  private static final double DRIVE_ENCODER_PPR = 4096.0;
+
   private final TalonSRX leftMaster;
   private final TalonSRX leftSlave1;
   private final TalonSRX rightMaster;
@@ -99,8 +101,6 @@ public class Drivetrain extends Subsystem {
     public void onStart(double timestamp) {
       synchronized (Drivetrain.this) {
         setOpenLoop(DriveCommand.defaultCommand());
-        setBrakeMode(false);
-        setVelocitySetpoint(0, 0);
         navX.reset();
 //        startLogging();
       }
@@ -175,29 +175,37 @@ public class Drivetrain extends Subsystem {
     leftMaster.setSensorPhase(true);
     leftMaster.setInverted(true);
 
-    leftMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    leftMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10*12), RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15*12), RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10 * 12),
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15 * 12),
+        RobotConstants.TALON_CONFIG_TIMEOUT);
 
     leftSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID,
         RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
-    leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.setInverted(true);
-
-
 
     leftSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
-    leftSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave2.setInverted(true);
-
 
     rightMaster = CANTalonFactory.createDefaultTalon(RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
@@ -209,26 +217,38 @@ public class Drivetrain extends Subsystem {
     rightMaster.configVelocityMeasurementWindow(32, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.setSensorPhase(true);
     //rightMaster.setInverted(true);
-    rightMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    rightMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10*12), RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15*12), RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster
+        .configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10 * 12),
+            RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15 * 12),
+        RobotConstants.TALON_CONFIG_TIMEOUT);
 
     rightSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_1_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
     //rightSlave1.setInverted(true);
-    rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
 
     rightSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
     //rightSlave2.setInverted(true);
-    rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
 
     setCurrentLimiting(false);
     reloadGains();
@@ -460,7 +480,7 @@ public class Drivetrain extends Subsystem {
 
   public boolean isDoneWithTrajectory() {
     if (motionPlanner == null || driveMode != DriveMode.CHEZY_PATH_FOLLOWING) {
-      return false;
+      return true;
     }
     return motionPlanner.isDone() || overrideTrajectory;
   }
@@ -511,6 +531,46 @@ public class Drivetrain extends Subsystem {
   public void zeroSensors() {
     resetEncoders();
     navX.zeroYaw();
+  }
+
+  public double getLeftEncoderRotations() {
+    return -periodicIO.left_position_ticks / DRIVE_ENCODER_PPR;
+  }
+
+  public double getRightEncoderRotations() {
+    return -periodicIO.right_position_ticks / DRIVE_ENCODER_PPR;
+  }
+
+  public double getLeftEncoderDistance() {
+    return DriveUtils.rotationsToInches(getLeftEncoderRotations());
+  }
+
+  public double getRightEncoderDistance() {
+    return DriveUtils.rotationsToInches(getRightEncoderRotations());
+  }
+
+  public double getRightVelocityNativeUnits() {
+    return periodicIO.right_velocity_ticks_per_100ms;
+  }
+
+  public double getRightLinearVelocity() {
+    return DriveUtils.rotationsToInches(getRightVelocityNativeUnits() * 10.0 / DRIVE_ENCODER_PPR);
+  }
+
+  public double getLeftVelocityNativeUnits() {
+    return periodicIO.left_velocity_ticks_per_100ms;
+  }
+
+  public double getLeftLinearVelocity() {
+    return DriveUtils.rotationsToInches(getLeftVelocityNativeUnits() * 10.0 / DRIVE_ENCODER_PPR);
+  }
+
+  public double getLinearVelocity() {
+    return (getLeftLinearVelocity() + getRightLinearVelocity()) / 2.0;
+  }
+
+  public double getAngularVelocity() {
+    return (getRightLinearVelocity() - getLeftLinearVelocity()) / ChezyConstants.kDriveWheelTrackWidthInches;
   }
 
   public synchronized void resetEncoders() {
@@ -587,27 +647,19 @@ public class Drivetrain extends Subsystem {
   }
 
   public double getLeftVelocityInchesPerSec() {
-    return DriveUtils.encoderCountToInches(leftMaster.getSelectedSensorVelocity(0)) * 10;
+    return DriveUtils.encoderCountToInches(periodicIO.left_velocity_ticks_per_100ms) * 10;
   }
 
   public double getRightVelocityInchesPerSec() {
-    return DriveUtils.encoderCountToInches(rightMaster.getSelectedSensorVelocity(0)) * 10;
+    return DriveUtils.encoderCountToInches(periodicIO.right_velocity_ticks_per_100ms) * 10;
   }
 
   public double getLeftDistanceInches() {
-    return DriveUtils.encoderCountToInches(leftMaster.getSelectedSensorPosition(0));
+    return DriveUtils.encoderCountToInches(periodicIO.left_position_ticks);
   }
 
   public double getRightDistanceInches() {
-    return DriveUtils.encoderCountToInches(rightMaster.getSelectedSensorPosition(0));
-  }
-
-  public int getLeftEncoderRotations() {
-    return leftMaster.getSelectedSensorPosition(0);
-  }
-
-  public int getRightEncoderRotations() {
-    return rightMaster.getSelectedSensorPosition(0);
+    return DriveUtils.encoderCountToInches(periodicIO.right_position_ticks);
   }
 
   @Override
@@ -653,6 +705,13 @@ public class Drivetrain extends Subsystem {
 
       periodicIO.error = motionPlanner.error();
       periodicIO.path_setpoint = motionPlanner.setpoint();
+
+      if (output.left_velocity != 0) {
+        System.out.println(String.format("[%s]: %s", timestamp, output));
+        //System.out.println(String.format("[%s]: %s - %s => %s", timestamp, periodicIO.path_setpoint.state().getPose(),
+        //    RobotState.getInstance().getLatestFieldToVehicle().getValue(), periodicIO.error));
+
+      }
 
       if (!overrideTrajectory) {
         setVelocity(new DriveCommand(Units.rads_per_sec_to_tp100ms(output.left_velocity),
@@ -825,6 +884,9 @@ public class Drivetrain extends Subsystem {
       System.out.println(String.format("Hit a bad control state %s %s",
           driveMode.getRequestedControlMode(), driveMode));
     }
+    //if (!isDoneWithTrajectory())
+
+      //System.out.println(String.format("[%s]:\t%s %s %s %s", Timer.getFPGATimestamp(), periodicIO.left_demand, periodicIO.right_demand, periodicIO.left_feedforward, periodicIO.right_feedforward));
   }
 
   public static class PeriodicIO {

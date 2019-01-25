@@ -25,6 +25,7 @@ import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Arm.WantedState;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
+import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 import net.teamrush27.frc2019.util.crash.CrashTracker;
@@ -33,10 +34,11 @@ import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
 public class Robot extends TimedRobot {
 
+  private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
   private Arm arm = Arm.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
-  private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain);
+  private final SubsystemManager subsystemManager = new SubsystemManager(robotStateEstimator, drivetrain);
   private final Looper enabledLooper = new Looper();
   private final Looper disabledLooper = new Looper();
 
@@ -61,6 +63,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     disabledLooper.stop();
     enabledLooper.start();
+
+    drivetrain.startLogging();
 
     autoModeExecutor = new AutoModeExecutor();
     autoModeExecutor.setAutoMode(new TestMode());
@@ -89,6 +93,8 @@ public class Robot extends TimedRobot {
   public void testInit() {
     enabledLooper.stop();
     disabledLooper.stop();
+
+    drivetrain.stopLogging();
   }
 
   @Override
@@ -98,6 +104,8 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     SmartDashboard.putString("Match Cycle", "DISABLED");
+
+    drivetrain.stopLogging();
 
     try {
       CrashTracker.logDisabledInit();

@@ -103,6 +103,14 @@ public interface IDrivetrainModel {
     public IDrivetrainModel.WheelState wheel_torque = new IDrivetrainModel.WheelState();  // N m
 
     @Override
+    public String toString() {
+      DecimalFormat fmt = new DecimalFormat("#0.000");
+      return fmt.format(curvature) + ", " + fmt.format(dcurvature) + ", (" + chassis_velocity + ", " + chassis_acceleration
+          + "), (" + wheel_velocity + ", " + wheel_acceleration
+          + ", " + voltage + ", " + wheel_torque + ")";
+    }
+
+    @Override
     public String toCSV() {
       return curvature + "," + dcurvature + "," + chassis_velocity + ", " + chassis_acceleration
           + ", " + wheel_velocity + ", " + wheel_acceleration

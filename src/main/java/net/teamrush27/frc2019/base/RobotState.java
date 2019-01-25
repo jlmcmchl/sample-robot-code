@@ -8,6 +8,7 @@ import java.util.Optional;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.constants.FieldConstants;
 import net.teamrush27.frc2019.constants.RobotConstants;
+import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.util.interpolate.InterpolatingDouble;
 import net.teamrush27.frc2019.util.interpolate.InterpolatingTreeMap;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
@@ -49,6 +50,7 @@ public class RobotState {
         fieldToVehicle.put(new InterpolatingDouble(startTime), initalFieldToVehicle);
         vehicleVelocityPredicted = Twist2d.identity();
         vehicleVelocityMeasured = Twist2d.identity();
+        Drivetrain.getInstance().setHeading(initalFieldToVehicle.getRotation());
 //        goalTracker = new GoalTracker();
         cameraPitchCorrection = Rotation2d.fromDegrees(-RobotConstants.CAMERA_PITCH_ANGLE);
         cameraYawCorrection = Rotation2d.fromDegrees(-RobotConstants.CAMERA_YAW_ANGLE);
@@ -56,8 +58,17 @@ public class RobotState {
         distanceDriven = 0.0;
     }
 
+    public synchronized Pose2d getFieldToVehicle(double timestamp) {
+        return fieldToVehicle.getInterpolated(new InterpolatingDouble(timestamp));
+    }
+
     public synchronized Map.Entry<InterpolatingDouble, Pose2d> getLatestFieldToVehicle() {
         return fieldToVehicle.lastEntry();
+    }
+
+    public synchronized Pose2d getPredictedFieldToVehicle(double lookahead_time) {
+        return getLatestFieldToVehicle().getValue()
+            .transformBy(Pose2d.exp(vehicleVelocityPredicted.scaled(lookahead_time)));
     }
 
     public synchronized void addFieldToVehicleObservation(double timestamp, Pose2d observation) {
@@ -81,6 +92,23 @@ public class RobotState {
         return change;
     }
 
+    public synchronized double getDistanceDriven() {
+        return distanceDriven;
+    }
 
+    public synchronized Twist2d getPredictedVelocity() {
+        return vehicleVelocityPredicted;
+    }
 
+    public synchronized Twist2d getMeasuredVelocity() {
+        return vehicleVelocityMeasured;
+    }
+
+    public void outputToSmartDashboard() {
+        Pose2d odometry = getLatestFieldToVehicle().getValue();
+        SmartDashboard.putNumber("Robot Pose X", odometry.getTranslation().x());
+        SmartDashboard.putNumber("Robot Pose Y", odometry.getTranslation().y());
+        SmartDashboard.putNumber("Robot Pose Theta", odometry.getRotation().getDegrees());
+        SmartDashboard.putNumber("Robot Linear Velocity", vehicleVelocityMeasured.deltaX);
+    }
 }
