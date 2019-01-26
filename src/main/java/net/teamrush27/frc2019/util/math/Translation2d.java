@@ -133,6 +133,11 @@ public class Translation2d implements ITranslation2d<Translation2d> {
         return fmt.format(x_) + "," + fmt.format(y_);
     }
 
+    @Override
+    public String header(String base) {
+        return base + "_x," + base + "_y";
+    }
+
     public static double dot(final Translation2d a, final Translation2d b) {
         return a.x_ * b.x_ + a.y_ * b.y_;
     }

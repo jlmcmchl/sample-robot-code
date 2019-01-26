@@ -169,6 +169,11 @@ public class DriveMotionPlanner implements CSVWritable {
         mSetpoint.toCSV();
   }
 
+  @Override
+  public String header(String base) {
+    return base + "_l_v," + base + "_r_v," + base + "_l_ff_v," + base + "_r_ff_v," + mSetpoint.header(base + "_setpoint");
+  }
+
   public static class Output {
 
     public Output() {

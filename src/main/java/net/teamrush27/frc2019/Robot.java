@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
+import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
+import net.teamrush27.frc2019.auto.modes.DriveAtSpeed;
 import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
@@ -64,6 +66,7 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     enabledLooper.start();
 
+    robotStateEstimator.startLogging();
     drivetrain.startLogging();
 
     autoModeExecutor = new AutoModeExecutor();
@@ -94,7 +97,6 @@ public class Robot extends TimedRobot {
     enabledLooper.stop();
     disabledLooper.stop();
 
-    drivetrain.stopLogging();
   }
 
   @Override
@@ -105,6 +107,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     SmartDashboard.putString("Match Cycle", "DISABLED");
 
+    robotStateEstimator.stopLogging();
     drivetrain.stopLogging();
 
     try {

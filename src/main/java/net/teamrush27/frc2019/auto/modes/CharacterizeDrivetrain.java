@@ -19,9 +19,9 @@ public class CharacterizeDrivetrain extends AutoModeBase {
     // runAction(new ShiftHighGearAction(false));
     // runAction(new WaitAction(10));
 
-    runAction(new CollectVelocityData(velocityData, false, true));
+    runAction(new CollectVelocityData(velocityData, false, false));
     runAction(new WaitAction(10));
-    runAction(new CollectAccelerationData(accelerationData, false, true));
+    runAction(new CollectAccelerationData(accelerationData, false, false));
 
     DriveCharacterization.CharacterizationConstants constants = DriveCharacterization.characterizeDrive(velocityData, accelerationData);
 

@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXPIDSetConfiguration;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
@@ -40,6 +41,7 @@ import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryIterator;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
 import net.teamrush27.frc2019.wrappers.CANTalonFactory;
+import net.teamrush27.frc2019.wrappers.LazyCANTalon;
 import net.teamrush27.frc2019.wrappers.NavX;
 
 /**
@@ -55,9 +57,9 @@ public class Drivetrain extends Subsystem {
 
   private static final double DRIVE_ENCODER_PPR = 4096.0;
 
-  private final TalonSRX leftMaster;
+  private final LazyCANTalon leftMaster;
   private final TalonSRX leftSlave1;
-  private final TalonSRX rightMaster;
+  private final LazyCANTalon rightMaster;
   private final TalonSRX rightSlave1;
 
   // new
@@ -173,7 +175,7 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.configVelocityMeasurementWindow(32, RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.setSensorPhase(true);
-    leftMaster.setInverted(true);
+    leftMaster.setInverted(false);
 
     leftMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -181,6 +183,9 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
+
+    leftMaster.enableVoltageCompensation(true);
+    leftMaster.configVoltageCompSaturation(12.0, RobotConstants.TALON_CONFIG_TIMEOUT);
 
     leftMaster.configMotionCruiseVelocity(DriveUtils.inchesPerSecondToEncoderCountPer100ms(10 * 12),
         RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -195,7 +200,7 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.setInverted(true);
+    leftSlave1.setInverted(false);
 
     leftSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_LEFT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
@@ -205,7 +210,7 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave2.setInverted(true);
+    leftSlave2.setInverted(false);
 
     rightMaster = CANTalonFactory.createDefaultTalon(RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
@@ -216,7 +221,7 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.configVelocityMeasurementWindow(32, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.setSensorPhase(true);
-    //rightMaster.setInverted(true);
+    rightMaster.setInverted(true);
     rightMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
@@ -230,9 +235,12 @@ public class Drivetrain extends Subsystem {
     rightMaster.configMotionAcceleration(DriveUtils.inchesPerSecondToEncoderCountPer100ms(15 * 12),
         RobotConstants.TALON_CONFIG_TIMEOUT);
 
+    rightMaster.enableVoltageCompensation(true);
+    rightMaster.configVoltageCompSaturation(12.0, RobotConstants.TALON_CONFIG_TIMEOUT);
+
     rightSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_1_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-    //rightSlave1.setInverted(true);
+    rightSlave1.setInverted(true);
     rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
@@ -242,7 +250,7 @@ public class Drivetrain extends Subsystem {
 
     rightSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-    //rightSlave2.setInverted(true);
+    rightSlave2.setInverted(true);
     rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
@@ -334,81 +342,66 @@ public class Drivetrain extends Subsystem {
    */
   public synchronized void reloadGains() {
     double startTime = Timer.getFPGATimestamp();
-    leftMaster
-        .config_kP(DRIVE_CONTROL_SLOT, DriveConstants.PID_P, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster
-        .config_kI(DRIVE_CONTROL_SLOT, DriveConstants.PID_I, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster
-        .config_kD(DRIVE_CONTROL_SLOT, DriveConstants.PID_D, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster
-        .config_kF(DRIVE_CONTROL_SLOT, DriveConstants.PID_F, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster
-        .config_IntegralZone(DRIVE_CONTROL_SLOT, DriveConstants.PID_I_ZONE,
-            RobotConstants.TALON_CONFIG_TIMEOUT);
+
     leftMaster.configClosedloopRamp(DriveConstants.PID_RAMP_RATE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    rightMaster
-        .config_kP(DRIVE_CONTROL_SLOT, DriveConstants.PID_P, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster
-        .config_kI(DRIVE_CONTROL_SLOT, DriveConstants.PID_I, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster
-        .config_kD(DRIVE_CONTROL_SLOT, DriveConstants.PID_D, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster
-        .config_kF(DRIVE_CONTROL_SLOT, DriveConstants.PID_F, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster
-        .config_IntegralZone(DRIVE_CONTROL_SLOT, DriveConstants.PID_I_ZONE,
-            RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftMaster.configurePIDF(
+        DRIVE_CONTROL_SLOT,
+        DriveConstants.PID_P,
+        DriveConstants.PID_I,
+        DriveConstants.PID_D,
+        DriveConstants.PID_F,
+        DriveConstants.PID_I_ZONE,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
+
     rightMaster.configClosedloopRamp(DriveConstants.PID_RAMP_RATE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    leftMaster.config_kP(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_P,
+    rightMaster.configurePIDF(
+        DRIVE_CONTROL_SLOT,
+        DriveConstants.PID_P,
+        DriveConstants.PID_I,
+        DriveConstants.PID_D,
+        DriveConstants.PID_F,
+        DriveConstants.PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.config_kI(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_I,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.config_kD(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_D,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.config_kF(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_F,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster
-        .config_IntegralZone(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_I_ZONE,
-            RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    rightMaster.config_kP(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_P,
+    leftMaster.configurePIDF(
+        VELOCITY_CONTROL_SLOT,
+        ChezyConstants.PID_P,
+        ChezyConstants.PID_I,
+        ChezyConstants.PID_D,
+        ChezyConstants.PID_F,
+        ChezyConstants.PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.config_kI(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_I,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.config_kD(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_D,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.config_kF(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_F,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster
-        .config_IntegralZone(VELOCITY_CONTROL_SLOT, ChezyConstants.PID_I_ZONE,
-            RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    leftMaster.config_kP(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_P,
+    rightMaster.configurePIDF(
+        VELOCITY_CONTROL_SLOT,
+        ChezyConstants.PID_P,
+        ChezyConstants.PID_I,
+        ChezyConstants.PID_D,
+        ChezyConstants.PID_F,
+        ChezyConstants.PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.config_kD(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_D,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.config_kI(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_I,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster.config_kF(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_F,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftMaster
-        .config_IntegralZone(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_I_ZONE,
-            RobotConstants.TALON_CONFIG_TIMEOUT);
 
-    rightMaster.config_kP(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_P,
+    leftMaster.configurePIDF(
+        TURNING_CONTROL_SLOT,
+        ChezyConstants.ROTATE_PID_P,
+        ChezyConstants.ROTATE_PID_I,
+        ChezyConstants.ROTATE_PID_D,
+        ChezyConstants.ROTATE_PID_F,
+        ChezyConstants.ROTATE_PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.config_kI(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_I,
+
+    rightMaster.configurePIDF(
+        TURNING_CONTROL_SLOT,
+        ChezyConstants.ROTATE_PID_P,
+        ChezyConstants.ROTATE_PID_I,
+        ChezyConstants.ROTATE_PID_D,
+        ChezyConstants.ROTATE_PID_F,
+        ChezyConstants.ROTATE_PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.config_kD(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_D,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster.config_kF(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_F,
-        RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightMaster
-        .config_IntegralZone(TURNING_CONTROL_SLOT, ChezyConstants.ROTATE_PID_I_ZONE,
-            RobotConstants.TALON_CONFIG_TIMEOUT);
 
     System.out
         .println("reloading gains took " + (Timer.getFPGATimestamp() - startTime) + " seconds");
@@ -454,11 +447,13 @@ public class Drivetrain extends Subsystem {
   public synchronized void setVelocity(DriveCommand signal, DriveCommand feedforward) {
     if (driveMode != DriveMode.CHEZY_PATH_FOLLOWING) {
       // We entered a velocity control state.
-      setBrakeMode(true);
+      setBrakeMode(signal.getBrakeMode());
       leftMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
       rightMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
       leftMaster.configNeutralDeadband(0.0, 0);
       rightMaster.configNeutralDeadband(0.0, 0);
+
+      reloadChezyGains();
 
       driveMode = DriveMode.CHEZY_PATH_FOLLOWING;
     }
@@ -521,8 +516,8 @@ public class Drivetrain extends Subsystem {
       rightMaster.configNeutralDeadband(0.04, 0);
     }
 
-    periodicIO.left_demand = -command.getLeftDriveInput();
-    periodicIO.right_demand = -command.getRightDriveInput();
+    periodicIO.left_demand = command.getLeftDriveInput();
+    periodicIO.right_demand = command.getRightDriveInput();
     periodicIO.left_feedforward = 0.0;
     periodicIO.right_feedforward = 0.0;
   }
@@ -534,11 +529,11 @@ public class Drivetrain extends Subsystem {
   }
 
   public double getLeftEncoderRotations() {
-    return -periodicIO.left_position_ticks / DRIVE_ENCODER_PPR;
+    return periodicIO.left_position_ticks / DRIVE_ENCODER_PPR;
   }
 
   public double getRightEncoderRotations() {
-    return -periodicIO.right_position_ticks / DRIVE_ENCODER_PPR;
+    return periodicIO.right_position_ticks / DRIVE_ENCODER_PPR;
   }
 
   public double getLeftEncoderDistance() {
@@ -570,12 +565,13 @@ public class Drivetrain extends Subsystem {
   }
 
   public double getAngularVelocity() {
-    return (getRightLinearVelocity() - getLeftLinearVelocity()) / ChezyConstants.kDriveWheelTrackWidthInches;
+    return (getRightLinearVelocity() - getLeftLinearVelocity())
+        / ChezyConstants.kDriveWheelTrackWidthInches;
   }
 
   public synchronized void resetEncoders() {
-    leftMaster.setSelectedSensorPosition(0, 0, 5);
-    rightMaster.setSelectedSensorPosition(0, 0, 5);
+    leftMaster.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+    rightMaster.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -590,11 +586,11 @@ public class Drivetrain extends Subsystem {
   /**
    * Start up velocity mode. This sets the drive train in high gear as well.
    */
-  public synchronized void setVelocitySetpoint(double leftInchesPerSecond,
-      double rightInchesPerSecond) {
+  public synchronized void setVelocitySetpoint(DriveCommand command) {
     configureTalonsForSpeedControl();
     driveMode = DriveMode.VELOCITY_SETPOINT;
-    updateVelocitySetpoint(leftInchesPerSecond, rightInchesPerSecond);
+    setBrakeMode(command.getBrakeMode());
+    updateVelocitySetpoint(command);
   }
 
   /**
@@ -621,7 +617,10 @@ public class Drivetrain extends Subsystem {
     if (driveMode == null || !Objects
         .equals(driveMode.getRequestedControlMode(), ControlMode.Velocity)) {
       // We entered a velocity control state.
-      setBrakeMode(true);
+      leftMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
+      rightMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
+      leftMaster.configNeutralDeadband(0.0, 0);
+      rightMaster.configNeutralDeadband(0.0, 0);
     }
   }
 
@@ -629,14 +628,13 @@ public class Drivetrain extends Subsystem {
    * Adjust Velocity setpoint (if already in velocity mode) <p><i>(Modified for new DriveMode
    * enum)</i></p>
    */
-  private synchronized void updateVelocitySetpoint(double leftInchesPerSecond,
-      double rightInchesPerSecond) {
+  private synchronized void updateVelocitySetpoint(DriveCommand command) {
 
     if (driveMode.getRequestedControlMode().equals(ControlMode.Velocity)) {
       periodicIO.left_demand = DriveUtils
-          .inchesPerSecondToEncoderCountPer100ms(leftInchesPerSecond);
+          .inchesPerSecondToEncoderCountPer100ms(command.getLeftDriveInput());
       periodicIO.right_demand = DriveUtils
-          .inchesPerSecondToEncoderCountPer100ms(rightInchesPerSecond);
+          .inchesPerSecondToEncoderCountPer100ms(command.getRightDriveInput());
 
     } else {
       System.out.println(String.format("Hit a bad velocity control state %s %s",
@@ -696,31 +694,34 @@ public class Drivetrain extends Subsystem {
 
   private void updateChezyPathFollower(double timestamp) {
     if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING) {
-      final double now = Timer.getFPGATimestamp();
+      double now = Timer.getFPGATimestamp();
 
       DriveMotionPlanner.Output output = motionPlanner
-          .update(now, RobotState.getInstance().getLatestFieldToVehicle().getValue());
+          .update(now, RobotState.getInstance().getPredictedFieldToVehicle(now));
 
-      // DriveCommand command = new DriveCommand(demand.left_feedforward_voltage / 12.0, demand.right_feedforward_voltage / 12.0);
-
+      periodicIO.timestamp = now;
       periodicIO.error = motionPlanner.error();
       periodicIO.path_setpoint = motionPlanner.setpoint();
 
-      if (output.left_velocity != 0) {
-        System.out.println(String.format("[%s]: %s", timestamp, output));
-        //System.out.println(String.format("[%s]: %s - %s => %s", timestamp, periodicIO.path_setpoint.state().getPose(),
-        //    RobotState.getInstance().getLatestFieldToVehicle().getValue(), periodicIO.error));
-
+      if (output.left_velocity > 0) {
+        System.out.println(String.format("%s %s", output.left_velocity,
+            DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.left_velocity),
+            output.left_accel,
+            DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.left_accel) / 1000.0,
+            output.left_feedforward_voltage, output.left_feedforward_voltage / 12));
       }
 
       if (!overrideTrajectory) {
-        setVelocity(new DriveCommand(Units.rads_per_sec_to_tp100ms(output.left_velocity),
-                Units.rads_per_sec_to_tp100ms(output.right_velocity)),
+        setVelocity(new DriveCommand(
+                DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.left_velocity),
+                DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.right_velocity)),
             new DriveCommand(output.left_feedforward_voltage / 12.0,
                 output.right_feedforward_voltage / 12.0));
 
-        periodicIO.left_accel = Units.rads_per_sec_to_tp100ms(output.left_accel) / 1000.0;
-        periodicIO.right_accel = Units.rads_per_sec_to_tp100ms(output.right_accel) / 1000.0;
+        periodicIO.left_accel =
+            DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.left_accel) / 1000.0;
+        periodicIO.right_accel =
+            DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.right_accel) / 1000.0;
       } else {
         setVelocity(DriveCommand.BRAKE, DriveCommand.BRAKE);
         periodicIO.left_accel = periodicIO.right_accel = 0.0;
@@ -844,12 +845,17 @@ public class Drivetrain extends Subsystem {
     if (CSVWriter != null) {
       CSVWriter.add(periodicIO);
     }
-
-    // System.out.println("control state: " + mDriveControlState + ", left: " + mPeriodicIO.left_demand + ", right: " + mPeriodicIO.right_demand);
   }
 
   @Override
   public synchronized void writePeriodicOutputs() {
+    /*if (!isDoneWithTrajectory()) {
+      System.out.println(String
+          .format("[%s]:\t%s %s\t%s %s\t%s %s", Timer.getFPGATimestamp(), periodicIO.left_demand,
+              periodicIO.right_demand, periodicIO.left_accel, periodicIO.right_accel,
+              periodicIO.left_feedforward, periodicIO.right_feedforward));
+    }*/
+
     if (driveMode == DriveMode.OPEN_LOOP) {
       leftMaster
           .set(ControlMode.PercentOutput, periodicIO.left_demand, DemandType.ArbitraryFeedForward,
@@ -858,12 +864,11 @@ public class Drivetrain extends Subsystem {
           .set(ControlMode.PercentOutput, periodicIO.right_demand, DemandType.ArbitraryFeedForward,
               0.0);
     } else if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING) {
-      leftMaster.set(ControlMode.Velocity, periodicIO.left_demand, DemandType.ArbitraryFeedForward,
-          periodicIO.left_feedforward + ChezyConstants.PID_D * periodicIO.left_accel / 1023.0);
-      rightMaster
-          .set(ControlMode.Velocity, periodicIO.right_demand, DemandType.ArbitraryFeedForward,
-              periodicIO.right_feedforward
-                  + ChezyConstants.PID_D * periodicIO.right_accel / 1023.0);
+      //System.out.println(String.format("%s %s %s %s", periodicIO.left_demand, periodicIO.left_feedforward, periodicIO.left_accel, ChezyConstants.PID_D * periodicIO.left_accel / 1023.0));
+      leftMaster.set(ControlMode.Velocity, periodicIO.left_demand);
+      //, DemandType.ArbitraryFeedForward, periodicIO.left_feedforward + ChezyConstants.PID_D * periodicIO.left_accel / 1023.0);
+      rightMaster.set(ControlMode.Velocity, periodicIO.right_demand);
+      //, DemandType.ArbitraryFeedForward, periodicIO.right_feedforward + ChezyConstants.PID_D * periodicIO.right_accel / 1023.0);
     } else if (driveMode == DriveMode.TURN_TO_HEADING) {
       leftMaster.set(
           ControlMode.MotionMagic,
@@ -872,6 +877,7 @@ public class Drivetrain extends Subsystem {
           ControlMode.MotionMagic,
           DriveUtils.inchesToEncoderCount(periodicIO.right_turn));
     } else if (driveMode == DriveMode.VELOCITY_SETPOINT) {
+
       leftMaster.set(
           ControlMode.Velocity,
           periodicIO.left_demand);
@@ -884,12 +890,11 @@ public class Drivetrain extends Subsystem {
       System.out.println(String.format("Hit a bad control state %s %s",
           driveMode.getRequestedControlMode(), driveMode));
     }
-    //if (!isDoneWithTrajectory())
-
-      //System.out.println(String.format("[%s]:\t%s %s %s %s", Timer.getFPGATimestamp(), periodicIO.left_demand, periodicIO.right_demand, periodicIO.left_feedforward, periodicIO.right_feedforward));
   }
 
   public static class PeriodicIO {
+
+    public double timestamp;
 
     // INPUTS
     public int left_position_ticks;

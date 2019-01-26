@@ -6,7 +6,7 @@ public class DriveConstants {
     public static double PID_D = 100; // 100.0;
     public static double PID_F = .2; // .45;
     public static int PID_I_ZONE = 700;
-    public static double PID_RAMP_RATE = .25; // V/s
+    public static double PID_RAMP_RATE = .125; // V/s
     
 
     

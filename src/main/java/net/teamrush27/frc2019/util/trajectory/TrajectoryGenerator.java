@@ -13,8 +13,8 @@ import net.teamrush27.frc2019.util.trajectory.timing.TimingConstraint;
 
 public class TrajectoryGenerator {
 
-  private static final double kMaxVelocity = 130.0;
-  private static final double kMaxAccel = 130.0;
+  private static final double kMaxVelocity = 60.0;
+  private static final double kMaxAccel = 48.0;
   private static final double kMaxCentripetalAccelElevatorDown = 110.0;
   private static final double kMaxCentripetalAccel = 100.0;
   private static final double kMaxVoltage = 9.0;
@@ -81,7 +81,7 @@ public class TrajectoryGenerator {
   // +y is to the left.
   // ALL POSES DEFINED FOR THE CASE THAT ROBOT STARTS ON RIGHT! (mirrored about +x axis for LEFT)
   public static final Pose2d originPose = new Pose2d(0.0, 0.0, Rotation2d.identity());
-  public static final Pose2d justStraightPose = new Pose2d(30.0, 0.0, Rotation2d.identity());
+  public static final Pose2d justStraightPose = new Pose2d(60.0, 0.0, Rotation2d.identity());
   /*public static final Pose2d kSideStartPose = new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(180.0));
   public static final Pose2d kNearScaleEmptyPose = new Pose2d(new Translation2d(253.0, 28.0),
       Rotation2d
@@ -218,7 +218,7 @@ public class TrajectoryGenerator {
       waypoints.add(originPose);
       waypoints.add(justStraightPose);
 
-      return generateTrajectory(true, waypoints,
+      return generateTrajectory(false, waypoints,
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }

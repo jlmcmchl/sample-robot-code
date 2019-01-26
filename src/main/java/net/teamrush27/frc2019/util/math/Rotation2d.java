@@ -139,6 +139,11 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     @Override
+    public String header(String base) {
+        return base + "_deg";
+    }
+
+    @Override
     public double distance(final Rotation2d other) {
         return inverse().rotateBy(other).getRadians();
     }
