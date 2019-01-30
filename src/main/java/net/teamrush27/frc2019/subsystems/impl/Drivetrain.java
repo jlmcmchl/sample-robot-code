@@ -69,7 +69,7 @@ public class Drivetrain extends Subsystem {
 
   private final NavX navX;
 
-  private DriveMode driveMode;
+  private DriveMode driveMode = DriveMode.OPEN_LOOP;
   private RobotState robotState = RobotState.getInstance();
   private Trajectory trajectory = null;
   private DriveMotionPlanner motionPlanner;
@@ -164,6 +164,8 @@ public class Drivetrain extends Subsystem {
    * @author team254
    */
   public Drivetrain() {
+    periodicIO = new PeriodicIO();
+
     leftMaster = CANTalonFactory.createDefaultTalon(RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
     leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
         RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -213,7 +215,7 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.configVelocityMeasurementWindow(32, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.setSensorPhase(true);
-    rightMaster.setInverted(true);
+
     rightMaster.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
@@ -229,7 +231,6 @@ public class Drivetrain extends Subsystem {
 
     rightSlave1 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_1_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-    rightSlave1.setInverted(true);
     rightSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
@@ -239,13 +240,20 @@ public class Drivetrain extends Subsystem {
 
     rightSlave2 = CANTalonFactory.createPermanentSlaveTalon(RobotMap.DRIVE_RIGHT_SLAVE_2_CAN_ID,
         RobotMap.DRIVE_RIGHT_MASTER_CAN_ID);
-    rightSlave2.setInverted(true);
     rightSlave2.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave2.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave2.configPeakCurrentLimit(DriveConstants.MAX_PEAK_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
+
+    leftMaster.setInverted(true);
+    leftSlave1.setInverted(true);
+    leftSlave2.setInverted(true);
+    rightMaster.setInverted(false);
+    rightSlave1.setInverted(false);
+    rightSlave2.setInverted(false);
+
 
     setCurrentLimiting(false);
     reloadGains();
