@@ -12,6 +12,7 @@ import net.teamrush27.frc2019.util.math.Rotation2d;
 import net.teamrush27.frc2019.util.math.Twist2d;
 
 public class RobotStateEstimator extends Subsystem {
+  private static String TAG = "ROBOTSTATEESTIMATOR";
 
   static RobotStateEstimator instance_ = new RobotStateEstimator();
   private RobotState robot_state_ = RobotState.getInstance();
@@ -100,6 +101,11 @@ public class RobotStateEstimator extends Subsystem {
     @Override
     public void onStop(double timestamp) {
       // no-op
+    }
+
+    @Override
+    public String id() {
+      return TAG;
     }
   };
 

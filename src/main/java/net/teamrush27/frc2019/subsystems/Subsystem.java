@@ -22,5 +22,7 @@ public abstract class Subsystem {
     public void writePeriodicOutputs() {
     }
 
-    
+    public String id() {
+        return "IMPLEMENT ME";
+    }
 }

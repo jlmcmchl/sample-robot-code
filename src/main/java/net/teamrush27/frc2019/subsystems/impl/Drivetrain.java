@@ -52,6 +52,7 @@ import net.teamrush27.frc2019.wrappers.NavX;
  */
 
 public class Drivetrain extends Subsystem {
+  private static String TAG = "DRIVETRAIN";
 
   private static Drivetrain instance = new Drivetrain();
 
@@ -147,6 +148,11 @@ public class Drivetrain extends Subsystem {
     public void onStop(double timestamp) {
       stop();
       stopLogging();
+    }
+
+    @Override
+    public String id() {
+      return TAG;
     }
 
   };
@@ -476,8 +482,10 @@ public class Drivetrain extends Subsystem {
   public synchronized void setHeading(Rotation2d heading) {
     System.out.println("SET HEADING: " + heading.getDegrees());
 
-    mGyroOffset = heading.rotateBy(Rotation2d.fromDegrees(navX.getRawYawDegrees()).inverse());
-    navX.setAngleAdjustment(mGyroOffset);
+    navX.reset();
+
+    navX.setAngleAdjustment(heading);
+
 
     System.out.println("Gyro offset: " + mGyroOffset.getDegrees());
 
@@ -655,15 +663,6 @@ public class Drivetrain extends Subsystem {
     enabledLooper.register(loop);
   }
 
-  public synchronized Rotation2d getGyroAngle() {
-    return navX.getYaw();
-  }
-
-  public synchronized void setGyroAngle(Rotation2d rotation) {
-    navX.reset();
-    navX.setAngleAdjustment(rotation);
-  }
-
   private void updateChezyPathFollower(double timestamp) {
     if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING) {
       double now = Timer.getFPGATimestamp();
@@ -808,6 +807,10 @@ public class Drivetrain extends Subsystem {
     }
   }
 
+  public String id() {
+    return TAG;
+  }
+
   public static class PeriodicIO {
 
     public double timestamp;
@@ -833,5 +836,36 @@ public class Drivetrain extends Subsystem {
     public double right_feedforward;
     public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<Pose2dWithCurvature>(
         Pose2dWithCurvature.identity());
+
+    public PeriodicIO() {
+
+    }
+
+    public PeriodicIO(PeriodicIO other) {
+      this.timestamp = other.timestamp;
+
+      this.left_position_ticks = other.left_position_ticks;
+      this.right_position_ticks = other.right_position_ticks;
+      this.left_distance = other.left_distance;
+      this.right_distance = other.right_distance;
+      this.left_velocity_ticks_per_100ms = other.left_velocity_ticks_per_100ms;
+      this.right_velocity_ticks_per_100ms = other.right_velocity_ticks_per_100ms;
+      this.gyro_heading = new Rotation2d(other.gyro_heading);
+      this.error = new Pose2d(other.error);
+
+      this.left_turn = other.left_turn;
+      this.right_turn = other.right_turn;
+      this.left_demand = other.left_demand;
+      this.right_demand = other.right_demand;
+      this.left_accel = other.left_accel;
+      this.right_accel = other.right_accel;
+      this.left_feedforward = other.left_feedforward;
+      this.right_feedforward = other.right_feedforward;
+      this.path_setpoint = new TimedState<Pose2dWithCurvature>(
+          other.path_setpoint.state(),
+          other.path_setpoint.t(),
+          other.path_setpoint.velocity(),
+          other.path_setpoint.acceleration());
+    }
   }
 }

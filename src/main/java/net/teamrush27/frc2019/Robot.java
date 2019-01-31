@@ -66,8 +66,7 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     enabledLooper.start();
 
-    robotStateEstimator.startLogging();
-    drivetrain.startLogging();
+    subsystemManager.startLogging();
 
 
     autoModeExecutor = new AutoModeExecutor();
@@ -84,7 +83,7 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     enabledLooper.start();
     //arm.setWantedState(WantedState.OPEN_LOOP);
-    drivetrain.startLogging();
+    subsystemManager.startLogging();
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
   }
 
@@ -109,8 +108,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     SmartDashboard.putString("Match Cycle", "DISABLED");
 
-    robotStateEstimator.stopLogging();
-    drivetrain.stopLogging();
+    subsystemManager.stopLogging();
 
     try {
       CrashTracker.logDisabledInit();

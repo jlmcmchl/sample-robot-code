@@ -7,6 +7,7 @@ import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 
 public class LED extends Subsystem {
+	private static String TAG = "LED";
 
 	private static LED INSTANCE = null;
 	
@@ -79,6 +80,11 @@ public class LED extends Subsystem {
 		@Override
 		public void onStop(double timestamp) {
 			stop();
+		}
+
+		@Override
+		public String id() {
+			return TAG;
 		}
 
 	};

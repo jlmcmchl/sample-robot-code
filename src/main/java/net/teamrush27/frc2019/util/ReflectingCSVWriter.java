@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * Writes data to a CSV file
  */
 public class ReflectingCSVWriter<T> {
-  ConcurrentLinkedDeque<String> mLinesToWrite = new ConcurrentLinkedDeque<>();
+  ConcurrentLinkedDeque<T> mLinesToWrite = new ConcurrentLinkedDeque<>();
   PrintWriter mOutput = null;
   Field[] mFields;
   boolean wrote_header = false;
@@ -24,7 +24,11 @@ public class ReflectingCSVWriter<T> {
     }
   }
 
-  private void writeHeader(T value) {
+  public void add(T value) {
+    mLinesToWrite.add(value);
+  }
+
+  private String valToHeader(T value) {
     // Write field names.
     StringBuffer line = new StringBuffer();
     for (Field field : mFields) {
@@ -42,15 +46,10 @@ public class ReflectingCSVWriter<T> {
         line.append(field.getName());
       }
     }
-    writeLine(line.toString());
+    return line.toString();
   }
 
-  public void add(T value) {
-    if (!wrote_header) {
-      writeHeader(value);
-      wrote_header = true;
-    }
-
+  private String valToString(T value) {
     StringBuffer line = new StringBuffer();
     for (Field field : mFields) {
       if (line.length() != 0) {
@@ -68,7 +67,8 @@ public class ReflectingCSVWriter<T> {
         e.printStackTrace();
       }
     }
-    mLinesToWrite.add(line.toString());
+
+    return line.toString();
   }
 
   protected synchronized void writeLine(String line) {
@@ -80,11 +80,15 @@ public class ReflectingCSVWriter<T> {
   // Call this periodically from any thread to write to disk.
   public void write() {
     while (true) {
-      String val = mLinesToWrite.pollFirst();
+      T val = mLinesToWrite.pollFirst();
       if (val == null) {
         break;
       }
-      writeLine(val);
+      if (!wrote_header) {
+        writeLine(valToHeader(val));
+        wrote_header = true;
+      }
+      writeLine(valToString(val));
     }
   }
 
