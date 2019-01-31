@@ -104,7 +104,6 @@ public class Drivetrain extends Subsystem {
       synchronized (Drivetrain.this) {
         setOpenLoop(DriveCommand.defaultCommand());
         navX.reset();
-//        startLogging();
       }
     }
 
@@ -128,17 +127,9 @@ public class Drivetrain extends Subsystem {
             break;
           case VELOCITY_SETPOINT:
             break;
-          //         case PATH_FOLLOWING:
-          //           if (leftEncoderFollower != null) {
-          //             updatePathFollower(timestamp);
-          //           }
-          //           break;
           case TURN_TO_HEADING:
             updateTurnToHeading(timestamp);
             break;
-          //         case CLIMB:
-          //           handleClimb(timestamp);
-          //           break;
           case CHEZY_PATH_FOLLOWING:
             updateChezyPathFollower(timestamp);
             break;
@@ -159,8 +150,6 @@ public class Drivetrain extends Subsystem {
     }
 
   };
-  private Path currentPath = null;
-  private PathFollower pathFollower = null;
 
   /**
    * @author team254
@@ -487,7 +476,8 @@ public class Drivetrain extends Subsystem {
   public synchronized void setHeading(Rotation2d heading) {
     System.out.println("SET HEADING: " + heading.getDegrees());
 
-    mGyroOffset = heading.rotateBy(navX.getYaw().inverse());
+    mGyroOffset = heading.rotateBy(Rotation2d.fromDegrees(navX.getRawYawDegrees()).inverse());
+    navX.setAngleAdjustment(mGyroOffset);
 
     System.out.println("Gyro offset: " + mGyroOffset.getDegrees());
 
@@ -674,24 +664,6 @@ public class Drivetrain extends Subsystem {
     navX.setAngleAdjustment(rotation);
   }
 
-  /*public synchronized boolean isDoneWithPath() {
-//		System.out.println(String.format("Mode: %s\tLeft: %s\tRight: %s", driveMode, leftEncoderFollower.isFinished(), rightEncoderFollower.isFinished()));
-
-    if (driveMode == DriveMode.PATH_FOLLOWING && leftEncoderFollower != null) {
-      return leftEncoderFollower.isFinished();
-    } else if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING && pathFollower != null) {
-      return pathFollower.isFinished();
-    } else {
-      System.out.println("Robot is not in path following mode");
-      return true;
-    }
-  }
-
-  public synchronized void setWantClimb() {
-    driveMode = DriveMode.CLIMB;
-
-  }*/
-
   private void updateChezyPathFollower(double timestamp) {
     if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING) {
       double now = Timer.getFPGATimestamp();
@@ -699,17 +671,8 @@ public class Drivetrain extends Subsystem {
       DriveMotionPlanner.Output output = motionPlanner
           .update(now, RobotState.getInstance().getPredictedFieldToVehicle(now));
 
-      periodicIO.timestamp = now;
       periodicIO.error = motionPlanner.error();
       periodicIO.path_setpoint = motionPlanner.setpoint();
-
-      if (output.left_velocity > 0) {
-        System.out.println(String.format("%s %s", output.left_velocity,
-            DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.left_velocity),
-            output.left_accel,
-            DriveUtils.radiansPerSecondToEncoderCountPer100ms(output.left_accel) / 1000.0,
-            output.left_feedforward_voltage, output.left_feedforward_voltage / 12));
-      }
 
       if (!overrideTrajectory) {
         setVelocity(new DriveCommand(
@@ -731,58 +694,9 @@ public class Drivetrain extends Subsystem {
     }
   }
 
-/*
-  public synchronized void setWantDrivePath(InterpolatingTrajectory centerTrajectory,
-      InterpolatingTrajectory leftTrajectory, InterpolatingTrajectory rightTrajectory,
-      boolean inverted) {
-    if (!Objects.equals(trajectory, centerTrajectory) || driveMode != DriveMode.PATH_FOLLOWING) {
-      isTrajectoryInverted = inverted;
-
-      configureTalonsForSpeedControl();
-      resetEncoders();
-      this.trajectory = centerTrajectory;
-
-      leftEncoderFollower.setTrajectory(leftTrajectory);
-      rightEncoderFollower.setTrajectory(rightTrajectory);
-
-      driveMode = DriveMode.PATH_FOLLOWING;
-    } else {
-      setVelocitySetpoint(0, 0);
-    }
-  }*/
-
   public void defaultState() {
     leftMaster.setNeutralMode(NeutralMode.Coast);
     rightMaster.setNeutralMode(NeutralMode.Coast);
-  }
-
-  public synchronized void setWantDrivePath(Path path, boolean reversed, double acceleration) {
-    /*if (!Objects.equals(currentPath, path) || driveMode != DriveMode.CHEZY_PATH_FOLLOWING) {
-      configureTalonsForSpeedControl();
-      RobotState.getInstance().resetDistanceDriven();
-      pathFollower = new PathFollower254Impl(path, reversed,
-          new PathFollower254Impl.Parameters(
-              new Lookahead(
-                  12.0,
-                  24.0,
-                  9.0,
-                  120.0),
-              ChezyConstants.INTERIAL_STEERING_GAIN,
-              2,
-              0.03,
-              0,
-              1.0,
-              0.05,
-              120.0,
-              acceleration,
-              .75,
-              50.0,
-              5.0));
-      driveMode = DriveMode.CHEZY_PATH_FOLLOWING;
-      currentPath = path;
-    } else {
-      setVelocitySetpoint(0, 0);
-    }*/
   }
 
   public synchronized void startRotation(Rotation2d heading) {
@@ -819,6 +733,7 @@ public class Drivetrain extends Subsystem {
 
   @Override
   public synchronized void readPeriodicInputs() {
+    periodicIO.timestamp = Timer.getFPGATimestamp();
     double prevLeftTicks = periodicIO.left_position_ticks;
     double prevRightTicks = periodicIO.right_position_ticks;
     periodicIO.left_position_ticks = leftMaster.getSelectedSensorPosition(0);
@@ -864,11 +779,12 @@ public class Drivetrain extends Subsystem {
           .set(ControlMode.PercentOutput, periodicIO.right_demand, DemandType.ArbitraryFeedForward,
               0.0);
     } else if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING) {
-      //System.out.println(String.format("%s %s %s %s", periodicIO.left_demand, periodicIO.left_feedforward, periodicIO.left_accel, ChezyConstants.PID_D * periodicIO.left_accel / 1023.0));
-      leftMaster.set(ControlMode.Velocity, periodicIO.left_demand);
-      //, DemandType.ArbitraryFeedForward, periodicIO.left_feedforward + ChezyConstants.PID_D * periodicIO.left_accel / 1023.0);
-      rightMaster.set(ControlMode.Velocity, periodicIO.right_demand);
-      //, DemandType.ArbitraryFeedForward, periodicIO.right_feedforward + ChezyConstants.PID_D * periodicIO.right_accel / 1023.0);
+      leftMaster.set(ControlMode.Velocity, periodicIO.left_demand,
+          DemandType.ArbitraryFeedForward,
+          periodicIO.left_feedforward + ChezyConstants.PID_D * periodicIO.left_accel / 1023.0);
+      rightMaster.set(ControlMode.Velocity, periodicIO.right_demand,
+          DemandType.ArbitraryFeedForward,
+          periodicIO.right_feedforward + ChezyConstants.PID_D * periodicIO.right_accel / 1023.0);
     } else if (driveMode == DriveMode.TURN_TO_HEADING) {
       leftMaster.set(
           ControlMode.MotionMagic,

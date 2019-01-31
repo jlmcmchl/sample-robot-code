@@ -69,6 +69,7 @@ public class Robot extends TimedRobot {
     robotStateEstimator.startLogging();
     drivetrain.startLogging();
 
+
     autoModeExecutor = new AutoModeExecutor();
     autoModeExecutor.setAutoMode(new TestMode());
     autoModeExecutor.start();
@@ -83,6 +84,7 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     enabledLooper.start();
     //arm.setWantedState(WantedState.OPEN_LOOP);
+    drivetrain.startLogging();
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
   }
 

@@ -21,4 +21,6 @@ public abstract class Subsystem {
     // Optional design pattern for caching periodic writes to avoid hammering the HAL/CAN.
     public void writePeriodicOutputs() {
     }
+
+    
 }

@@ -40,7 +40,7 @@ public class DriveMotionPlanner implements CSVWritable {
     NONLINEAR_FEEDBACK
   }
 
-  FollowerType mFollowerType = FollowerType.FEEDFORWARD_ONLY;
+  FollowerType mFollowerType = FollowerType.NONLINEAR_FEEDBACK;
 
   public void setFollowerType(FollowerType type) {
     mFollowerType = type;
@@ -171,7 +171,8 @@ public class DriveMotionPlanner implements CSVWritable {
 
   @Override
   public String header(String base) {
-    return base + "_l_v," + base + "_r_v," + base + "_l_ff_v," + base + "_r_ff_v," + mSetpoint.header(base + "_setpoint");
+    return base + "_l_v," + base + "_r_v," + base + "_l_ff_v," + base + "_r_ff_v," + mSetpoint
+        .header(base + "_setpoint");
   }
 
   public static class Output {
@@ -297,6 +298,8 @@ public class DriveMotionPlanner implements CSVWritable {
       adjusted_velocity.angular = curvature * dynamics.chassis_velocity.linear;
     }
 
+    //System.out.println(adjusted_velocity);
+
     dynamics.chassis_velocity = adjusted_velocity;
     dynamics.wheel_velocity = mModel.solveInverseKinematics(adjusted_velocity);
 
@@ -308,11 +311,11 @@ public class DriveMotionPlanner implements CSVWritable {
         dynamics.voltage.right);
   }
 
-  protected Output updateNonlinearFeedback(DriveDynamics dynamics,
+  protected Output updateNonlinearFeedback(DifferentialDrive.DriveDynamics dynamics,
       Pose2d current_state) {
     // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
-    final double kBeta = 2.0;  // >0.
-    final double kZeta = 0.7;  // Damping coefficient, [0, 1].
+    final double kBeta = 0.0;  // >0.
+    final double kZeta = 0.0;  // Damping coefficient, [0, 1].
 
     // Compute gain parameter.
     final double k =
@@ -323,7 +326,7 @@ public class DriveMotionPlanner implements CSVWritable {
     final double angle_error_rads = mError.getRotation().getRadians();
     final double sin_x_over_x = MathUtils.epsilonEquals(angle_error_rads, 0.0, 1E-2) ?
         1.0 : mError.getRotation().sin() / angle_error_rads;
-    final ChassisState adjusted_velocity = new ChassisState(
+    final DifferentialDrive.ChassisState adjusted_velocity = new DifferentialDrive.ChassisState(
         dynamics.chassis_velocity.linear * mError.getRotation().cos() +
             k * Units.inches_to_meters(mError.getTranslation().x()),
         dynamics.chassis_velocity.angular + k * angle_error_rads +
@@ -331,14 +334,9 @@ public class DriveMotionPlanner implements CSVWritable {
                 .getTranslation().y()));
 
     // Compute adjusted left and right wheel velocities.
-    ChassisState old_velocity = dynamics.chassis_velocity;
     dynamics.chassis_velocity = adjusted_velocity;
     dynamics.wheel_velocity = mModel.solveInverseKinematics(adjusted_velocity);
 
-    /*System.out.println(String
-        .format("[%s]: %s\t%s\t%s => %s => %s", Timer.getFPGATimestamp(), old_velocity,
-            mError.getRotation(), mError.getTranslation(), adjusted_velocity, dynamics.wheel_velocity));
-*/
     dynamics.chassis_acceleration.linear =
         mDt == 0 ? 0.0 : (dynamics.chassis_velocity.linear - prev_velocity_
             .linear) / mDt;
@@ -348,7 +346,7 @@ public class DriveMotionPlanner implements CSVWritable {
 
     prev_velocity_ = dynamics.chassis_velocity;
 
-    WheelState feedforward_voltages = mModel
+    DifferentialDrive.WheelState feedforward_voltages = mModel
         .solveInverseDynamics(dynamics.chassis_velocity,
             dynamics.chassis_acceleration).voltage;
 

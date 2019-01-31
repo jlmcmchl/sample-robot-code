@@ -2,12 +2,12 @@ package net.teamrush27.frc2019.constants;
 
 public class ChezyConstants {
     // DRIVE CONSTANTS
-    public static double PID_P = 1.0; //1.0;
+    public static double PID_P = 0.0; //1.0; // 105.5/2617.26 * 1023 / 105.5 err at 60 in/s;
     public static double PID_I = 0.0; // 0.002;
-    public static double PID_D = 100.0; // 100.0;
-    public static double PID_F = 0.45; // .45;
+    public static double PID_D = 0.0;//10.0; // 100.0;
+    public static double PID_F = 0.0; // .3908; // 1023 / 2617.26;
     public static int PID_I_ZONE = 700;
-    public static double PID_RAMP_RATE = .125; // V/s
+    public static double PID_RAMP_RATE = .100; // V/s
     
     
     public static double ROTATE_PID_P = 1.0; //1.0;
@@ -85,7 +85,7 @@ public class ChezyConstants {
     public static double kDriveKv = 0.240;
     public static double kDriveWheelDiameterInches = 7.75;
     public static double kDriveWheelRadiusInches = kDriveWheelDiameterInches / 2;
-    public static double kRobotLinearInertia = 60.0;
+    public static double kRobotLinearInertia = 70.0; // fat boy
     public static double kDriveKa = 0.043;
     public static double kDriveVIntercept = 1.302;
     public static double kRobotAngularInertia = 10.0;
@@ -94,6 +94,6 @@ public class ChezyConstants {
     public static double kTrackScrubFactor = 1.00;
     public static double kPathLookaheadTime = 0.4;
     public static double kPathMinLookaheadDistance = 24.0;
-    public static double kPathKX = 4.0;
+    public static double kPathKX = 5.0;
 
 }
