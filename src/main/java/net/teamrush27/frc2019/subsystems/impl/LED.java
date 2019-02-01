@@ -2,6 +2,7 @@ package net.teamrush27.frc2019.subsystems.impl;
 
 
 import edu.wpi.first.wpilibj.Talon;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
@@ -131,7 +132,7 @@ public class LED extends Subsystem {
 	}
 
 	@Override
-	public void registerEnabledLoops(Looper enabledLooper) {
+	public void registerEnabledLoops(ILooper enabledLooper) {
 		enabledLooper.register(loop);
 	}
 

@@ -3,14 +3,14 @@ package net.teamrush27.frc2019.util;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Writes data to a CSV file
  */
 public class ReflectingCSVWriter<T> {
-  ConcurrentLinkedDeque<T> mLinesToWrite = new ConcurrentLinkedDeque<>();
+
+  ConcurrentLinkedDeque<String> mLinesToWrite = new ConcurrentLinkedDeque<>();
   PrintWriter mOutput = null;
   Field[] mFields;
   boolean wrote_header = false;
@@ -22,13 +22,10 @@ public class ReflectingCSVWriter<T> {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
+
   }
 
-  public void add(T value) {
-    mLinesToWrite.add(value);
-  }
-
-  private String valToHeader(T value) {
+  private void writeHeader(T value) {
     // Write field names.
     StringBuffer line = new StringBuffer();
     for (Field field : mFields) {
@@ -46,10 +43,15 @@ public class ReflectingCSVWriter<T> {
         line.append(field.getName());
       }
     }
-    return line.toString();
+    mLinesToWrite.add(line.toString());
   }
 
-  private String valToString(T value) {
+  public void add(T value) {
+    if (!wrote_header) {
+      writeHeader(value);
+      wrote_header = true;
+    }
+
     StringBuffer line = new StringBuffer();
     for (Field field : mFields) {
       if (line.length() != 0) {
@@ -61,14 +63,12 @@ public class ReflectingCSVWriter<T> {
         } else {
           line.append(field.get(value).toString());
         }
-      } catch (IllegalArgumentException e) {
-        e.printStackTrace();
       } catch (IllegalAccessException e) {
         e.printStackTrace();
       }
     }
 
-    return line.toString();
+    mLinesToWrite.add(line.toString());
   }
 
   protected synchronized void writeLine(String line) {
@@ -79,16 +79,9 @@ public class ReflectingCSVWriter<T> {
 
   // Call this periodically from any thread to write to disk.
   public void write() {
-    while (true) {
-      T val = mLinesToWrite.pollFirst();
-      if (val == null) {
-        break;
-      }
-      if (!wrote_header) {
-        writeLine(valToHeader(val));
-        wrote_header = true;
-      }
-      writeLine(valToString(val));
+    String val;
+    while ((val = mLinesToWrite.pollFirst()) != null) {
+      writeLine(val);
     }
   }
 

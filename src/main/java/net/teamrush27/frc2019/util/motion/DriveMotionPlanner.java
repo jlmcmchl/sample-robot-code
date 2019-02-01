@@ -40,7 +40,7 @@ public class DriveMotionPlanner implements CSVWritable {
     NONLINEAR_FEEDBACK
   }
 
-  FollowerType mFollowerType = FollowerType.NONLINEAR_FEEDBACK;
+  FollowerType mFollowerType = FollowerType.PURE_PURSUIT;
 
   public void setFollowerType(FollowerType type) {
     mFollowerType = type;
@@ -227,9 +227,9 @@ public class DriveMotionPlanner implements CSVWritable {
   protected Output updatePID(DriveDynamics dynamics, Pose2d current_state) {
     ChassisState adjusted_velocity = new ChassisState();
     // Feedback on longitudinal error (distance).
-    final double kPathKX = 5.0;
+    final double kPathKX = 1.0;
     final double kPathKY = 1.0;
-    final double kPathKTheta = 5.0;
+    final double kPathKTheta = 1.0;
     adjusted_velocity.linear = dynamics.chassis_velocity.linear + kPathKX * Units.inches_to_meters
         (mError.getTranslation().x());
     adjusted_velocity.angular =

@@ -2,6 +2,7 @@ package net.teamrush27.frc2019.subsystems.impl;
 
 import java.sql.Ref;
 import net.teamrush27.frc2019.base.RobotState;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
@@ -47,7 +48,7 @@ public class RobotStateEstimator extends Subsystem {
   }
 
   @Override
-  public void registerEnabledLoops(Looper enabledLooper) {
+  public void registerEnabledLoops(ILooper enabledLooper) {
     enabledLooper.register(loop);
   }
 
@@ -108,6 +109,11 @@ public class RobotStateEstimator extends Subsystem {
       return TAG;
     }
   };
+
+  @Override
+  public String id() {
+    return TAG;
+  }
 
   public synchronized void startLogging() {
     if (CSVWriter == null) {

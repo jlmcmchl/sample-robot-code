@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.util.CSVWritable;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 
 /**
@@ -16,11 +18,12 @@ import net.teamrush27.frc2019.util.ReflectingCSVWriter;
  */
 public class SubsystemManager implements ILooper {
 
+  public static String TAG = "SUBSYSTEMMANAGER";
+
   private final Set<Subsystem> subsystems = new HashSet<Subsystem>();
   private List<Loop> loops = new ArrayList<>();
 
   private ReflectingCSVWriter CSVWriter;
-  private boolean logging = false;
 
   public SubsystemManager(Subsystem... subsystems) {
     Collections.addAll(this.subsystems, subsystems);
@@ -30,21 +33,20 @@ public class SubsystemManager implements ILooper {
   }
 
   public void outputToSmartDashboard() {
-    subsystems.forEach((s) -> s.outputToSmartDashboard());
+    subsystems.forEach(s -> s.outputToSmartDashboard());
   }
 
   public void stop() {
-    subsystems.forEach((s) -> s.stop());
+    subsystems.forEach(s -> s.stop());
   }
 
   public void zeroSensors() {
-    subsystems.forEach((s) -> s.zeroSensors());
+    subsystems.forEach(s -> s.zeroSensors());
   }
 
   public void registerEnabledLoops(Looper enabledLooper) {
-    subsystems.forEach((s) -> s.registerEnabledLoops(enabledLooper));
+    subsystems.forEach(s -> s.registerEnabledLoops(this));
     enabledLooper.register(new EnabledLoop());
-
   }
 
   public void registerDisabledLoops(Looper disabledLooper) {
@@ -66,60 +68,66 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public void onStart(double timestamp) {
-      for (Loop l : loops) {
+      List profiles = loops.parallelStream().map(l -> {
         double start = Timer.getFPGATimestamp();
-        l.onStart(timestamp);
+        l.onStart(start);
         double end = Timer.getFPGATimestamp();
-        CSVWriter.add(new Profile(l.id(), "START", end, end - start));
+
+        return new Profile(l.id(), "START", start, end - start);
+      }).collect(Collectors.toList());
+
+      double end = Timer.getFPGATimestamp();
+      profiles.add(new Profile(this.id(), "START", timestamp, end - timestamp));
+
+      if (CSVWriter != null) {
+        profiles.forEach(p -> CSVWriter.add(p));
       }
     }
 
     @Override
     public void onLoop(double timestamp) {
-      for (Subsystem s : subsystems) {
-        if (logging) {
-          double start = Timer.getFPGATimestamp();
-          s.readPeriodicInputs();
-          double end = Timer.getFPGATimestamp();
-          CSVWriter.add(new Profile(s.id(), "READ_INPUT", end, end - start));
-        } else {
-          s.readPeriodicInputs();
-        }
-      }
+      readSubsystemInputs(timestamp);
 
-      for (Loop l : loops) {
-        if(logging) {
-          double start = Timer.getFPGATimestamp();
-          l.onLoop(timestamp);
-          double end = Timer.getFPGATimestamp();
-          CSVWriter.add(new Profile(l.id(), "LOOP", end, end - start));
-        } else {
-          l.onLoop(timestamp);
-        }
-      }
+      List profiles = loops.parallelStream().map(l -> {
+        double start = Timer.getFPGATimestamp();
+        l.onLoop(start);
+        double end = Timer.getFPGATimestamp();
 
-      for (Subsystem s : subsystems) {
-        if (logging) {
-          double start = Timer.getFPGATimestamp();
-          s.writePeriodicOutputs();
-          double end = Timer.getFPGATimestamp();
-          CSVWriter.add(new Profile(s.id(), "WRITE_OUTPUT", end, end - start));
-        } else {
-          s.writePeriodicOutputs();
-        }
+        return new Profile(l.id(), "LOOP", start, end - start);
+      }).collect(Collectors.toList());
+
+      writeSubsystemOutputs(Timer.getFPGATimestamp());
+
+      double end = Timer.getFPGATimestamp();
+      profiles.add(new Profile(this.id(), "LOOP", timestamp, end - timestamp));
+
+      if (CSVWriter != null) {
+        profiles.forEach(p -> CSVWriter.add(p));
       }
     }
 
     @Override
     public void onStop(double timestamp) {
-      for (Loop l : loops) {
-        l.onStop(timestamp);
+
+      List profiles = loops.parallelStream().map(l -> {
+        double start = Timer.getFPGATimestamp();
+        l.onStop(start);
+        double end = Timer.getFPGATimestamp();
+
+        return new Profile(l.id(), "STOP", start, end - start);
+      }).collect(Collectors.toList());
+
+      double end = Timer.getFPGATimestamp();
+      profiles.add(new Profile(this.id(), "STOP", timestamp, end - timestamp));
+
+      if (CSVWriter != null) {
+        profiles.forEach(p -> CSVWriter.add(p));
       }
     }
 
     @Override
     public String id() {
-      return "SYSMGR_ENABLED_LOOP";
+      return TAG;
     }
   }
 
@@ -132,26 +140,8 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public void onLoop(double timestamp) {
-      for (Subsystem s : subsystems) {
-        if (logging) {
-          double start = Timer.getFPGATimestamp();
-          s.readPeriodicInputs();
-          double end = Timer.getFPGATimestamp();
-          CSVWriter.add(new Profile(s.id(), "READ_INPUT", end, end - start));
-        } else {
-          s.readPeriodicInputs();
-        }
-      }
-      for (Subsystem s : subsystems) {
-        if (logging) {
-          double start = Timer.getFPGATimestamp();
-          s.writePeriodicOutputs();
-          double end = Timer.getFPGATimestamp();
-          CSVWriter.add(new Profile(s.id(), "WRITE_OUTPUT", end, end - start));
-        } else {
-          s.writePeriodicOutputs();
-        }
-      }
+      readSubsystemInputs(timestamp);
+      writeSubsystemOutputs(Timer.getFPGATimestamp());
     }
 
     @Override
@@ -161,13 +151,47 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public String id() {
-      return "SYSMGR_DISABLED_LOOP";
+      return TAG;
     }
   }
+
+  public void readSubsystemInputs(double timestamp) {
+    List profiles = subsystems.parallelStream().map(s -> {
+      double start = Timer.getFPGATimestamp();
+      s.readPeriodicInputs();
+      double end = Timer.getFPGATimestamp();
+
+      return new Profile(s.id(), "READ_INPUT", start, end - start);
+    }).collect(Collectors.toList());
+
+    double end = Timer.getFPGATimestamp();
+    profiles.add(new Profile(this.id(), "READ_INPUT", timestamp, end - timestamp));
+
+    if (CSVWriter != null) {
+      profiles.forEach(p -> CSVWriter.add(p));
+    }
+  }
+
+  public void writeSubsystemOutputs(double timestamp) {
+    List profiles = subsystems.parallelStream().map(s -> {
+      double start = Timer.getFPGATimestamp();
+      s.writePeriodicOutputs();
+      double end = Timer.getFPGATimestamp();
+
+      return new Profile(s.id(), "WRITE_OUTPUT", start, end - start);
+    }).collect(Collectors.toList());
+
+    double end = Timer.getFPGATimestamp();
+    profiles.add(new Profile(this.id(), "WRITE_OUTPUT", timestamp, end - timestamp));
+
+    if (CSVWriter != null) {
+      profiles.forEach(p -> CSVWriter.add(p));
+    }
+  }
+
   public void startLogging() {
     if (CSVWriter == null) {
       CSVWriter = new ReflectingCSVWriter<>("/home/lvuser/PROFILE-LOGS.csv", Profile.class);
-      logging = true;
     }
   }
 
@@ -175,21 +199,30 @@ public class SubsystemManager implements ILooper {
     if (CSVWriter != null) {
       CSVWriter.flush();
       CSVWriter = null;
-      logging = false;
     }
   }
 
+  public String id() {
+    return TAG;
+  }
+
   public static class Profile {
-    String id;
-    String action;
-    double timestamp;
-    double duration;
+
+    public String id;
+    public String action;
+    public double timestamp;
+    public double duration;
 
     public Profile(String id, String action, double timestamp, double duration) {
       this.id = id;
       this.action = action;
       this.timestamp = timestamp;
       this.duration = duration;
+    }
+
+    @Override
+    public String toString() {
+      return id + ", " + action + ", " + timestamp + ", " + duration;
     }
   }
 }

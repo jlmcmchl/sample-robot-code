@@ -1,6 +1,7 @@
 package net.teamrush27.frc2019.wrappers;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 /**
@@ -12,7 +13,9 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 public class LazyCANTalon extends TalonSRX {
 
   protected double lastValue = Double.NaN;
+  protected double lastDemand = Double.NaN;
   protected ControlMode lastControlMode = null;
+  protected DemandType lastDemandType = null;
   protected int controlPeriodMs = 5;
   private int count = 0;
 
@@ -39,6 +42,18 @@ public class LazyCANTalon extends TalonSRX {
 //            setControlFramePeriod(ControlFrame.Control_3_General,controlPeriodMs);
 //            setControlFramePeriod(ControlFrame.Control_4_Advanced,controlPeriodMs);
       super.set(controlMode, value);
+    }
+  }
+
+  @Override
+  public void set(ControlMode controlMode, double value, DemandType demandType, double demand) {
+    if (value != lastValue || controlMode != lastControlMode || demandType != lastDemandType || demand != lastDemand) {
+      lastValue = value;
+      lastControlMode = controlMode;
+      lastDemandType = demandType;
+      lastDemand = demand;
+
+      super.set(controlMode, value, demandType, demand);
     }
   }
 

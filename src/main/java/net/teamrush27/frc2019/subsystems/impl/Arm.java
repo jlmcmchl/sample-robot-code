@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.RobotMap;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
@@ -165,7 +166,7 @@ public class Arm extends Subsystem {
   }
 
   @Override
-  public void registerEnabledLoops(Looper enabledLooper) {
+  public void registerEnabledLoops(ILooper enabledLooper) {
     enabledLooper.register(loop);
   }
 
@@ -179,6 +180,11 @@ public class Arm extends Subsystem {
 
   @Override
   public void test() {
+  }
+
+  @Override
+  public String id() {
+    return TAG;
   }
 
   public double getDistanceOutsideFramePerimeter() {

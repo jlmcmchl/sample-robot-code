@@ -21,6 +21,7 @@ import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.base.RobotState;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
@@ -64,10 +65,9 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     disabledLooper.stop();
-    enabledLooper.start();
-
+    drivetrain.startLogging();
     subsystemManager.startLogging();
-
+    enabledLooper.start();
 
     autoModeExecutor = new AutoModeExecutor();
     autoModeExecutor.setAutoMode(new TestMode());
@@ -108,11 +108,12 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     SmartDashboard.putString("Match Cycle", "DISABLED");
 
-    subsystemManager.stopLogging();
-
     try {
       CrashTracker.logDisabledInit();
       enabledLooper.stop();
+
+      subsystemManager.stopLogging();
+      drivetrain.stopLogging();
 
       Drivetrain.getInstance().zeroSensors();
       RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2d.identity());

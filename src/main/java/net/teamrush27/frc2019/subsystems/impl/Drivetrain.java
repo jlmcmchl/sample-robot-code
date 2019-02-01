@@ -20,6 +20,7 @@ import net.teamrush27.frc2019.constants.ChezyConstants;
 import net.teamrush27.frc2019.constants.DriveConstants;
 import net.teamrush27.frc2019.constants.FollowingConstants;
 import net.teamrush27.frc2019.constants.RobotConstants;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
@@ -659,7 +660,7 @@ public class Drivetrain extends Subsystem {
   }
 
   @Override
-  public void registerEnabledLoops(Looper enabledLooper) {
+  public void registerEnabledLoops(ILooper enabledLooper) {
     enabledLooper.register(loop);
   }
 
@@ -741,6 +742,8 @@ public class Drivetrain extends Subsystem {
     periodicIO.right_velocity_ticks_per_100ms = rightMaster.getSelectedSensorVelocity(0);
     periodicIO.gyro_heading = navX.getYaw();
 
+    periodicIO.can_read_delta = Timer.getFPGATimestamp() - periodicIO.timestamp;
+
     double deltaLeftTicks = ((periodicIO.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
     if (deltaLeftTicks > 0.0) {
       periodicIO.left_distance += deltaLeftTicks * RobotConstants.DRIVE_WHEEL_DIAMETER;
@@ -807,6 +810,7 @@ public class Drivetrain extends Subsystem {
     }
   }
 
+  @Override
   public String id() {
     return TAG;
   }
@@ -814,6 +818,7 @@ public class Drivetrain extends Subsystem {
   public static class PeriodicIO {
 
     public double timestamp;
+    public double can_read_delta;
 
     // INPUTS
     public int left_position_ticks;
@@ -843,6 +848,7 @@ public class Drivetrain extends Subsystem {
 
     public PeriodicIO(PeriodicIO other) {
       this.timestamp = other.timestamp;
+      this.can_read_delta = 0;
 
       this.left_position_ticks = other.left_position_ticks;
       this.right_position_ticks = other.right_position_ticks;
