@@ -40,7 +40,7 @@ public class DriveMotionPlanner implements CSVWritable {
     NONLINEAR_FEEDBACK
   }
 
-  FollowerType mFollowerType = FollowerType.PURE_PURSUIT;
+  FollowerType mFollowerType = FollowerType.NONLINEAR_FEEDBACK;
 
   public void setFollowerType(FollowerType type) {
     mFollowerType = type;
@@ -53,8 +53,11 @@ public class DriveMotionPlanner implements CSVWritable {
   double mLastTime = Double.POSITIVE_INFINITY;
   public TimedState<Pose2dWithCurvature> mSetpoint = new TimedState<>(
       Pose2dWithCurvature.identity());
+  public TimedState<Pose2dWithCurvature> mLookahead = new TimedState<>(
+      Pose2dWithCurvature.identity());
   Pose2d mError = Pose2d.identity();
   Output mOutput = new Output();
+  public double mCurvature;
 
   ChassisState prev_velocity_ = new ChassisState();
   double mDt = 0.0;
@@ -258,64 +261,74 @@ public class DriveMotionPlanner implements CSVWritable {
         .wheel_acceleration.right, left_voltage, right_voltage);
   }
 
-  protected Output updatePurePursuit(DriveDynamics dynamics,
-      Pose2d current_state) {
+  protected Output updatePurePursuit(DriveDynamics dynamics, Pose2d current_state) {
     double lookahead_time = ChezyConstants.kPathLookaheadTime;
     final double kLookaheadSearchDt = 0.01;
-    TimedState<Pose2dWithCurvature> lookahead_state = mCurrentTrajectory.preview(lookahead_time)
-        .state();
+
+    TimedState<Pose2dWithCurvature> lookahead_state
+        = mCurrentTrajectory.preview(lookahead_time).state();
     double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
+
     while (actual_lookahead_distance < ChezyConstants.kPathMinLookaheadDistance &&
-        mCurrentTrajectory.getRemainingProgress() > lookahead_time) {
+        lookahead_time < mCurrentTrajectory.getRemainingProgress()) {
       lookahead_time += kLookaheadSearchDt;
       lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
       actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
     }
+
+    mLookahead = lookahead_state;
+
     if (actual_lookahead_distance < ChezyConstants.kPathMinLookaheadDistance) {
-      lookahead_state = new TimedState<>(new Pose2dWithCurvature(lookahead_state.state()
-          .getPose().transformBy(Pose2d.fromTranslation(new Translation2d(
-              (mIsReversed ? -1.0 : 1.0) * (ChezyConstants.kPathMinLookaheadDistance -
-                  actual_lookahead_distance), 0.0))), 0.0), lookahead_state.t()
-          , lookahead_state.velocity(), lookahead_state.acceleration());
+      lookahead_state = new TimedState<>(
+          new Pose2dWithCurvature(
+              lookahead_state.state().getPose()
+                  .transformBy(Pose2d.fromTranslation(new Translation2d(
+                      (mIsReversed ? -1.0 : 1.0)
+                          * (ChezyConstants.kPathMinLookaheadDistance - actual_lookahead_distance),
+                      0.0))),
+              0.0),
+          lookahead_state.t(),
+          lookahead_state.velocity(),
+          lookahead_state.acceleration());
     }
 
     ChassisState adjusted_velocity = new ChassisState();
     // Feedback on longitudinal error (distance).
-    adjusted_velocity.linear =
-        dynamics.chassis_velocity.linear + ChezyConstants.kPathKX * Units.inches_to_meters
-            (mError.getTranslation().x());
+    adjusted_velocity.linear = dynamics.chassis_velocity.linear
+        + ChezyConstants.kPathKX * Units.inches_to_meters(mError.getTranslation().x());
 
     // Use pure pursuit to peek ahead along the trajectory and generate a new curvature.
-    final PurePursuitController.Arc<Pose2dWithCurvature> arc = new PurePursuitController.Arc<>(
-        current_state,
-        lookahead_state.state());
+    final PurePursuitController.Arc<Pose2dWithCurvature> arc
+        = new PurePursuitController.Arc<>(current_state, lookahead_state.state());
 
     double curvature = 1.0 / Units.inches_to_meters(arc.radius);
     if (Double.isInfinite(curvature)) {
+      System.out.println("INFINITE CURVATURE");
       adjusted_velocity.linear = 0.0;
       adjusted_velocity.angular = dynamics.chassis_velocity.angular;
     } else {
       adjusted_velocity.angular = curvature * dynamics.chassis_velocity.linear;
     }
 
-    //System.out.println(adjusted_velocity);
+    mCurvature = curvature;
 
     dynamics.chassis_velocity = adjusted_velocity;
     dynamics.wheel_velocity = mModel.solveInverseKinematics(adjusted_velocity);
 
-    //System.out.println(String.format("[%s]: %s", Timer.getFPGATimestamp(), dynamics));
-
-    return new Output(dynamics.wheel_velocity.left, dynamics.wheel_velocity.right,
-        dynamics.wheel_acceleration
-            .left, dynamics.wheel_acceleration.right, dynamics.voltage.left,
+    return new Output(
+        dynamics.wheel_velocity.left,
+        dynamics.wheel_velocity.right,
+        dynamics.wheel_acceleration.left,
+        dynamics.wheel_acceleration.right,
+        dynamics.voltage.left,
         dynamics.voltage.right);
   }
 
   protected Output updateNonlinearFeedback(DifferentialDrive.DriveDynamics dynamics,
       Pose2d current_state) {
     // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
-    final double kBeta = 0.0;  // >0.
-    final double kZeta = 0.0;  // Damping coefficient, [0, 1].
+    final double kBeta = 2.0;  // >0.
+    final double kZeta = 0.2;  // Damping coefficient, [0, 1].
 
     // Compute gain parameter.
     final double k =
@@ -323,7 +336,7 @@ public class DriveMotionPlanner implements CSVWritable {
             .linear + dynamics.chassis_velocity.angular * dynamics.chassis_velocity.angular);
 
     // Compute error components.
-    final double angle_error_rads = mError.getRotation().getRadians();
+    final double angle_error_rads = -mError.getRotation().getRadians();
     final double sin_x_over_x = MathUtils.epsilonEquals(angle_error_rads, 0.0, 1E-2) ?
         1.0 : mError.getRotation().sin() / angle_error_rads;
     final DifferentialDrive.ChassisState adjusted_velocity = new DifferentialDrive.ChassisState(
@@ -412,5 +425,13 @@ public class DriveMotionPlanner implements CSVWritable {
 
   public TimedState<Pose2dWithCurvature> setpoint() {
     return mSetpoint;
+  }
+
+  public TimedState<Pose2dWithCurvature> lookahead() {
+    return mLookahead;
+  }
+
+  public double curvature() {
+    return mCurvature;
   }
 }

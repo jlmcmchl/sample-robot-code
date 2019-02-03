@@ -1,7 +1,8 @@
-package net.teamrush27.frc2019.auto.actions;
+package net.teamrush27.frc2019.auto.actions.impl;
 
 import edu.wpi.first.wpilibj.Timer;
 import java.util.List;
+import net.teamrush27.frc2019.auto.actions.Action;
 import net.teamrush27.frc2019.base.RobotState;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;

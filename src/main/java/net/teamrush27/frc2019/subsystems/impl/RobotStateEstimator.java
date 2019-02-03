@@ -22,11 +22,7 @@ public class RobotStateEstimator extends Subsystem {
   private double right_encoder_prev_distance_ = 0.0;
   private ReflectingCSVWriter CSVWriter;
 
-  private StateFrame stateFrame;
-
-  RobotStateEstimator() {
-    stateFrame = new StateFrame();
-  }
+  private StateFrame stateFrame = new StateFrame();
 
   public static RobotStateEstimator getInstance() {
     return instance_;
@@ -67,33 +63,29 @@ public class RobotStateEstimator extends Subsystem {
 
     @Override
     public synchronized void onLoop(double timestamp) {
-      final double left_distance = drive_.getLeftEncoderDistance();
-      final double right_distance = drive_.getRightEncoderDistance();
-      final double delta_left = left_distance - left_encoder_prev_distance_;
-      final double delta_right = right_distance - right_encoder_prev_distance_;
-      final Rotation2d gyro_angle = drive_.getHeading();
-      final Twist2d odometry_velocity = robot_state_.generateOdometryFromSensors(
-          delta_left, delta_right, gyro_angle);
-      final Twist2d predicted_velocity = KinematicsUtils
-          .forwardKinematics(drive_.getLeftLinearVelocity(),
-              drive_.getRightLinearVelocity());
-      robot_state_.addObservations(timestamp, odometry_velocity,
-          predicted_velocity);
-      left_encoder_prev_distance_ = left_distance;
-      right_encoder_prev_distance_ = right_distance;
-
       stateFrame.timestamp = timestamp;
 
-      stateFrame.left_distance = left_distance;
-      stateFrame.right_distance = right_distance;
-      stateFrame.delta_left = delta_left;
-      stateFrame.delta_right = delta_right;
-      stateFrame.gyro_angle = gyro_angle;
-      stateFrame.odometry_velocity = odometry_velocity;
-      stateFrame.predicted_velocity = predicted_velocity;
+      stateFrame.left_distance = drive_.getLeftEncoderDistance();
+      stateFrame.right_distance = drive_.getRightEncoderDistance();
+
+      stateFrame.delta_left = stateFrame.left_distance - left_encoder_prev_distance_;
+      stateFrame.delta_right = stateFrame.right_distance - right_encoder_prev_distance_;
+      stateFrame.gyro_angle = drive_.getHeading();
+
+      stateFrame.odometry_velocity = robot_state_.generateOdometryFromSensors(
+          stateFrame.delta_left, stateFrame.delta_right, stateFrame.gyro_angle);
+      stateFrame.predicted_velocity = KinematicsUtils
+          .forwardKinematics(drive_.getLeftLinearVelocity(),
+              drive_.getRightLinearVelocity());
+
+      robot_state_.addObservations(timestamp, stateFrame.odometry_velocity,
+          stateFrame.predicted_velocity);
+      left_encoder_prev_distance_ = stateFrame.left_distance;
+      right_encoder_prev_distance_ = stateFrame.right_distance;
 
       if (CSVWriter != null) {
         CSVWriter.add(stateFrame);
+        stateFrame = new StateFrame();
       }
 
       //System.out.println(String.format("%s,%s", timestamp, robot_state_.getLatestFieldToVehicle().getValue()));

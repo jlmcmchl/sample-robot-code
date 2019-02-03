@@ -1,6 +1,7 @@
-package net.teamrush27.frc2019.auto.actions;
+package net.teamrush27.frc2019.auto.actions.impl;
 
 import edu.wpi.first.wpilibj.Timer;
+import net.teamrush27.frc2019.auto.actions.Action;
 
 /**
  * Action to wait for a given amount of time

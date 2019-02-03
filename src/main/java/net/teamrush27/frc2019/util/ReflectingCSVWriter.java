@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * Writes data to a CSV file
  */
 public class ReflectingCSVWriter<T> {
+  ConcurrentLinkedDeque<T> mObjectsToWrite = new ConcurrentLinkedDeque<>();
 
   ConcurrentLinkedDeque<String> mLinesToWrite = new ConcurrentLinkedDeque<>();
   PrintWriter mOutput = null;
@@ -47,28 +48,7 @@ public class ReflectingCSVWriter<T> {
   }
 
   public void add(T value) {
-    if (!wrote_header) {
-      writeHeader(value);
-      wrote_header = true;
-    }
-
-    StringBuffer line = new StringBuffer();
-    for (Field field : mFields) {
-      if (line.length() != 0) {
-        line.append(", ");
-      }
-      try {
-        if (CSVWritable.class.isAssignableFrom(field.getType())) {
-          line.append(((CSVWritable) field.get(value)).toCSV());
-        } else {
-          line.append(field.get(value).toString());
-        }
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
-      }
-    }
-
-    mLinesToWrite.add(line.toString());
+    mObjectsToWrite.add(value);
   }
 
   protected synchronized void writeLine(String line) {
@@ -79,6 +59,33 @@ public class ReflectingCSVWriter<T> {
 
   // Call this periodically from any thread to write to disk.
   public void write() {
+    T value;
+
+    while ((value = mObjectsToWrite.pollFirst()) != null) {
+      if (!wrote_header) {
+        writeHeader(value);
+        wrote_header = true;
+      }
+
+      StringBuffer line = new StringBuffer();
+      for (Field field : mFields) {
+        if (line.length() != 0) {
+          line.append(", ");
+        }
+        try {
+          if (CSVWritable.class.isAssignableFrom(field.getType())) {
+            line.append(((CSVWritable) field.get(value)).toCSV());
+          } else {
+            line.append(field.get(value).toString());
+          }
+        } catch (IllegalAccessException e) {
+          e.printStackTrace();
+        }
+      }
+
+      mLinesToWrite.add(line.toString());
+    }
+
     String val;
     while ((val = mLinesToWrite.pollFirst()) != null) {
       writeLine(val);

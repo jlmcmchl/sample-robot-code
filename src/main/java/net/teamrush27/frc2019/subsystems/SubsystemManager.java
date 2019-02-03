@@ -68,7 +68,7 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public void onStart(double timestamp) {
-      List profiles = loops.parallelStream().map(l -> {
+      List profiles = loops.stream().map(l -> {
         double start = Timer.getFPGATimestamp();
         l.onStart(start);
         double end = Timer.getFPGATimestamp();
@@ -86,9 +86,11 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public void onLoop(double timestamp) {
-      readSubsystemInputs(timestamp);
+      List readProfiles = readSubsystemInputs(timestamp);
 
-      List profiles = loops.parallelStream().map(l -> {
+      double loopStart = Timer.getFPGATimestamp();
+
+      List loopProfiles = loops.stream().map(l -> {
         double start = Timer.getFPGATimestamp();
         l.onLoop(start);
         double end = Timer.getFPGATimestamp();
@@ -96,20 +98,23 @@ public class SubsystemManager implements ILooper {
         return new Profile(l.id(), "LOOP", start, end - start);
       }).collect(Collectors.toList());
 
-      writeSubsystemOutputs(Timer.getFPGATimestamp());
-
       double end = Timer.getFPGATimestamp();
-      profiles.add(new Profile(this.id(), "LOOP", timestamp, end - timestamp));
+      loopProfiles.add(new Profile(this.id(), "LOOP", loopStart, end - loopStart));
+
+      List writeProfiles = writeSubsystemOutputs(Timer.getFPGATimestamp());
 
       if (CSVWriter != null) {
-        profiles.forEach(p -> CSVWriter.add(p));
+        readProfiles.forEach(p -> CSVWriter.add(p));
+        loopProfiles.forEach(p -> CSVWriter.add(p));
+        writeProfiles.forEach(p -> CSVWriter.add(p));
+
       }
     }
 
     @Override
     public void onStop(double timestamp) {
 
-      List profiles = loops.parallelStream().map(l -> {
+      List profiles = loops.stream().map(l -> {
         double start = Timer.getFPGATimestamp();
         l.onStop(start);
         double end = Timer.getFPGATimestamp();
@@ -155,8 +160,8 @@ public class SubsystemManager implements ILooper {
     }
   }
 
-  public void readSubsystemInputs(double timestamp) {
-    List profiles = subsystems.parallelStream().map(s -> {
+  public List readSubsystemInputs(double timestamp) {
+    List profiles = subsystems.stream().map(s -> {
       double start = Timer.getFPGATimestamp();
       s.readPeriodicInputs();
       double end = Timer.getFPGATimestamp();
@@ -167,13 +172,11 @@ public class SubsystemManager implements ILooper {
     double end = Timer.getFPGATimestamp();
     profiles.add(new Profile(this.id(), "READ_INPUT", timestamp, end - timestamp));
 
-    if (CSVWriter != null) {
-      profiles.forEach(p -> CSVWriter.add(p));
-    }
+    return profiles;
   }
 
-  public void writeSubsystemOutputs(double timestamp) {
-    List profiles = subsystems.parallelStream().map(s -> {
+  public List writeSubsystemOutputs(double timestamp) {
+    List profiles = subsystems.stream().map(s -> {
       double start = Timer.getFPGATimestamp();
       s.writePeriodicOutputs();
       double end = Timer.getFPGATimestamp();
@@ -184,9 +187,7 @@ public class SubsystemManager implements ILooper {
     double end = Timer.getFPGATimestamp();
     profiles.add(new Profile(this.id(), "WRITE_OUTPUT", timestamp, end - timestamp));
 
-    if (CSVWriter != null) {
-      profiles.forEach(p -> CSVWriter.add(p));
-    }
+    return profiles;
   }
 
   public void startLogging() {

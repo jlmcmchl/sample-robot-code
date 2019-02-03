@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import net.teamrush27.frc2019.auto.AutoModeBase;
 import net.teamrush27.frc2019.auto.AutoModeEndedException;
-import net.teamrush27.frc2019.auto.actions.CollectAccelerationData;
-import net.teamrush27.frc2019.auto.actions.CollectVelocityData;
-import net.teamrush27.frc2019.auto.actions.WaitAction;
+import net.teamrush27.frc2019.auto.actions.impl.CollectAccelerationData;
+import net.teamrush27.frc2019.auto.actions.impl.CollectVelocityData;
+import net.teamrush27.frc2019.auto.actions.impl.WaitAction;
 import net.teamrush27.frc2019.util.physics.DriveCharacterization;
 import net.teamrush27.frc2019.util.physics.DriveCharacterization.VelocityDataPoint;
 

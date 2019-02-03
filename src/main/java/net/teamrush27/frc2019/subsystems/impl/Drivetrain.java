@@ -8,11 +8,13 @@ import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXPIDSetConfiguration;
+import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.text.DecimalFormat;
 import java.util.Objects;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.base.RobotState;
@@ -27,6 +29,7 @@ import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
+import net.teamrush27.frc2019.util.CSVWritable;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 import net.teamrush27.frc2019.util.follow.Path;
 import net.teamrush27.frc2019.util.follow.PathFollower;
@@ -38,6 +41,8 @@ import net.teamrush27.frc2019.util.math.Twist2d;
 import net.teamrush27.frc2019.util.math.Units;
 import net.teamrush27.frc2019.util.motion.DistancePathFollower;
 import net.teamrush27.frc2019.util.motion.DriveMotionPlanner;
+import net.teamrush27.frc2019.util.physics.IDrivetrainModel;
+import net.teamrush27.frc2019.util.physics.IDrivetrainModel.DriveDynamics;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryIterator;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
@@ -53,6 +58,7 @@ import net.teamrush27.frc2019.wrappers.NavX;
  */
 
 public class Drivetrain extends Subsystem {
+
   private static String TAG = "DRIVETRAIN";
 
   private static Drivetrain instance = new Drivetrain();
@@ -73,7 +79,7 @@ public class Drivetrain extends Subsystem {
   private final int VELOCITY_CONTROL_SLOT = 1;
   private final int TURNING_CONTROL_SLOT = 2;
 
-  private final NavX navX;
+  private final AHRS navX;
 
   private DriveMode driveMode = DriveMode.OPEN_LOOP;
   private RobotState robotState = RobotState.getInstance();
@@ -443,9 +449,8 @@ public class Drivetrain extends Subsystem {
   public synchronized void setVelocity(DriveCommand signal, DriveCommand feedforward) {
     if (driveMode != DriveMode.CHEZY_PATH_FOLLOWING) {
       // We entered a velocity control state.
-      setBrakeMode(signal.getBrakeMode());
-      leftMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
-      rightMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
+      setBrakeMode(true);
+      reloadChezyGains();
       leftMaster.configNeutralDeadband(0.0, 0);
       rightMaster.configNeutralDeadband(0.0, 0);
 
@@ -485,9 +490,7 @@ public class Drivetrain extends Subsystem {
 
     navX.reset();
 
-    navX.setAngleAdjustment(heading);
-
-
+    mGyroOffset = heading.rotateBy(Rotation2d.fromDegrees(navX.getFusedHeading()).inverse());
     System.out.println("Gyro offset: " + mGyroOffset.getDegrees());
 
     periodicIO.gyro_heading = heading;
@@ -586,8 +589,10 @@ public class Drivetrain extends Subsystem {
    * Start up velocity mode. This sets the drive train in high gear as well.
    */
   public synchronized void setVelocitySetpoint(DriveCommand command) {
-    configureTalonsForSpeedControl();
-    driveMode = DriveMode.VELOCITY_SETPOINT;
+    if (driveMode != DriveMode.VELOCITY_SETPOINT) {
+      configureTalonsForSpeedControl();
+      driveMode = DriveMode.VELOCITY_SETPOINT;
+    }
     setBrakeMode(command.getBrakeMode());
     updateVelocitySetpoint(command);
   }
@@ -616,8 +621,8 @@ public class Drivetrain extends Subsystem {
     if (driveMode == null || !Objects
         .equals(driveMode.getRequestedControlMode(), ControlMode.Velocity)) {
       // We entered a velocity control state.
-      leftMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
-      rightMaster.selectProfileSlot(VELOCITY_CONTROL_SLOT, 0);
+      leftMaster.selectProfileSlot(TURNING_CONTROL_SLOT, 0);
+      rightMaster.selectProfileSlot(TURNING_CONTROL_SLOT, 0);
       leftMaster.configNeutralDeadband(0.0, 0);
       rightMaster.configNeutralDeadband(0.0, 0);
     }
@@ -628,7 +633,6 @@ public class Drivetrain extends Subsystem {
    * enum)</i></p>
    */
   private synchronized void updateVelocitySetpoint(DriveCommand command) {
-
     if (driveMode.getRequestedControlMode().equals(ControlMode.Velocity)) {
       periodicIO.left_demand = DriveUtils
           .inchesPerSecondToEncoderCountPer100ms(command.getLeftDriveInput());
@@ -668,11 +672,17 @@ public class Drivetrain extends Subsystem {
     if (driveMode == DriveMode.CHEZY_PATH_FOLLOWING) {
       double now = Timer.getFPGATimestamp();
 
+      //periodicIO.field_to_vehicle = RobotState.getInstance().getPredictedFieldToVehicle(now);
+      periodicIO.field_to_vehicle = new Pose2d(
+          RobotState.getInstance().getLatestFieldToVehicle().getValue());
+
       DriveMotionPlanner.Output output = motionPlanner
-          .update(now, RobotState.getInstance().getPredictedFieldToVehicle(now));
+          .update(now, periodicIO.field_to_vehicle);
 
       periodicIO.error = motionPlanner.error();
       periodicIO.path_setpoint = motionPlanner.setpoint();
+      periodicIO.path_lookahead = motionPlanner.lookahead();
+      periodicIO.path_curvature = motionPlanner.curvature();
 
       if (!overrideTrajectory) {
         setVelocity(new DriveCommand(
@@ -720,7 +730,7 @@ public class Drivetrain extends Subsystem {
 
   public synchronized void startLogging() {
     if (CSVWriter == null) {
-      CSVWriter = new ReflectingCSVWriter<>("/home/lvuser/DRIVE-LOGS.csv", PeriodicIO.class);
+      CSVWriter = new ReflectingCSVWriter("/home/lvuser/DRIVE-LOGS.csv", PeriodicIO.class);
     }
   }
 
@@ -740,8 +750,8 @@ public class Drivetrain extends Subsystem {
     periodicIO.right_position_ticks = rightMaster.getSelectedSensorPosition(0);
     periodicIO.left_velocity_ticks_per_100ms = leftMaster.getSelectedSensorVelocity(0);
     periodicIO.right_velocity_ticks_per_100ms = rightMaster.getSelectedSensorVelocity(0);
-    periodicIO.gyro_heading = navX.getYaw();
-
+    periodicIO.gyro_heading = Rotation2d
+        .fromDegrees(navX.getFusedHeading()).rotateBy(mGyroOffset);
     periodicIO.can_read_delta = Timer.getFPGATimestamp() - periodicIO.timestamp;
 
     double deltaLeftTicks = ((periodicIO.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
@@ -761,6 +771,7 @@ public class Drivetrain extends Subsystem {
 
     if (CSVWriter != null) {
       CSVWriter.add(periodicIO);
+      periodicIO = new PeriodicIO(periodicIO);
     }
   }
 
@@ -795,7 +806,6 @@ public class Drivetrain extends Subsystem {
           ControlMode.MotionMagic,
           DriveUtils.inchesToEncoderCount(periodicIO.right_turn));
     } else if (driveMode == DriveMode.VELOCITY_SETPOINT) {
-
       leftMaster.set(
           ControlMode.Velocity,
           periodicIO.left_demand);
@@ -803,7 +813,6 @@ public class Drivetrain extends Subsystem {
       rightMaster.set(
           ControlMode.Velocity,
           periodicIO.right_demand);
-
     } else {
       System.out.println(String.format("Hit a bad control state %s %s",
           driveMode.getRequestedControlMode(), driveMode));
@@ -839,8 +848,12 @@ public class Drivetrain extends Subsystem {
     public double right_accel;
     public double left_feedforward;
     public double right_feedforward;
-    public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<Pose2dWithCurvature>(
+    public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState(
         Pose2dWithCurvature.identity());
+    public TimedState<Pose2dWithCurvature> path_lookahead = new TimedState(
+        Pose2dWithCurvature.identity());
+    public double path_curvature;
+    public Pose2d field_to_vehicle = Pose2d.identity();
 
     public PeriodicIO() {
 
@@ -867,11 +880,18 @@ public class Drivetrain extends Subsystem {
       this.right_accel = other.right_accel;
       this.left_feedforward = other.left_feedforward;
       this.right_feedforward = other.right_feedforward;
-      this.path_setpoint = new TimedState<Pose2dWithCurvature>(
+      this.path_setpoint = new TimedState(
           other.path_setpoint.state(),
           other.path_setpoint.t(),
           other.path_setpoint.velocity(),
           other.path_setpoint.acceleration());
+      this.path_lookahead = new TimedState(
+          other.path_lookahead.state(),
+          other.path_lookahead.t(),
+          other.path_lookahead.velocity(),
+          other.path_lookahead.acceleration());
+      this.path_curvature = other.path_curvature;
+      this.field_to_vehicle = new Pose2d(other.field_to_vehicle);
     }
   }
 }

@@ -2,7 +2,7 @@ package net.teamrush27.frc2019.auto.modes;
 
 import net.teamrush27.frc2019.auto.AutoModeBase;
 import net.teamrush27.frc2019.auto.AutoModeEndedException;
-import net.teamrush27.frc2019.auto.actions.ConstantVelocityAction;
+import net.teamrush27.frc2019.auto.actions.impl.ConstantVelocityAction;
 
 public class DriveAtSpeed extends AutoModeBase {
 

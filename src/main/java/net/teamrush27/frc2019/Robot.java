@@ -41,7 +41,8 @@ public class Robot extends TimedRobot {
   private Arm arm = Arm.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
-  private final SubsystemManager subsystemManager = new SubsystemManager(robotStateEstimator, drivetrain);
+  private final SubsystemManager subsystemManager = new SubsystemManager(robotStateEstimator,
+      drivetrain);
   private final Looper enabledLooper = new Looper();
   private final Looper disabledLooper = new Looper();
 
@@ -67,6 +68,7 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     drivetrain.startLogging();
     subsystemManager.startLogging();
+    robotStateEstimator.startLogging();
     enabledLooper.start();
 
     autoModeExecutor = new AutoModeExecutor();
@@ -84,6 +86,8 @@ public class Robot extends TimedRobot {
     enabledLooper.start();
     //arm.setWantedState(WantedState.OPEN_LOOP);
     subsystemManager.startLogging();
+    robotStateEstimator.startLogging();
+    drivetrain.startLogging();
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
   }
 
@@ -108,12 +112,17 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     SmartDashboard.putString("Match Cycle", "DISABLED");
 
+    if (autoModeExecutor != null) {
+      autoModeExecutor.stop();
+    }
+
     try {
       CrashTracker.logDisabledInit();
       enabledLooper.stop();
 
       subsystemManager.stopLogging();
       drivetrain.stopLogging();
+      robotStateEstimator.stopLogging();
 
       Drivetrain.getInstance().zeroSensors();
       RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2d.identity());

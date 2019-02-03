@@ -81,7 +81,7 @@ public class KinematicsUtils {
         if (Math.abs(velocity.deltaTheta) < MAX_ERROR) {
             return new DriveVelocity(velocity.deltaX, velocity.deltaX);
         }
-        double deltaV = ChezyConstants.TRACK_WIDTH * velocity.deltaTheta / (2 * ChezyConstants.SCRUB_FACTOR);
+        double deltaV = ChezyConstants.kDriveWheelTrackWidthInches * velocity.deltaTheta / (2 * ChezyConstants.kTrackScrubFactor);
         return new DriveVelocity(velocity.deltaX - deltaV, velocity.deltaX + deltaV);
     }
 }
