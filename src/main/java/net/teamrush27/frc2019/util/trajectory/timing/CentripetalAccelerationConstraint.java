@@ -16,6 +16,8 @@ public class CentripetalAccelerationConstraint implements TimingConstraint<Pose2
 
   @Override
   public MinMaxAcceleration getMinMaxAcceleration(final Pose2dWithCurvature state, final double velocity) {
+//    System.out.print("Centripetal: ");
+//    System.out.println(MinMaxAcceleration.kNoLimits);
     return MinMaxAcceleration.kNoLimits;
   }
 }

@@ -36,7 +36,7 @@ public interface IDrivetrainModel {
   }
 
   // Can refer to velocity or acceleration depending on context.
-  class ChassisState {
+  class ChassisState implements CSVWritable {
 
     public double linear;
     public double angular;
@@ -54,10 +54,20 @@ public interface IDrivetrainModel {
       DecimalFormat fmt = new DecimalFormat("#0.000");
       return fmt.format(linear) + ", " + fmt.format(angular);
     }
+
+    @Override
+    public String toCSV() {
+      return this.toString();
+    }
+
+    @Override
+    public String header(String base) {
+      return null;
+    }
   }
 
   // Can refer to velocity, acceleration, torque, voltage, etc., depending on context.
-  class WheelState {
+  class WheelState implements CSVWritable {
 
     public double left;
     public double right;
@@ -87,6 +97,16 @@ public interface IDrivetrainModel {
       DecimalFormat fmt = new DecimalFormat("#0.000");
       return fmt.format(left) + ", " + fmt.format(right);
     }
+
+    @Override
+    public String toCSV() {
+      return this.toString();
+    }
+
+    @Override
+    public String header(String base) {
+      return base + "_l," + base + "_r";
+    }
   }
 
   // Full state dynamics of the drivetrain.
@@ -103,11 +123,27 @@ public interface IDrivetrainModel {
     public IDrivetrainModel.WheelState wheel_torque = new IDrivetrainModel.WheelState();  // N m
 
     @Override
+    public String toString() {
+      DecimalFormat fmt = new DecimalFormat("#0.000");
+      return fmt.format(curvature) + ", " + fmt.format(dcurvature) + ", (" + chassis_velocity + ", "
+          + chassis_acceleration
+          + "), (" + wheel_velocity + ", " + wheel_acceleration
+          + ", " + voltage + ", " + wheel_torque + ")";
+    }
+
+    @Override
     public String toCSV() {
-      return curvature + "," + dcurvature + "," + chassis_velocity + ", " + chassis_acceleration
-          + ", " + wheel_velocity + ", " + wheel_acceleration
-          + ", " + voltage + ", " + wheel_torque;
+      return curvature + "," + dcurvature + "," + chassis_velocity.toCSV() + ", " + chassis_acceleration.toCSV()
+          + ", " + wheel_velocity.toCSV() + ", " + wheel_acceleration.toCSV()
+          + ", " + voltage.toCSV() + ", " + wheel_torque.toCSV();
+    }
+
+    @Override
+    public String header(String base) {
+      return base + "_curv," + base + "_dcurv," + chassis_velocity.header(base + "_chassis_v") + ","
+          + chassis_acceleration.header(base + "_chassis_a") + "," + wheel_velocity
+          .header(base + "_wheel_v") + "," + wheel_acceleration.header(base + "_wheel_a") + ","
+          + voltage.header(base + "_voltage") + "," + wheel_torque.header(base + "_wheel_t");
     }
   }
-
 }

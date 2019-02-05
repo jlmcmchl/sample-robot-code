@@ -2,11 +2,13 @@ package net.teamrush27.frc2019.subsystems.impl;
 
 
 import edu.wpi.first.wpilibj.Talon;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 
 public class LED extends Subsystem {
+	private static String TAG = "LED";
 
 	private static LED INSTANCE = null;
 	
@@ -81,6 +83,11 @@ public class LED extends Subsystem {
 			stop();
 		}
 
+		@Override
+		public String id() {
+			return TAG;
+		}
+
 	};
 	
 	private SystemState handleState(double timestamp) {
@@ -125,7 +132,7 @@ public class LED extends Subsystem {
 	}
 
 	@Override
-	public void registerEnabledLoops(Looper enabledLooper) {
+	public void registerEnabledLoops(ILooper enabledLooper) {
 		enabledLooper.register(loop);
 	}
 

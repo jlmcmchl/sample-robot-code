@@ -189,6 +189,11 @@ public class Pose2d implements IPose2d<Pose2d> {
   }
 
   @Override
+  public String header(String base) {
+    return getTranslation().header(base) + "," + getRotation().header(base);
+  }
+
+  @Override
   public double distance(final Pose2d other) {
     return Pose2d.log(inverse().transformBy(other)).norm();
   }

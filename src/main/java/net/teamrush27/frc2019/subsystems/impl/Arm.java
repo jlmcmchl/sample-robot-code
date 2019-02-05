@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.RobotMap;
+import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
@@ -13,6 +14,7 @@ import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.wrappers.CANTalonFactory;
 
 public class Arm extends Subsystem {
+	private String TAG = "ARM";
     
     private static Arm INSTANCE = null;
 	
@@ -87,8 +89,13 @@ public class Arm extends Subsystem {
         public void onStop(double timestamp) {
             stop();
         }
-        
-    };
+
+		@Override
+		public String id() {
+			return TAG;
+		}
+
+	};
 	
 	public Arm() {
 		rotationMotor = CANTalonFactory.createDefaultTalon(RobotMap.ARM_ROTATION_CAN_ID);
@@ -156,9 +163,10 @@ public class Arm extends Subsystem {
     @Override
     public void zeroSensors() {
     }
-	
+
+
 	@Override
-    public void registerEnabledLoops(Looper enabledLooper) {
+    public void registerEnabledLoops(ILooper enabledLooper) {
         enabledLooper.register(loop);
     }
     

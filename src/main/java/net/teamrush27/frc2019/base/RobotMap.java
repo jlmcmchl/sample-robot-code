@@ -10,9 +10,8 @@ public class RobotMap {
   public static final int DRIVE_LEFT_SLAVE_1_CAN_ID = 14;
   public static final int DRIVE_LEFT_SLAVE_2_CAN_ID = 16;
 
-
-  public static final int ARM_ROTATION_CAN_ID = 15;
-  public static final int ARM_EXTENSION_CAN_ID = 16;
+  public static final int ARM_ROTATION_CAN_ID = 17;
+  public static final int ARM_EXTENSION_CAN_ID = 18;
 
   public static final int ARM_ROTATION_POT_CHANNEL = 0;
   public static final int ARM_EXTENSION_POT_CHANNEL = 1;

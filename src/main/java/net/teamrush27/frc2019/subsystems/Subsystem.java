@@ -1,5 +1,7 @@
 package net.teamrush27.frc2019.subsystems;
 
+import net.teamrush27.frc2019.loops.ILooper;
+import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 
 public abstract class Subsystem {
@@ -10,7 +12,7 @@ public abstract class Subsystem {
 
     public abstract void zeroSensors();
 
-    public abstract void registerEnabledLoops(Looper enabledLooper);
+    public abstract void registerEnabledLoops(ILooper enabledLooper);
 
     public abstract void test();
 
@@ -20,5 +22,9 @@ public abstract class Subsystem {
 
     // Optional design pattern for caching periodic writes to avoid hammering the HAL/CAN.
     public void writePeriodicOutputs() {
+    }
+
+    public String id() {
+        return "IMPLEMENT ME";
     }
 }

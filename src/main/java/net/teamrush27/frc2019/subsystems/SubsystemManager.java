@@ -1,42 +1,52 @@
 package net.teamrush27.frc2019.subsystems;
 
+import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.util.CSVWritable;
+import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 
 /**
  * Used to reset, start, stop, and update all subsystems at once
  */
 public class SubsystemManager implements ILooper {
 
+  public static String TAG = "SUBSYSTEMMANAGER";
+
   private final Set<Subsystem> subsystems = new HashSet<Subsystem>();
   private List<Loop> loops = new ArrayList<>();
+
+  private ReflectingCSVWriter CSVWriter;
 
   public SubsystemManager(Subsystem... subsystems) {
     Collections.addAll(this.subsystems, subsystems);
   }
 
+  public SubsystemManager(List subsystems) {
+  }
+
   public void outputToSmartDashboard() {
-    subsystems.forEach((s) -> s.outputToSmartDashboard());
+    subsystems.forEach(s -> s.outputToSmartDashboard());
   }
 
   public void stop() {
-    subsystems.forEach((s) -> s.stop());
+    subsystems.forEach(s -> s.stop());
   }
 
   public void zeroSensors() {
-    subsystems.forEach((s) -> s.zeroSensors());
+    subsystems.forEach(s -> s.zeroSensors());
   }
 
   public void registerEnabledLoops(Looper enabledLooper) {
-    subsystems.forEach((s) -> s.registerEnabledLoops(enabledLooper));
+    subsystems.forEach(s -> s.registerEnabledLoops(this));
     enabledLooper.register(new EnabledLoop());
-
   }
 
   public void registerDisabledLoops(Looper disabledLooper) {
@@ -58,29 +68,71 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public void onStart(double timestamp) {
-      for (Loop l : loops) {
-        l.onStart(timestamp);
+      List profiles = loops.stream().map(l -> {
+        double start = Timer.getFPGATimestamp();
+        l.onStart(start);
+        double end = Timer.getFPGATimestamp();
+
+        return new Profile(l.id(), "START", start, end - start);
+      }).collect(Collectors.toList());
+
+      double end = Timer.getFPGATimestamp();
+      profiles.add(new Profile(this.id(), "START", timestamp, end - timestamp));
+
+      if (CSVWriter != null) {
+        profiles.forEach(p -> CSVWriter.add(p));
       }
     }
 
     @Override
     public void onLoop(double timestamp) {
-      for (Subsystem s : subsystems) {
-        s.readPeriodicInputs();
-      }
-      for (Loop l : loops) {
-        l.onLoop(timestamp);
-      }
-      for (Subsystem s : subsystems) {
-        s.writePeriodicOutputs();
+      List readProfiles = readSubsystemInputs(timestamp);
+
+      double loopStart = Timer.getFPGATimestamp();
+
+      List loopProfiles = loops.stream().map(l -> {
+        double start = Timer.getFPGATimestamp();
+        l.onLoop(start);
+        double end = Timer.getFPGATimestamp();
+
+        return new Profile(l.id(), "LOOP", start, end - start);
+      }).collect(Collectors.toList());
+
+      double end = Timer.getFPGATimestamp();
+      loopProfiles.add(new Profile(this.id(), "LOOP", loopStart, end - loopStart));
+
+      List writeProfiles = writeSubsystemOutputs(Timer.getFPGATimestamp());
+
+      if (CSVWriter != null) {
+        readProfiles.forEach(p -> CSVWriter.add(p));
+        loopProfiles.forEach(p -> CSVWriter.add(p));
+        writeProfiles.forEach(p -> CSVWriter.add(p));
+
       }
     }
 
     @Override
     public void onStop(double timestamp) {
-      for (Loop l : loops) {
-        l.onStop(timestamp);
+
+      List profiles = loops.stream().map(l -> {
+        double start = Timer.getFPGATimestamp();
+        l.onStop(start);
+        double end = Timer.getFPGATimestamp();
+
+        return new Profile(l.id(), "STOP", start, end - start);
+      }).collect(Collectors.toList());
+
+      double end = Timer.getFPGATimestamp();
+      profiles.add(new Profile(this.id(), "STOP", timestamp, end - timestamp));
+
+      if (CSVWriter != null) {
+        profiles.forEach(p -> CSVWriter.add(p));
       }
+    }
+
+    @Override
+    public String id() {
+      return TAG;
     }
   }
 
@@ -93,17 +145,85 @@ public class SubsystemManager implements ILooper {
 
     @Override
     public void onLoop(double timestamp) {
-      for (Subsystem s : subsystems) {
-        s.readPeriodicInputs();
-      }
-      for (Subsystem s : subsystems) {
-        s.writePeriodicOutputs();
-      }
+      readSubsystemInputs(timestamp);
+      writeSubsystemOutputs(Timer.getFPGATimestamp());
     }
 
     @Override
     public void onStop(double timestamp) {
 
+    }
+
+    @Override
+    public String id() {
+      return TAG;
+    }
+  }
+
+  public List readSubsystemInputs(double timestamp) {
+    List profiles = subsystems.stream().map(s -> {
+      double start = Timer.getFPGATimestamp();
+      s.readPeriodicInputs();
+      double end = Timer.getFPGATimestamp();
+
+      return new Profile(s.id(), "READ_INPUT", start, end - start);
+    }).collect(Collectors.toList());
+
+    double end = Timer.getFPGATimestamp();
+    profiles.add(new Profile(this.id(), "READ_INPUT", timestamp, end - timestamp));
+
+    return profiles;
+  }
+
+  public List writeSubsystemOutputs(double timestamp) {
+    List profiles = subsystems.stream().map(s -> {
+      double start = Timer.getFPGATimestamp();
+      s.writePeriodicOutputs();
+      double end = Timer.getFPGATimestamp();
+
+      return new Profile(s.id(), "WRITE_OUTPUT", start, end - start);
+    }).collect(Collectors.toList());
+
+    double end = Timer.getFPGATimestamp();
+    profiles.add(new Profile(this.id(), "WRITE_OUTPUT", timestamp, end - timestamp));
+
+    return profiles;
+  }
+
+  public void startLogging() {
+    if (CSVWriter == null) {
+      CSVWriter = new ReflectingCSVWriter<>("/home/lvuser/PROFILE-LOGS.csv", Profile.class);
+    }
+  }
+
+  public void stopLogging() {
+    if (CSVWriter != null) {
+      CSVWriter.flush();
+      CSVWriter = null;
+    }
+  }
+
+  public String id() {
+    return TAG;
+  }
+
+  public static class Profile {
+
+    public String id;
+    public String action;
+    public double timestamp;
+    public double duration;
+
+    public Profile(String id, String action, double timestamp, double duration) {
+      this.id = id;
+      this.action = action;
+      this.timestamp = timestamp;
+      this.duration = duration;
+    }
+
+    @Override
+    public String toString() {
+      return id + ", " + action + ", " + timestamp + ", " + duration;
     }
   }
 }

@@ -64,6 +64,11 @@ public class TimedState<S extends State<S>> implements State<TimedState<S>> {
   }
 
   @Override
+  public String header(String base) {
+    return state().header(base) + "," + base + "_t," + base + "_v," + base + "_a" ;
+  }
+
+  @Override
   public TimedState<S> interpolate(TimedState<S> other, double x) {
     final double new_t = MathUtils.interpolate(t(), other.t(), x);
     final double delta_t = new_t - t();

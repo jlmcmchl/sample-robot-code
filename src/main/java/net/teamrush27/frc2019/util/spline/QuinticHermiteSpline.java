@@ -100,7 +100,7 @@ public class QuinticHermiteSpline extends Spline {
   public Translation2d getPoint(double t) {
     double x = ax * t * t * t * t * t + bx * t * t * t * t + cx * t * t * t + dx * t * t + ex * t + fx;
     double y = ay * t * t * t * t * t + by * t * t * t * t + cy * t * t * t + dy * t * t + ey * t + fy;
-    return new Translation2d(x, y);
+    return new Translation2d(x, -y);
   }
 
   private double dx(double t) {
@@ -153,7 +153,7 @@ public class QuinticHermiteSpline extends Spline {
 
   @Override
   public Rotation2d getHeading(double t) {
-    return new Rotation2d(dx(t), dy(t), true);
+    return new Rotation2d(dx(t), -dy(t), true);
   }
 
   /**

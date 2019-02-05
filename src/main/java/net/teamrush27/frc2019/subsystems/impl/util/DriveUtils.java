@@ -23,8 +23,16 @@ public class DriveUtils {
 		return inches / (RobotConstants.DRIVE_WHEEL_DIAMETER * Math.PI);
 	}
 
+	public static double radiansToRotations(double radians) {
+		return radians / (Math.PI * 2);
+	}
+
 	public static int inchesPerSecondToEncoderCountPer100ms(double inches_per_second) {
 		return Double.valueOf(rotationsToEncoderCount(inchesPerSecondToRotationsPer100ms(inches_per_second))).intValue();
+	}
+
+	public static double radiansPerSecondToEncoderCountPer100ms(double rads_per_second) {
+		return rotationsToEncoderCount(radiansToRotations(rads_per_second)) / 10;
 	}
 	
 	public static double rotationsToEncoderCount(double rotations) {

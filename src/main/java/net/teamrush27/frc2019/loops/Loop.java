@@ -13,4 +13,6 @@ public interface Loop {
     public void onLoop(double timestamp);
 
     public void onStop(double timestamp);
+
+    public String id();
 }

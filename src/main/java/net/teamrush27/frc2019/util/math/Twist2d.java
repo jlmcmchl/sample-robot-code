@@ -1,6 +1,7 @@
 package net.teamrush27.frc2019.util.math;
 
 import java.text.DecimalFormat;
+import net.teamrush27.frc2019.util.CSVWritable;
 
 /**
  * A movement along an arc at constant curvature and velocity. We can use ideas from "differential calculus" to create
@@ -8,7 +9,7 @@ import java.text.DecimalFormat;
  *
  * A Twist can be used to represent a difference between two poses, a velocity, an acceleration, etc.
  */
-public class Twist2d {
+public class Twist2d implements CSVWritable {
     protected static final Twist2d IDENTITY = new Twist2d(0.0, 0.0, 0.0);
 
     public static final Twist2d identity() {
@@ -46,5 +47,16 @@ public class Twist2d {
     public String toString() {
         final DecimalFormat fmt = new DecimalFormat("#0.000");
         return "(" + fmt.format(deltaX) + "," + fmt.format(deltaY) + "," + fmt.format(Math.toDegrees(deltaTheta)) + " deg)";
+    }
+
+    @Override
+    public String toCSV() {
+        final DecimalFormat fmt = new DecimalFormat("#0.000");
+        return fmt.format(deltaX) + ", " + fmt.format(deltaY) + ", " + fmt.format(Math.toDegrees(deltaTheta));
+    }
+
+    @Override
+    public String header(String base) {
+        return base + "_x, " + base + "_y," + base + "_theta";
     }
 }

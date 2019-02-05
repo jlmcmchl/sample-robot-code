@@ -108,4 +108,9 @@ public class Pose2dWithCurvature implements IPose2d<Pose2dWithCurvature>, ICurva
     final DecimalFormat fmt = new DecimalFormat("#0.000");
     return getPose().toCSV() + "," + fmt.format(getCurvature()) + "," + fmt.format(getDCurvatureDs());
   }
+
+  @Override
+  public String header(String base) {
+    return getPose().header(base) + "," + base + "_curv," + base + "_dcurv";
+  }
 }
