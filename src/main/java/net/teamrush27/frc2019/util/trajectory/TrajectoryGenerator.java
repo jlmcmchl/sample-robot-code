@@ -13,7 +13,7 @@ import net.teamrush27.frc2019.util.trajectory.timing.TimingConstraint;
 
 public class TrajectoryGenerator {
 
-  private static final double kMaxVelocity = 60.0;
+  private static final double kMaxVelocity = 120.0;
   private static final double kMaxAccel = 72.0;
   private static final double kMaxCentripetalAccelElevatorDown = 110.0;
   private static final double kMaxCentripetalAccel = 100.0;
@@ -81,7 +81,11 @@ public class TrajectoryGenerator {
   // +y is to the left.
   // ALL POSES DEFINED FOR THE CASE THAT ROBOT STARTS ON RIGHT! (mirrored about +x axis for LEFT)
   public static final Pose2d originPose = new Pose2d(0.0, 0.0, Rotation2d.identity());
-  public static final Pose2d justStraightPose = new Pose2d(60.0, 0.0, Rotation2d.identity());
+  public static final Pose2d justStraightPose = new Pose2d(300.0, 0.0, Rotation2d.identity());
+  public static final Pose2d justStraightBackPose = new Pose2d(-60.0, 0.0, Rotation2d.identity());
+  public static final Pose2d turnRightBackPose = new Pose2d(-60.0, 60.0, Rotation2d.fromDegrees(-90));
+
+
   public static final Pose2d turnRightOrigin = new Pose2d(60.0, 0.0, Rotation2d.identity());
   public static final Pose2d turnRightCompletion = new Pose2d(120.0, 60.0, Rotation2d.fromDegrees(90));
   public static final Pose2d turnLeftOrigin = new Pose2d(120.0, 120.0, Rotation2d.fromDegrees(90));
@@ -214,6 +218,8 @@ public class TrajectoryGenerator {
     //    use Trajectory<TimedState<Pose2dWithCurvature>>
 
     public final MirroredTrajectory justStraight;
+    public final MirroredTrajectory justStraightBack;
+    public final MirroredTrajectory turnRightBack;
     public final MirroredTrajectory turnRight;
     public final MirroredTrajectory humanPlayerToCloseSideCargo;
     public final MirroredTrajectory habToFrontShip;
@@ -224,10 +230,12 @@ public class TrajectoryGenerator {
       // For Mirrored Trajectories, wrap in `new MirroredTrajectory`
 
       justStraight = new MirroredTrajectory(getJustStraight());
+      justStraightBack = new MirroredTrajectory(getJustStraightBack());
+      turnRightBack = new MirroredTrajectory(getTurnRightBack());
+
       turnRight = new MirroredTrajectory(getTurnRight());
       humanPlayerToCloseSideCargo = new MirroredTrajectory(getHumanPlayerToCloseSideCargo());
       habToFrontShip = new MirroredTrajectory(getHabToFrontShip());
-
 
     }
 
@@ -245,7 +253,17 @@ public class TrajectoryGenerator {
     private Trajectory<TimedState<Pose2dWithCurvature>> getJustStraightBack() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(originPose);
-      waypoints.add(justStraightPose);
+      waypoints.add(justStraightBackPose);
+
+      return generateTrajectory(true, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+    }
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getTurnRightBack() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(originPose);
+      waypoints.add(turnRightBackPose);
 
       return generateTrajectory(true, waypoints,
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
@@ -280,6 +298,18 @@ public class TrajectoryGenerator {
     }
 
     private Trajectory<TimedState<Pose2dWithCurvature>> getHabToFrontShip() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(originPose);
+      waypoints.add(originToOffHab);
+      waypoints.add(originToFrontShipPose);
+
+
+      return generateTrajectory(false, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+    }
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getFrontShipToHumanPlayer() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(originPose);
       waypoints.add(originToOffHab);

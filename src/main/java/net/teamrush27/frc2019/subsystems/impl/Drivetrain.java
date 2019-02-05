@@ -681,8 +681,6 @@ public class Drivetrain extends Subsystem {
 
       periodicIO.error = motionPlanner.error();
       periodicIO.path_setpoint = motionPlanner.setpoint();
-      periodicIO.path_lookahead = motionPlanner.lookahead();
-      periodicIO.path_curvature = motionPlanner.curvature();
 
       if (!overrideTrajectory) {
         setVelocity(new DriveCommand(
@@ -785,6 +783,8 @@ public class Drivetrain extends Subsystem {
     }*/
 
     if (driveMode == DriveMode.OPEN_LOOP) {
+      periodicIO.field_to_vehicle = RobotState.getInstance().getLatestFieldToVehicle().getValue();
+
       leftMaster
           .set(ControlMode.PercentOutput, periodicIO.left_demand, DemandType.ArbitraryFeedForward,
               0.0);
@@ -850,9 +850,6 @@ public class Drivetrain extends Subsystem {
     public double right_feedforward;
     public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState(
         Pose2dWithCurvature.identity());
-    public TimedState<Pose2dWithCurvature> path_lookahead = new TimedState(
-        Pose2dWithCurvature.identity());
-    public double path_curvature;
     public Pose2d field_to_vehicle = Pose2d.identity();
 
     public PeriodicIO() {
@@ -885,12 +882,6 @@ public class Drivetrain extends Subsystem {
           other.path_setpoint.t(),
           other.path_setpoint.velocity(),
           other.path_setpoint.acceleration());
-      this.path_lookahead = new TimedState(
-          other.path_lookahead.state(),
-          other.path_lookahead.t(),
-          other.path_lookahead.velocity(),
-          other.path_lookahead.acceleration());
-      this.path_curvature = other.path_curvature;
       this.field_to_vehicle = new Pose2d(other.field_to_vehicle);
     }
   }

@@ -53,11 +53,8 @@ public class DriveMotionPlanner implements CSVWritable {
   double mLastTime = Double.POSITIVE_INFINITY;
   public TimedState<Pose2dWithCurvature> mSetpoint = new TimedState<>(
       Pose2dWithCurvature.identity());
-  public TimedState<Pose2dWithCurvature> mLookahead = new TimedState<>(
-      Pose2dWithCurvature.identity());
   Pose2d mError = Pose2d.identity();
   Output mOutput = new Output();
-  public double mCurvature;
 
   ChassisState prev_velocity_ = new ChassisState();
   double mDt = 0.0;
@@ -276,8 +273,6 @@ public class DriveMotionPlanner implements CSVWritable {
       actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
     }
 
-    mLookahead = lookahead_state;
-
     if (actual_lookahead_distance < ChezyConstants.kPathMinLookaheadDistance) {
       lookahead_state = new TimedState<>(
           new Pose2dWithCurvature(
@@ -309,8 +304,6 @@ public class DriveMotionPlanner implements CSVWritable {
     } else {
       adjusted_velocity.angular = curvature * dynamics.chassis_velocity.linear;
     }
-
-    mCurvature = curvature;
 
     dynamics.chassis_velocity = adjusted_velocity;
     dynamics.wheel_velocity = mModel.solveInverseKinematics(adjusted_velocity);
@@ -425,13 +418,5 @@ public class DriveMotionPlanner implements CSVWritable {
 
   public TimedState<Pose2dWithCurvature> setpoint() {
     return mSetpoint;
-  }
-
-  public TimedState<Pose2dWithCurvature> lookahead() {
-    return mLookahead;
-  }
-
-  public double curvature() {
-    return mCurvature;
   }
 }
