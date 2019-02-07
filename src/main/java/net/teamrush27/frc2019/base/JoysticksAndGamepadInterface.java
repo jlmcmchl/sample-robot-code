@@ -36,4 +36,19 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		Double armExtension = gamePad.getRightTriggerAxis() - gamePad.getLeftTriggerAxis();
 		return new ArmInput(armExtension, gamePad.getLeftStickX());
 	}
+	
+	@Override
+	public Boolean getWantManipulateHatch() {
+		return gamePad.getBButtonPressed();
+	}
+	
+	@Override
+	public Boolean getWantManipulateCargo() {
+		return gamePad.getAButtonPressed();
+	}
+	
+	@Override
+	public Double getWristInput() {
+		return gamePad.getRightStickY();
+	}
 }

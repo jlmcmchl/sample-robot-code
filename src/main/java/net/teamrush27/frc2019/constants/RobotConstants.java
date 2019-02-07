@@ -27,6 +27,6 @@ public class RobotConstants {
     public static double LOOPER_DELTA_TIME = 0.005; // 200hz
 
     // Talon Parameters
-    public static int TALON_CONFIG_TIMEOUT = 0; // 100ms
+    public static int TALON_CONFIG_TIMEOUT = 10; // 100ms
 
 }

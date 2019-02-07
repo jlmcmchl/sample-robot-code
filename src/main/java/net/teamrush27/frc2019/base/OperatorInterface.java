@@ -9,5 +9,8 @@ public interface OperatorInterface {
     
     // OPERATOR CONTROLS
 	ArmInput getArmInput();
-
+	Boolean getWantManipulateHatch();
+	Boolean getWantManipulateCargo();
+	Double getWristInput();
+	
 }

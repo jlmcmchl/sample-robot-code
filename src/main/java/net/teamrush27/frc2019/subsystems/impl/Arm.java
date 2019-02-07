@@ -1,212 +1,278 @@
 package net.teamrush27.frc2019.subsystems.impl;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import com.revrobotics.CANPIDController.AccelStrategy;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
+import com.revrobotics.ControlType;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
-import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
-import net.teamrush27.frc2019.wrappers.CANTalonFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Arm extends Subsystem {
-	private String TAG = "ARM";
-    
-    private static Arm INSTANCE = null;
+	
+	private static final String TAG = "ARM";
+	private static final Logger LOG = LogManager.getLogger(Arm.class);
+	private static Arm INSTANCE = null;
 	
 	public static Arm getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Arm();
-        }
-        return INSTANCE;
-    }
+		if (INSTANCE == null) {
+			INSTANCE = new Arm();
+		}
+		return INSTANCE;
+	}
 	
-
 	public enum WantedState {
-        OFF, OPEN_LOOP
-    }
-    
-    public enum SystemState {
-        OFF, OPEN_LOOP
-    }
+		OFF, OPEN_LOOP, CLOSED_LOOP
+	}
+	
+	public enum SystemState {
+		OFF, OPEN_LOOP, CLOSED_LOOP
+	}
 	
 	private WantedState wantedState = WantedState.OFF;
-    private SystemState systemState = SystemState.OFF;
+	private SystemState systemState = SystemState.OFF;
 	
+	private final CANSparkMax rotationMotorMaster;
+	private final CANSparkMax rotationMotorSlave;
+	private final CANSparkMax extensionMotor;
 	
-	private final TalonSRX rotationMotor;
-	private final TalonSRX extensionMotor;
-	
-	private final AnalogPotentiometer rotationPot;
-	private final AnalogPotentiometer extensionPot;
+	private final DigitalInput rotationHomeSensor;
+	private final DigitalInput extensionHomeSensor;
 	
 	private boolean stateChanged = false;
 	private double currentStateStartTime;
 	
+	private ArmInput openLoopInput = new ArmInput(0d, 0d);
+	private ArmInput closedLoopInput = new ArmInput(0d, 0d);
 	
-	private static double MAX_ROTATION = 339.12;
-	private static double MIN_ROTATION = 46.58;
-	private static double MAX_EXTENSION = 108.78;
-	private static double MIN_EXTENSION = 35.83;
-	
-	private ArmInput openLoopInput = new ArmInput(0d,0d);
-	
+	private ArmState armState = new ArmState(0, 0, false, false);
 	
 	private Loop loop = new Loop() {
-        
-        @Override
-        public void onStart(double timestamp) {
-            currentStateStartTime = timestamp;
-        }
-        
-        @Override
-        public void onLoop(double timestamp) {
-            SystemState newState;
-            switch (systemState) {
+		
+		@Override
+		public void onStart(double timestamp) {
+			currentStateStartTime = timestamp;
+		}
+		
+		@Override
+		public void onLoop(double timestamp) {
+			SystemState newState;
+			switch (systemState) {
 				case OPEN_LOOP:
-                    newState = handleOpenLoop(timestamp);
-                    break;
-                case OFF:
-                default:
-                    newState = handleOff(timestamp);
-                    break;
-            }
-            if (newState != systemState) {
-                System.out.println("Arm state " + systemState + " to " + newState);
-                systemState = newState;
-                currentStateStartTime = timestamp;
-                stateChanged = true;
-            } else {
-                stateChanged = false;
-            }
-        }
-        
-        @Override
-        public void onStop(double timestamp) {
-            stop();
-        }
-
+					newState = handleOpenLoop(timestamp);
+					break;
+				case CLOSED_LOOP:
+					newState = handleClosedLoop(timestamp);
+					break;
+				case OFF:
+				default:
+					newState = handleOff(timestamp);
+					break;
+			}
+			if (newState != systemState) {
+				LOG.info("Arm state {} to {}",systemState,newState);
+				systemState = newState;
+				currentStateStartTime = timestamp;
+				stateChanged = true;
+			} else {
+				stateChanged = false;
+			}
+		}
+		
+		@Override
+		public void onStop(double timestamp) {
+			stop();
+		}
+		
 		@Override
 		public String id() {
 			return TAG;
 		}
-
+		
 	};
 	
 	public Arm() {
-		rotationMotor = CANTalonFactory.createDefaultTalon(RobotMap.ARM_ROTATION_CAN_ID);
-		rotationMotor.setNeutralMode(NeutralMode.Brake);
-	
-		extensionMotor = CANTalonFactory.createDefaultTalon(RobotMap.ARM_EXTENSION_CAN_ID);
-		extensionMotor.setNeutralMode(NeutralMode.Brake);
+		rotationMotorMaster = new CANSparkMax(RobotMap.ARM_ROTATION_MASTER_CAN_ID,
+			MotorType.kBrushless);
+		rotationMotorMaster.restoreFactoryDefaults();
+		rotationMotorMaster.setIdleMode(IdleMode.kBrake);
+		rotationMotorMaster.setSmartCurrentLimit(50);
+		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
+		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
 		
-		rotationPot = new AnalogPotentiometer(RobotMap.ARM_ROTATION_POT_CHANNEL);
-		extensionPot = new AnalogPotentiometer(RobotMap.ARM_EXTENSION_POT_CHANNEL);
-    }
-    
-    @Override
-    public void outputToSmartDashboard() {
-		SmartDashboard.putNumber("armPot",getArmAngle());
-		SmartDashboard.putNumber("extPot",getArmExtension());
-    }
+		rotationMotorSlave = new CANSparkMax(RobotMap.ARM_ROTATION_SLAVE_CAN_ID,
+			MotorType.kBrushless);
+		rotationMotorSlave.restoreFactoryDefaults();
+		rotationMotorSlave.setSmartCurrentLimit(50);
+		rotationMotorSlave.follow(rotationMotorMaster);
+		
+		extensionMotor = new CANSparkMax(RobotMap.ARM_EXTENSION_CAN_ID, MotorType.kBrushless);
+		extensionMotor.setIdleMode(IdleMode.kBrake);
+		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
+		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
+		extensionMotor.setOpenLoopRampRate(.1);
+		extensionMotor.setClosedLoopRampRate(.1);
+		extensionMotor.setSmartCurrentLimit(50);
+		
+		rotationHomeSensor = new DigitalInput(RobotMap.ARM_ROTATION_HOME_SENSOR_ID);
+		extensionHomeSensor = new DigitalInput(RobotMap.ARM_EXTENSION_HOME_SENSOR_ID);
+		
+		reloadGains();
+	}
+	
+	private void reloadGains() {
+		rotationMotorMaster.getPIDController().setP(1 / 2500d, 0);
+		rotationMotorMaster.getPIDController().setI(0, 0);
+		rotationMotorMaster.getPIDController().setD(.01, 0);
+		rotationMotorMaster.getPIDController().setFF(1d / 6000d, 0);
+		rotationMotorMaster.getPIDController().setOutputRange(-.5, .5, 0);
+		rotationMotorMaster.getPIDController()
+			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionMaxAccel(360, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(180, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionMinOutputVelocity(1, 0);
+		
+		extensionMotor.getPIDController().setP(.1, 0);
+		extensionMotor.getPIDController().setI(0, 0);
+		extensionMotor.getPIDController().setD(0, 0);
+		extensionMotor.getPIDController().setOutputRange(-.75, .75, 0);
+		extensionMotor.getPIDController()
+			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+		extensionMotor.getPIDController().setSmartMotionAllowedClosedLoopError(.1, 0);
+		extensionMotor.getPIDController().setSmartMotionMaxAccel(93, 0);
+		extensionMotor.getPIDController().setSmartMotionMaxVelocity(46, 0);
+		extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(1, 0);
+	}
+	
+	@Override
+	public void outputToSmartDashboard() {
+		SmartDashboard.putNumber("arm.rotation", armState.getRotation());
+		SmartDashboard.putBoolean("arm.rotation.reset", armState.isRotationAtHome());
+		SmartDashboard.putNumber("arm.extension", armState.getExtension());
+		SmartDashboard.putBoolean("arm.extension.reset", armState.isExtensionAtHome());
+	}
+	
+	private SystemState handleClosedLoop(double timestamp) {
+		extensionMotor.getPIDController()
+			.setReference(closedLoopInput.getExtensionInput(), ControlType.kSmartMotion);
+		rotationMotorMaster.getPIDController()
+			.setReference(closedLoopInput.getRotationInput(), ControlType.kSmartMotion);
+		
+		return defaultStateTransfer(timestamp);
+	}
 	
 	private SystemState handleOpenLoop(double timestamp) {
-		
 		Double rotationInput = openLoopInput.getRotationInput();
 		Double extensionInput = openLoopInput.getExtensionInput();
 		
-		if(getArmAngle() <= 28d){
-			rotationInput = Math.min(0, rotationInput);
-		}
-		
-		if(getArmExtension() >= 36d){
-			extensionInput = Math.max(0, extensionInput);
-		} else if(getArmExtension() <= 2d){
-			extensionInput = Math.min(0, extensionInput);
-		}
-		
-		
-		System.out.println("rot : " + getArmAngle() + " rot 2 : " + rotationInput + " - ext : " + getArmExtension());
-		
-		extensionMotor.set(ControlMode.PercentOutput,extensionInput);
-		rotationMotor.set(ControlMode.PercentOutput,rotationInput);
+		extensionMotor.set(extensionInput);
+		rotationMotorMaster.set(rotationInput);
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleOff(double timestamp) {
-		extensionMotor.set(ControlMode.PercentOutput,0);
-		rotationMotor.set(ControlMode.PercentOutput,0);
+		extensionMotor.set(0);
+		rotationMotorMaster.set(0);
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState defaultStateTransfer(double timestamp) {
-        switch (wantedState) {
+		switch (wantedState) {
 			case OPEN_LOOP:
-            	return SystemState.OPEN_LOOP;
-            case OFF:
-            default:
-            	return SystemState.OFF;
-        }
-    }
-    
-    @Override
-    public void stop() {
-        wantedState = WantedState.OFF;
-    }
-    
-    @Override
-    public void zeroSensors() {
-    }
-
-
-	@Override
-    public void registerEnabledLoops(ILooper enabledLooper) {
-        enabledLooper.register(loop);
-    }
-    
-    public void setWantedState(WantedState wantedState) {
-        this.wantedState = wantedState;
-    }
-	
-	public void reset() {
-		systemState = SystemState.OFF;
+				return SystemState.OPEN_LOOP;
+			case OFF:
+			default:
+				return SystemState.OFF;
+		}
 	}
-
+	
+	@Override
+	public void readPeriodicInputs() {
+		armState = new ArmState( //
+			rotationMotorMaster.getEncoder().getPosition(), //
+			extensionMotor.getEncoder().getPosition(), //
+			rotationHomeSensor.get(), //
+			extensionHomeSensor.get());
+	}
+	
+	@Override
+	public void stop() {
+		wantedState = WantedState.OFF;
+	}
+	
+	@Override
+	public void zeroSensors() {
+	}
+	
+	@Override
+	public void registerEnabledLoops(ILooper enabledLooper) {
+		enabledLooper.register(loop);
+	}
+	
+	public void setWantedState(WantedState wantedState) {
+		this.wantedState = wantedState;
+	}
+	
 	@Override
 	public void test() {
 	}
 	
-	public double getDistanceOutsideFramePerimeter(){
-		double a = 0d;
-		double b = 0d;
-		double c = 0d;
-		
-		return 0d;
-	}
-	
-	public void setOpenLoopInput(ArmInput armInput){
-		synchronized (openLoopInput){
+	public void setOpenLoopInput(ArmInput armInput) {
+		synchronized (openLoopInput) {
 			openLoopInput = armInput;
 		}
 	}
 	
-	public SystemState getSystemState() {
-		return systemState;
+	public void setClosedLoopInput(ArmInput armInput) {
+		synchronized (closedLoopInput) {
+			closedLoopInput = armInput;
+		}
 	}
 	
 	
-	private double getArmAngle(){
-		return (rotationPot.get() * MAX_ROTATION) - MIN_ROTATION;
+	private class ArmState {
+		
+		// in degrees from vertical
+		private final double rotation;
+		// in inches
+		private final double extension;
+		
+		private final boolean rotationAtHome;
+		private final boolean extensionAtHome;
+		
+		public ArmState(double rotation, double extension, boolean rotationAtHome,
+			boolean extensionAtHome) {
+			this.rotation = rotation;
+			this.extension = extension;
+			this.rotationAtHome = rotationAtHome;
+			this.extensionAtHome = extensionAtHome;
+		}
+		
+		public double getRotation() {
+			return rotation;
+		}
+		
+		public double getExtension() {
+			return extension;
+		}
+		
+		public boolean isRotationAtHome() {
+			return rotationAtHome;
+		}
+		
+		public boolean isExtensionAtHome() {
+			return extensionAtHome;
+		}
 	}
-	
-	private double getArmExtension(){
-		return (extensionPot.get() * MAX_EXTENSION) - MIN_EXTENSION;
-	}
-	
 }
