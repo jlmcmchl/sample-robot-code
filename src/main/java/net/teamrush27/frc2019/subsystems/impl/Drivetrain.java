@@ -7,48 +7,37 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.TalonSRXPIDSetConfiguration;
 import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import java.text.DecimalFormat;
 import java.util.Objects;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.base.RobotState;
 import net.teamrush27.frc2019.constants.ChezyConstants;
 import net.teamrush27.frc2019.constants.DriveConstants;
-import net.teamrush27.frc2019.constants.FollowingConstants;
 import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
-import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
-import net.teamrush27.frc2019.util.CSVWritable;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
-import net.teamrush27.frc2019.util.follow.Path;
-import net.teamrush27.frc2019.util.follow.PathFollower;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
 import net.teamrush27.frc2019.util.math.Pose2d;
 import net.teamrush27.frc2019.util.math.Pose2dWithCurvature;
 import net.teamrush27.frc2019.util.math.Rotation2d;
 import net.teamrush27.frc2019.util.math.Twist2d;
-import net.teamrush27.frc2019.util.math.Units;
-import net.teamrush27.frc2019.util.motion.DistancePathFollower;
 import net.teamrush27.frc2019.util.motion.DriveMotionPlanner;
-import net.teamrush27.frc2019.util.physics.IDrivetrainModel;
-import net.teamrush27.frc2019.util.physics.IDrivetrainModel.DriveDynamics;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryIterator;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
 import net.teamrush27.frc2019.wrappers.CANTalonFactory;
 import net.teamrush27.frc2019.wrappers.LazyCANTalon;
 import net.teamrush27.frc2019.wrappers.NavX;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Drivetrain Subsystem (Adapted from 254 Drive.java)
@@ -58,10 +47,17 @@ import net.teamrush27.frc2019.wrappers.NavX;
  */
 
 public class Drivetrain extends Subsystem {
+  private static final Logger LOG = LogManager.getLogger(Drivetrain.class);
+  private static final String TAG = "DRIVETRAIN";
 
-  private static String TAG = "DRIVETRAIN";
-
-  private static Drivetrain instance = new Drivetrain();
+  private static Drivetrain INSTANCE = null;
+  
+  public static Drivetrain getInstance(){
+    if(INSTANCE == null){
+      INSTANCE = new Drivetrain();
+    }
+    return INSTANCE;
+  }
 
   private static final double DRIVE_ENCODER_PPR = 4096.0;
 
@@ -87,7 +83,7 @@ public class Drivetrain extends Subsystem {
   private DriveMotionPlanner motionPlanner;
   private boolean overrideTrajectory = false;
 
-  private Rotation2d mGyroOffset = Rotation2d.identity();
+  private Rotation2d gyroOffset = Rotation2d.identity();
 
   private PeriodicIO periodicIO;
 
@@ -122,7 +118,7 @@ public class Drivetrain extends Subsystem {
     public void onLoop(double timestamp) {
       synchronized (Drivetrain.this) {
         if (driveMode != lastMode) {
-          System.out.println("DriveMode changed from " + lastMode + " to " + driveMode);
+          LOG.info("DriveMode changed from {} to {}",lastMode,driveMode);
           timeSinceModeSwitch = timestamp;
           lastMode = driveMode;
           modeChanged = true;
@@ -142,7 +138,7 @@ public class Drivetrain extends Subsystem {
             updateChezyPathFollower(timestamp);
             break;
           default:
-            System.out.println("Unexpected drive mode: " + driveMode);
+            LOG.warn("Unexpected drive mode: " + driveMode);
             break;
         }
       }
@@ -326,7 +322,7 @@ public class Drivetrain extends Subsystem {
       periodicIO.left_turn = leftInches;
       periodicIO.right_turn = rightInches;
     } else {
-      System.out.println("Hit a bad position control state");
+      LOG.warn("Hit a bad position control state");
       setOpenLoop(DriveCommand.defaultCommand());
     }
   }
@@ -412,9 +408,8 @@ public class Drivetrain extends Subsystem {
         ChezyConstants.ROTATE_PID_F,
         ChezyConstants.ROTATE_PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-
-    System.out
-        .println("reloading gains took " + (Timer.getFPGATimestamp() - startTime) + " seconds");
+  
+    LOG.info("reloading gains took {} seconds", (Timer.getFPGATimestamp() - startTime));
 
     leftMaster.selectProfileSlot(DRIVE_CONTROL_SLOT, 0);
     rightMaster.selectProfileSlot(DRIVE_CONTROL_SLOT, 0);
@@ -494,12 +489,12 @@ public class Drivetrain extends Subsystem {
   }
 
   public synchronized void setHeading(Rotation2d heading) {
-    System.out.println("SET HEADING: " + heading.getDegrees());
+    LOG.info("SET HEADING: {}", heading.getDegrees());
 
     navX.reset();
 
-    mGyroOffset = heading.rotateBy(Rotation2d.fromDegrees(navX.getFusedHeading()).inverse());
-    System.out.println("Gyro offset: " + mGyroOffset.getDegrees());
+    gyroOffset = heading.rotateBy(Rotation2d.fromDegrees(navX.getFusedHeading()).inverse());
+    LOG.info("Gyro offset: {}", gyroOffset.getDegrees());
 
     periodicIO.gyro_heading = heading;
   }
@@ -588,10 +583,6 @@ public class Drivetrain extends Subsystem {
     rightSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
   }
 
-  public static Drivetrain getInstance() {
-    return instance;
-  }
-
 
   /**
    * Start up velocity mode. This sets the drive train in high gear as well.
@@ -648,8 +639,8 @@ public class Drivetrain extends Subsystem {
           .inchesPerSecondToEncoderCountPer100ms(command.getRightDriveInput());
 
     } else {
-      System.out.println(String.format("Hit a bad velocity control state %s %s",
-          driveMode.getRequestedControlMode(), driveMode));
+      LOG.warn("Hit a bad velocity control state {} {}",
+          driveMode.getRequestedControlMode(), driveMode);
       periodicIO.left_demand = 0;
       periodicIO.right_demand = 0;
     }
@@ -725,7 +716,7 @@ public class Drivetrain extends Subsystem {
     if (driveMode == driveMode.TURN_TO_HEADING) {
       return isOnTarget;
     } else {
-      System.out.println("Robot is not in turn to heading mode");
+      LOG.warn("Robot is not in turn to heading mode");
       return false;
     }
   }
@@ -757,7 +748,7 @@ public class Drivetrain extends Subsystem {
     periodicIO.left_velocity_ticks_per_100ms = leftMaster.getSelectedSensorVelocity(0);
     periodicIO.right_velocity_ticks_per_100ms = rightMaster.getSelectedSensorVelocity(0);
     periodicIO.gyro_heading = Rotation2d
-        .fromDegrees(navX.getFusedHeading()).rotateBy(mGyroOffset);
+        .fromDegrees(navX.getFusedHeading()).rotateBy(gyroOffset);
     periodicIO.can_read_delta = Timer.getFPGATimestamp() - periodicIO.timestamp;
 
     double deltaLeftTicks = ((periodicIO.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
@@ -822,8 +813,8 @@ public class Drivetrain extends Subsystem {
           ControlMode.Velocity,
           periodicIO.right_demand);
     } else {
-      System.out.println(String.format("Hit a bad control state %s %s",
-          driveMode.getRequestedControlMode(), driveMode));
+      LOG.warn("Hit a bad control state {} {}",
+          driveMode.getRequestedControlMode(), driveMode);
     }
   }
 

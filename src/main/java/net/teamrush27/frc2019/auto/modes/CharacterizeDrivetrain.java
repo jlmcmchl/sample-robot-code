@@ -9,8 +9,12 @@ import net.teamrush27.frc2019.auto.actions.impl.CollectVelocityData;
 import net.teamrush27.frc2019.auto.actions.impl.WaitAction;
 import net.teamrush27.frc2019.util.physics.DriveCharacterization;
 import net.teamrush27.frc2019.util.physics.DriveCharacterization.VelocityDataPoint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CharacterizeDrivetrain extends AutoModeBase {
+  private static final Logger LOG = LogManager.getLogger(CharacterizeDrivetrain.class);
+  
   @Override
   protected void routine() throws AutoModeEndedException {
     List<VelocityDataPoint> velocityData = new ArrayList<>();
@@ -25,8 +29,8 @@ public class CharacterizeDrivetrain extends AutoModeBase {
 
     DriveCharacterization.CharacterizationConstants constants = DriveCharacterization.characterizeDrive(velocityData, accelerationData);
 
-    System.out.println("ks: " + constants.ks);
-    System.out.println("kv: " + constants.kv);
-    System.out.println("ka: " + constants.ka);
+    LOG.info("ks: " + constants.ks);
+    LOG.info("kv: " + constants.kv);
+    LOG.info("ka: " + constants.ka);
   }
 }

@@ -6,8 +6,11 @@ import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.util.math.MathUtils;
 import net.teamrush27.frc2019.util.math.Rotation2d;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TurnInPlaceAction implements Action {
+  private static final Logger LOG = LogManager.getLogger(TurnInPlaceAction.class);
 
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private double target_radians;
@@ -41,8 +44,8 @@ public class TurnInPlaceAction implements Action {
     if (current_heading != null
         && Math.abs(current_heading.getRadians() - drive_heading.getRadians()) > 0.5) {
       total_turns += Math.signum(current_heading.getRadians());
-
-      System.out.println(String.format("%s %s %s", total_turns, current_heading, drive_heading));
+  
+      LOG.info("{} {} {}", total_turns, current_heading, drive_heading);
     }
 
     current_heading = drive_heading;
@@ -58,7 +61,7 @@ public class TurnInPlaceAction implements Action {
     double expected = (2 * Math.PI * total_turns + current_heading.getRadians())
         * ChezyConstants.kDriveWheelTrackWidthInches / 2;
 
-    System.out.println(String.format("Scrub Factor at %s: %s", velocity, avg / expected));
+    LOG.info("Scrub Factor at {} : {}", velocity, avg / expected);
 
     drivetrain.setVelocitySetpoint(DriveCommand.BRAKE);
   }

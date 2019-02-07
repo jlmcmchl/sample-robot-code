@@ -4,11 +4,13 @@ package net.teamrush27.frc2019.subsystems.impl;
 import edu.wpi.first.wpilibj.Talon;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
-import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LED extends Subsystem {
-	private static String TAG = "LED";
+	private static final Logger LOG = LogManager.getLogger(LED.class);
+	private static final String TAG = "LED";
 
 	private static LED INSTANCE = null;
 	

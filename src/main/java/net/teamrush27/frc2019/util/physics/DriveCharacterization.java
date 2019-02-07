@@ -3,8 +3,12 @@ package net.teamrush27.frc2019.util.physics;
 import java.util.List;
 import net.teamrush27.frc2019.util.math.MathUtils;
 import net.teamrush27.frc2019.util.math.PolynomialRegression;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DriveCharacterization {
+  private static final Logger LOG = LogManager.getLogger(DriveCharacterization.class);
+  
   public static class CharacterizationConstants {
     public double ks; //voltage needed to break static friction
     public double kv;
@@ -59,7 +63,7 @@ public class DriveCharacterization {
       return constants;
     }
     PolynomialRegression p = new PolynomialRegression(points, 1);
-    System.out.println("r^2: " + p.R2());
+    LOG.info("r^2: {}", p.R2());
     constants.ks = p.beta(0);
     constants.kv = p.beta(1);
     return constants;
@@ -71,7 +75,7 @@ public class DriveCharacterization {
     }
 
     PolynomialRegression p = new PolynomialRegression(points, 1);
-    System.out.println("r^2: " + p.R2());
+    LOG.info("r^2: {}", p.R2());
     velocityChacterization.ka = p.beta(1);
     return velocityChacterization;
   }

@@ -10,8 +10,11 @@ import net.teamrush27.frc2019.util.motion.DriveMotionPlanner;
 import net.teamrush27.frc2019.util.trajectory.timing.CentripetalAccelerationConstraint;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
 import net.teamrush27.frc2019.util.trajectory.timing.TimingConstraint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TrajectoryGenerator {
+  private static final Logger LOG = LogManager.getLogger(TrajectoryGenerator.class);
 
   private static final double kMaxVelocity = 120.0;
   private static final double kMaxAccel = 72.0;
@@ -40,9 +43,9 @@ public class TrajectoryGenerator {
 
   public void generateTrajectories() {
     if (mTrajectorySet == null) {
-      System.out.println("Generating trajectories...");
+      LOG.info("Generating trajectories...");
       mTrajectorySet = new TrajectorySet();
-      System.out.println("Finished trajectory generation");
+      LOG.info("Finished trajectory generation");
     }
   }
 

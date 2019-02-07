@@ -1,6 +1,5 @@
 package net.teamrush27.frc2019.util.motion;
 
-import edu.wpi.first.wpilibj.Timer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +25,11 @@ import net.teamrush27.frc2019.util.trajectory.timing.DifferentialDriveDynamicsCo
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
 import net.teamrush27.frc2019.util.trajectory.timing.TimingConstraint;
 import net.teamrush27.frc2019.util.trajectory.timing.TimingUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DriveMotionPlanner implements CSVWritable {
+  private static final Logger LOG = LogManager.getLogger(DriveMotionPlanner.class);
 
   private static final double kMaxDx = 2.0;
   private static final double kMaxDy = 0.25;
@@ -298,7 +300,7 @@ public class DriveMotionPlanner implements CSVWritable {
 
     double curvature = 1.0 / Units.inches_to_meters(arc.radius);
     if (Double.isInfinite(curvature)) {
-      System.out.println("INFINITE CURVATURE");
+      LOG.info("INFINITE CURVATURE");
       adjusted_velocity.linear = 0.0;
       adjusted_velocity.angular = dynamics.chassis_velocity.angular;
     } else {

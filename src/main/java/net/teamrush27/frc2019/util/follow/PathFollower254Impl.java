@@ -8,6 +8,8 @@ import net.teamrush27.frc2019.util.motion.MotionProfileGoal;
 import net.teamrush27.frc2019.util.motion.MotionProfileGoal.CompletionBehavior;
 import net.teamrush27.frc2019.util.motion.MotionState;
 import net.teamrush27.frc2019.util.motion.ProfileFollower;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A PathFollower follows a predefined path using a combination of feedforward
@@ -16,6 +18,7 @@ import net.teamrush27.frc2019.util.motion.ProfileFollower;
  * ProfileFollower to generate a profile (displacement and velocity) command.
  */
 public class PathFollower254Impl implements PathFollower {
+    private static final Logger LOG = LogManager.getLogger(PathFollower254Impl.class);
     private static final double REALLY_BIG_NUMBER = 1E6;
     
     private AdaptivePurePursuitController steeringController;
@@ -124,7 +127,7 @@ public class PathFollower254Impl implements PathFollower {
         debugOutput.crossTrackError = crossTrackError;
         debugOutput.alongTrackError = alongTrackError;
 	
-        System.out.println(debugOutput.toCSV());
+        LOG.info(debugOutput.toCSV());
 	
 		return twistToApply;
     }

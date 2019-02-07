@@ -9,12 +9,16 @@ import net.teamrush27.frc2019.util.motion.MotionProfileConstraints;
 import net.teamrush27.frc2019.util.motion.MotionProfileGenerator;
 import net.teamrush27.frc2019.util.motion.MotionProfileGoal;
 import net.teamrush27.frc2019.util.motion.MotionState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class representing a segment of the robot's autonomous path.
  */
 
 public class PathSegment {
+    private static final Logger LOG = LogManager.getLogger(PathSegment.class);
+    
     private Translation2d start;
     private Translation2d end;
     private Translation2d center;
@@ -252,7 +256,7 @@ public class PathSegment {
         if (state.isPresent()) {
             return state.get().velocity();
         } else {
-            System.out.println("Velocity does not exist at that position!");
+            LOG.info("Velocity does not exist at that position!");
             return 0.0;
         }
     }

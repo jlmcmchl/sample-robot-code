@@ -9,8 +9,12 @@ import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryIterator;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DriveTrajectory implements Action {
+  private static final Logger LOG = LogManager.getLogger(DriveTrajectory.class);
+  
   private static final Drivetrain mDrive = Drivetrain.getInstance();
   private static final RobotState mRobotState = RobotState.getInstance();
 
@@ -30,7 +34,7 @@ public class DriveTrajectory implements Action {
   @Override
   public boolean isFinished() {
     if (mDrive.isDoneWithTrajectory()) {
-      System.out.println("Trajectory finished");
+      LOG.info("Trajectory finished");
       return true;
     }
     return false;
@@ -46,7 +50,7 @@ public class DriveTrajectory implements Action {
 
   @Override
   public void start() {
-    System.out.println("Starting trajectory! (length=" + mTrajectory.getRemainingProgress() + ")");
+    LOG.info("Starting trajectory! (length=" + mTrajectory.getRemainingProgress() + ")");
     if (mResetPose) {
       mRobotState.reset(Timer.getFPGATimestamp(), mTrajectory.getState().state().getPose());
     }
