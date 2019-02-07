@@ -1,6 +1,9 @@
 package net.teamrush27.frc2019.constants;
 
 public class TrackingConstants {
+    public static final double HALF_FOV = Math.PI / 4;
+    public static final double FOV_RADIUS = 96;
+
     public static double MAX_GOAL_TRACK_AGE = 1.0;
     public static double MAX_TRACKER_DISTANCE = 18.0;
     public static double CAMERA_FRAME_RATE = 30.0;

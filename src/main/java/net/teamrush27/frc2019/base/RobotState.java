@@ -1,17 +1,15 @@
 package net.teamrush27.frc2019.base;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import net.teamrush27.frc2019.constants.FieldConstants;
-import net.teamrush27.frc2019.constants.RobotConstants;
+import net.teamrush27.frc2019.constants.TrackingConstants;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.util.interpolate.InterpolatingDouble;
 import net.teamrush27.frc2019.util.interpolate.InterpolatingTreeMap;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
+import net.teamrush27.frc2019.util.math.MathUtils;
 import net.teamrush27.frc2019.util.math.Pose2d;
 import net.teamrush27.frc2019.util.math.Rotation2d;
 import net.teamrush27.frc2019.util.math.Translation2d;
@@ -111,5 +109,86 @@ public class RobotState {
     SmartDashboard.putNumber("Robot Pose Y", odometry.getTranslation().y());
     SmartDashboard.putNumber("Robot Pose Theta", odometry.getRotation().getDegrees());
     SmartDashboard.putNumber("Robot Linear Velocity", vehicle_velocity_measured_.deltaX);
+  }
+
+  public enum Target {
+    SHIP_FRONT(new Pose2d(219, 152, Rotation2d.identity())),
+    SHIP_SIDE_1(new Pose2d(260, 136, Rotation2d.fromDegrees(90))),
+    SHIP_SIDE_2(new Pose2d(282, 136, Rotation2d.fromDegrees(90))),
+    SHIP_SIDE_3(new Pose2d(303, 136, Rotation2d.fromDegrees(90))),
+    ROCKET_CLOSE_SIDE(new Pose2d(214, 20, Rotation2d.fromDegrees(-28.75))),
+    ROCKET_CARGO_SIDE(new Pose2d(229, 29, Rotation2d.fromDegrees(-90))),
+    ROCKET_FAR_SIDE(new Pose2d(243, 20, Rotation2d.fromDegrees(-151.75))),
+    HUMAN_PLAYER_STATION(new Pose2d(0, 28, Rotation2d.fromDegrees(-180))),
+    NO_TARGET(
+        new Pose2d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Rotation2d.identity()));
+
+    private static final Target[] TARGET_ARR = new Target[]{
+        SHIP_FRONT,
+        SHIP_SIDE_1,
+        SHIP_SIDE_2,
+        SHIP_SIDE_3,
+        ROCKET_CLOSE_SIDE,
+        ROCKET_CARGO_SIDE,
+        ROCKET_FAR_SIDE,
+        HUMAN_PLAYER_STATION
+    };
+
+    private final Pose2d targetOrientation;
+
+    Target(Pose2d orientation) {
+      this.targetOrientation = orientation;
+    }
+
+    public Pose2d getTargetOrientation() {
+      return this.targetOrientation;
+    }
+  }
+
+  // Don't worry about the orientation of the target relative to our orientation,
+  // that's just a matter of ending up same or opposite direction when we get there
+  private Optional<Target> getNearestFacedTargetInternal(Pose2d location) {
+    return Arrays.stream(Target.TARGET_ARR)
+        .filter(t -> Math.abs(location.rotationTo(t.getTargetOrientation()).getRadians())
+            < TrackingConstants.HALF_FOV
+            && location.distance(t.getTargetOrientation()) < TrackingConstants.FOV_RADIUS)
+        .sorted((t1, t2) -> {
+          double d1 = location.distance(t1.getTargetOrientation());
+          double d2 = location.distance(t2.getTargetOrientation());
+          if (MathUtils.epsilonEquals(d1, d2, 0.5)) {
+            return 0;
+          }
+          return d1 > d2 ? 1 : -1;
+        }).findAny();
+  }
+
+  public Target getNearestFacedTarget(boolean reverse) {
+    Pose2d location = RobotState.getInstance().getLatestFieldToVehicle().getValue();
+    if (reverse) {
+      location.transformBy(Pose2d.fromRotation(Rotation2d.fromDegrees(-180)));
+    }
+
+    Optional<Target> found = getNearestFacedTargetInternal(location);
+
+    if (location.getTranslation().y() > 136) {
+      Pose2d mirrored_location = location.mirror();
+      Pose2d flipped_location = new Pose2d(
+          mirrored_location.getTranslation().translateBy(new Translation2d(0, 324)),
+          mirrored_location.getRotation());
+
+      Optional<Target> other = getNearestFacedTargetInternal(flipped_location);
+
+      if (found.isPresent() && other.isPresent()) {
+        double d1 = location.distance(found.get().getTargetOrientation());
+        double d2 = flipped_location.distance(other.get().getTargetOrientation());
+        if (d2 < d1) {
+          found = other;
+        }
+      } else if (found.isEmpty() && other.isPresent()) {
+        found = other;
+      }
+    }
+
+    return found.orElse(Target.NO_TARGET);
   }
 }
