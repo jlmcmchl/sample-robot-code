@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2019.1.1"
+    id "edu.wpi.first.GradleRIO" version "2019.2.1"
 }
 
 def ROBOT_MAIN_CLASS = "net.teamrush27.frc2019.Main"
@@ -49,8 +49,11 @@ dependencies {
     compile 'com.ctre.phoenix:api-java:5.13.0'
     compile 'com.ctre.phoenix:wpiapi-java:5.13.0'
     compile 'com.kauailabs.navx.frc:navx-java:3.1.344'
-    compile 'com.revrobotics.frc:SparkMax-java:1.0.26'
+    compile 'com.revrobotics.frc:SparkMax-java:1.1.5'
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
+    compile group: 'com.opencsv', name: 'opencsv', version: '4.4'
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 }
