@@ -2,7 +2,9 @@ package net.teamrush27.frc2019.subsystems.impl;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Timer;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
@@ -97,33 +99,46 @@ public class Gripper extends Subsystem {
 	private final Servo topJawServo;
 	private final Servo bottomJawServo;
 	
+	private final AnalogInput detective;
+	
 	public Gripper() {
 		gripperMotorTop = new TalonSRX(RobotMap.GRIPPER_MOTOR_MASTER_CAN_ID);
 		gripperMotorTop.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		gripperMotorTop.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotorTop.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotorTop.enableCurrentLimit(true);
 		
 		gripperMotorBottom = new TalonSRX(RobotMap.GRIPPER_MOTOR_SLAVE_CAN_ID);
 		gripperMotorBottom.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		gripperMotorBottom.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotorBottom.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotorBottom.enableCurrentLimit(true);
 		gripperMotorBottom.follow(gripperMotorTop);
+		
 		
 		topJawServo = new Servo(RobotMap.GRIPPER_JAWS_TOP_SERVO_ID);
 		bottomJawServo = new Servo(RobotMap.GRIPPER_JAWS_BOTTOM_SERVO_ID);
+		
+		detective = new AnalogInput(RobotMap.GRIPPER_CARGO_ANALOG_SENSOR_ID);
 		
 	}
 	
 	
 	private SystemState handleOff(double timestamp) {
 		gripperMotorTop.set(ControlMode.Disabled, 0);
-		topJawServo.set(0);
-		bottomJawServo.set(0);
+		topJawServo.set(1);
+		bottomJawServo.set(1);
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleHoldHatch(double timestamp) {
-		topJawServo.set(1);
-		bottomJawServo.set(1);
+		topJawServo.set(0);
+		bottomJawServo.set(0);
+		
+		if(WantedState.INTAKE_HATCH.equals(wantedState)){
+			return SystemState.HOLD_HATCH;
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -136,19 +151,45 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleExhaustCargo(double timestamp) {
+		firstFoundBall=0;
 		gripperMotorTop.set(ControlMode.PercentOutput, -1);
+		
+		if(WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 2.5){
+			wantedState = WantedState.OFF;
+			return SystemState.OFF;
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleHoldCargo(double timestamp) {
+		firstFoundBall = 0;
 		gripperMotorTop.set(ControlMode.PercentOutput, .1);
+		
+		if(WantedState.EXHAUST_CARGO.equals(wantedState)){
+			return SystemState.EXHAUST_CARGO;
+		}
+		
+		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1){
+			return SystemState.HOLD_CARGO;
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
+	private double firstFoundBall = 0;
+	
 	private SystemState handleIntakeCargo(double timestamp) {
 		gripperMotorTop.set(ControlMode.PercentOutput, 1);
+		
+		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 2.5){
+			if(firstFoundBall == 0) {
+				firstFoundBall = Timer.getFPGATimestamp();
+			}
+			if(Timer.getFPGATimestamp() - firstFoundBall > .1){
+				return SystemState.HOLD_CARGO;
+			}
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -174,9 +215,14 @@ public class Gripper extends Subsystem {
 		enabledLooper.register(loop);
 	}
 	
+	int i = 0;
+	
 	@Override
 	public void outputToSmartDashboard() {
-	
+		
+		if(i++ % 100 == 0){
+			LOG.trace("analogInput: {}", detective.getVoltage());
+		}
 	}
 	
 	@Override
@@ -216,18 +262,26 @@ public class Gripper extends Subsystem {
 	}
 	
 	public void transitionHatch() {
-		synchronized (wantedState) {
-			switch (wantedState) {
-				case INTAKE_HATCH:
-					wantedState = WantedState.EXHAUST_HATCH;
+		synchronized (systemState) {
+			switch (systemState) {
+				default:
+				case OFF:
+					wantedState = WantedState.INTAKE_HATCH;
 					break;
-				case EXHAUST_HATCH:
+				case INTAKE_HATCH:
+					wantedState = WantedState.INTAKE_HATCH;
+					systemState = SystemState.HOLD_HATCH;
+					break;
+				case HOLD_HATCH:
 					wantedState = WantedState.OFF;
 					break;
-				default:
-					wantedState = WantedState.INTAKE_HATCH;
 			}
 		}
+	}
+	
+	@Override
+	public String id(){
+		return TAG;
 	}
 	
 }

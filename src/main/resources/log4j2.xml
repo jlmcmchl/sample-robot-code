@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
 	<Appenders>
-		<File name="File" bufferedIO="true" fileName="/tmp/logs/robot-latest.log">
+		<File name="File" bufferedIO="true" fileName="/media/sda/logs/robot-latest.log">
 			<PatternLayout pattern="%d %p %m%n" />
 		</File>
 	</Appenders>

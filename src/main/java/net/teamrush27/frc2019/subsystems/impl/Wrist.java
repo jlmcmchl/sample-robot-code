@@ -1,7 +1,11 @@
 package net.teamrush27.frc2019.subsystems.impl;
 
+import com.ctre.phoenix.CANifier;
+import com.ctre.phoenix.CANifier.PWMChannel;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.RobotMap;
@@ -83,7 +87,8 @@ public class Wrist extends Subsystem {
 		
 	};
 	
-	private TalonSRX wristMotor;
+	private final TalonSRX wristMotor;
+	private final CANifier wristSensor;
 	
 	private Double openLoopInput = 0d;
 	private Double closedLoopInput = 0d;
@@ -91,18 +96,21 @@ public class Wrist extends Subsystem {
 	public Wrist() {
 		wristMotor = new TalonSRX(RobotMap.WRIST_MOTOR_CAN_ID);
 		wristMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
-		wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,
-			RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.configVoltageCompSaturation(4, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.enableVoltageCompensation(true);
-		wristMotor.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
-		wristMotor.configClosedloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
+		
+		wristMotor.configRemoteFeedbackFilter(RobotMap.WRIST_CANIFIER_CAN_ID, RemoteSensorSource.CANifier_Quadrature, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		wristMotor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0, 0 ,RobotConstants.TALON_CONFIG_TIMEOUT);
+		wristMotor.setSensorPhase(true);
+		
+		wristSensor = new CANifier(RobotMap.WRIST_CANIFIER_CAN_ID);
+		wristSensor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		
 		reloadGains();
 	}
 	
 	private void reloadGains() {
-		wristMotor.config_kP(1, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		wristMotor.config_kP(0, 10, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.config_kI(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.config_kD(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.config_kF(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -120,7 +128,7 @@ public class Wrist extends Subsystem {
 	}
 	
 	private SystemState handleClosedLoop(double timestamp) {
-		wristMotor.set(ControlMode.Disabled, 0);
+		wristMotor.set(ControlMode.Position, 0);
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -151,6 +159,8 @@ public class Wrist extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
+		LOG.trace("wrist.position : {}",wristMotor.getSelectedSensorPosition());
+		
 		SmartDashboard.putNumber("wrist.position", wristMotor.getSelectedSensorPosition());
 	}
 	
@@ -161,6 +171,7 @@ public class Wrist extends Subsystem {
 	
 	@Override
 	public void zeroSensors() {
+		wristSensor.setQuadraturePosition(0, RobotConstants.TALON_CONFIG_TIMEOUT);
 	}
 	
 	@Override
@@ -184,5 +195,10 @@ public class Wrist extends Subsystem {
 		synchronized (wantedState) {
 			this.wantedState = wantedState;
 		}
+	}
+	
+	@Override
+	public String id(){
+		return TAG;
 	}
 }

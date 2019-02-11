@@ -1,6 +1,8 @@
 package net.teamrush27.frc2019.subsystems.impl;
 
 
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.Talon;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
@@ -49,8 +51,6 @@ public class LED extends Subsystem {
 	
 	
 	private boolean stateChanged = false;
-	private int heldCycle = 0;
-	private final Talon talon;
 	private double currentStateStartTime;
 	
 	
@@ -92,15 +92,10 @@ public class LED extends Subsystem {
 
 	};
 	
-	private SystemState handleState(double timestamp) {
-		talon.set(systemState.getValue());
-		
-		return defaultStateTransfer();
-	}
-	
+	private final I2C arduino;
 	
 	public LED() {
-		talon = new Talon(0);
+		arduino = new I2C(Port.kOnboard, 4);
 	}
 
 	@Override
@@ -123,6 +118,12 @@ public class LED extends Subsystem {
 				return SystemState.FORKS_DEPLOYED;
 		}
 	}
+	
+	private SystemState handleState(double timestamp) {
+		arduino.transaction(systemState.name().getBytes(), systemState.name().getBytes().length, null, 0);
+		
+		return defaultStateTransfer();
+	}
 
 	@Override
 	public void stop() {
@@ -139,9 +140,6 @@ public class LED extends Subsystem {
 	}
 
 	public void setWantedState(WantedState wantedState) {
-		if(!WantedState.HOLDING_CUBE.equals(this.wantedState) && WantedState.HOLDING_CUBE.equals(wantedState)){
-			heldCycle = 0;
-		}
 		this.wantedState = wantedState;
 	}
 	

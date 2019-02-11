@@ -13,4 +13,6 @@ public interface OperatorInterface {
 	Boolean getWantManipulateCargo();
 	Double getWristInput();
 	
+	Boolean wantsPreClimb();
+	Boolean wantsClimb();
 }

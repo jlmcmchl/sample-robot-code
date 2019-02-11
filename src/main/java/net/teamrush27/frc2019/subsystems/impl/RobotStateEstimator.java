@@ -17,7 +17,7 @@ public class RobotStateEstimator extends Subsystem {
 
   static RobotStateEstimator instance_ = new RobotStateEstimator();
   private RobotState robot_state_ = RobotState.getInstance();
-  private Drivetrain drive_ = Drivetrain.getInstance();
+//  private Drivetrain drive_ = Drivetrain.getInstance();
   private double left_encoder_prev_distance_ = 0.0;
   private double right_encoder_prev_distance_ = 0.0;
   private ReflectingCSVWriter CSVWriter;
@@ -56,8 +56,8 @@ public class RobotStateEstimator extends Subsystem {
   private Loop loop = new Loop() {
     @Override
     public synchronized void onStart(double timestamp) {
-      left_encoder_prev_distance_ = drive_.getLeftEncoderDistance();
-      right_encoder_prev_distance_ = drive_.getRightEncoderDistance();
+//      left_encoder_prev_distance_ = drive_.getLeftEncoderDistance();
+//      right_encoder_prev_distance_ = drive_.getRightEncoderDistance();
 
     }
 
@@ -65,18 +65,18 @@ public class RobotStateEstimator extends Subsystem {
     public synchronized void onLoop(double timestamp) {
       stateFrame.timestamp = timestamp;
 
-      stateFrame.left_distance = drive_.getLeftEncoderDistance();
-      stateFrame.right_distance = drive_.getRightEncoderDistance();
+//      stateFrame.left_distance = drive_.getLeftEncoderDistance();
+//      stateFrame.right_distance = drive_.getRightEncoderDistance();
 
       stateFrame.delta_left = stateFrame.left_distance - left_encoder_prev_distance_;
       stateFrame.delta_right = stateFrame.right_distance - right_encoder_prev_distance_;
-      stateFrame.gyro_angle = drive_.getHeading();
+//      stateFrame.gyro_angle = drive_.getHeading();
 
       stateFrame.odometry_velocity = robot_state_.generateOdometryFromSensors(
           stateFrame.delta_left, stateFrame.delta_right, stateFrame.gyro_angle);
-      stateFrame.predicted_velocity = KinematicsUtils
-          .forwardKinematics(drive_.getLeftLinearVelocity(),
-              drive_.getRightLinearVelocity());
+//      stateFrame.predicted_velocity = KinematicsUtils
+//          .forwardKinematics(drive_.getLeftLinearVelocity(),
+//              drive_.getRightLinearVelocity());
 
       robot_state_.addObservations(timestamp, stateFrame.odometry_velocity,
           stateFrame.predicted_velocity);
