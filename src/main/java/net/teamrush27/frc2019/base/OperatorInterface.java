@@ -8,11 +8,25 @@ public interface OperatorInterface {
     DriveCommand getTankCommand();
     
     // OPERATOR CONTROLS
-	ArmInput getArmInput();
+	
+	// gripper
 	Boolean getWantManipulateHatch();
 	Boolean getWantManipulateCargo();
-	Double getWristInput();
 	
+	// arm
+	Boolean wantsStow();
+	Boolean wantsGroundPickup();
+	Boolean wantsLevel1HumanLoad();
+	Boolean wantsLevel2();
+	Boolean wantsLevel3();
+	Boolean getWantsInvert();
+	
+	// climb
 	Boolean wantsPreClimb();
 	Boolean wantsClimb();
+
+	// open loop
+	Double getWristInput();
+	ArmInput getArmInput();
+	
 }

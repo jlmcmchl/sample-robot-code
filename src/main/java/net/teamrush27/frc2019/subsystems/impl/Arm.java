@@ -1,6 +1,7 @@
 package net.teamrush27.frc2019.subsystems.impl;
 
 import com.revrobotics.CANError;
+import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -22,6 +23,8 @@ public class Arm extends Subsystem {
 	private static final String TAG = "ARM";
 	private static final Logger LOG = LogManager.getLogger(Arm.class);
 	private static Arm INSTANCE = null;
+	
+	private static final double ROTATIONS_PER_DEGREE = 0.297349654;
 	
 	public static Arm getInstance() {
 		if (INSTANCE == null) {
@@ -49,7 +52,7 @@ public class Arm extends Subsystem {
 	private final DigitalInput extensionHomeSensor;
 	
 	private boolean stateChanged = false;
-	private double currentStateStartTime;
+	private double currentStateStartTime = 0d;
 	private Boolean rotationHomed = false;
 	private Boolean extensionHomed = false;
 	
@@ -105,7 +108,7 @@ public class Arm extends Subsystem {
 	public Arm() {
 		rotationMotorMaster = new CANSparkMax(RobotMap.ARM_ROTATION_MASTER_CAN_ID,
 			MotorType.kBrushless);
-//		rotationMotorMaster.restoreFactoryDefaults();
+		rotationMotorMaster.restoreFactoryDefaults();
 		rotationMotorMaster.setIdleMode(IdleMode.kBrake);
 		rotationMotorMaster.setSmartCurrentLimit(50);
 		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
@@ -115,17 +118,16 @@ public class Arm extends Subsystem {
 		
 		rotationMotorSlave = new CANSparkMax(RobotMap.ARM_ROTATION_SLAVE_CAN_ID,
 			MotorType.kBrushless);
-//		rotationMotorSlave.restoreFactoryDefaults();
+		rotationMotorSlave.restoreFactoryDefaults();
 		rotationMotorSlave.setIdleMode(IdleMode.kBrake);
 		rotationMotorSlave.setSmartCurrentLimit(50);
 		
 		extensionMotor = new CANSparkMax(RobotMap.ARM_EXTENSION_CAN_ID, MotorType.kBrushless);
+		extensionMotor.restoreFactoryDefaults();
+		extensionMotor.enableVoltageCompensation(12);
 		extensionMotor.setIdleMode(IdleMode.kBrake);
 		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
 		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
-//		extensionMotor.setOpenLoopRampRate(.1);
-//		extensionMotor.setClosedLoopRampRate(.1);
-		extensionMotor.setSmartCurrentLimit(50);
 		
 		
 		rotationHomeSensor = new InvertableDigitalInput(RobotMap.ARM_ROTATION_HOME_SENSOR_ID, true);
@@ -139,43 +141,56 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.getPIDController().setI(0, 0);
 		rotationMotorMaster.getPIDController().setD(0, 0);
 		rotationMotorMaster.getPIDController().setFF(0, 0);
-		rotationMotorMaster.getPIDController().setOutputRange(-0.1, 0.1);
-//		rotationMotorMaster.getPIDController()
-//			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
-//		rotationMotorMaster.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
-//		rotationMotorMaster.getPIDController().setSmartMotionMaxAccel(500, 0);
-//		rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(500, 0);
-//		rotationMotorMaster.getPIDController().setSmartMotionMinOutputVelocity(500, 0);
+		rotationMotorMaster.getPIDController().setOutputRange(-0.25, 0.25);
+		rotationMotorMaster.getPIDController()
+			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionMaxAccel(500, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(500, 0);
+		rotationMotorMaster.getPIDController().setSmartMotionMinOutputVelocity(500, 0);
+		
+		rotationMotorSlave.getPIDController().setP(.1, 0);
+		rotationMotorSlave.getPIDController().setI(0, 0);
+		rotationMotorSlave.getPIDController().setD(0, 0);
+		rotationMotorSlave.getPIDController().setFF(0, 0);
+		rotationMotorSlave.getPIDController().setOutputRange(-0.5, 0.5);
+		rotationMotorSlave.getPIDController()
+			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+		rotationMotorSlave.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
+		rotationMotorSlave.getPIDController().setSmartMotionMaxAccel(500, 0);
+		rotationMotorSlave.getPIDController().setSmartMotionMaxVelocity(500, 0);
+		rotationMotorSlave.getPIDController().setSmartMotionMinOutputVelocity(500, 0);
 		
 		extensionMotor.getPIDController().setP(.1, 0);
 		extensionMotor.getPIDController().setI(0, 0);
 		extensionMotor.getPIDController().setD(0, 0);
 		extensionMotor.getPIDController().setOutputRange(-.75, .75, 0);
-//		extensionMotor.getPIDController()
-//			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
-//		extensionMotor.getPIDController().setSmartMotionAllowedClosedLoopError(.1, 0);
-//		extensionMotor.getPIDController().setSmartMotionMaxAccel(1, 0);
-//		extensionMotor.getPIDController().setSmartMotionMaxVelocity(1, 0);
-//		extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(1, 0);
+		extensionMotor.getPIDController()
+			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+		extensionMotor.getPIDController().setSmartMotionAllowedClosedLoopError(.1, 0);
+		extensionMotor.getPIDController().setSmartMotionMaxAccel(1, 0);
+		extensionMotor.getPIDController().setSmartMotionMaxVelocity(1, 0);
+		extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(1, 0);
 	}
 	
 	@Override
 	public void outputToSmartDashboard() {
-		SmartDashboard.putNumber("arm.rotation", armState.getRotation());
+//		LOG.info("arm.extension: {}", extensionMotor.getAppliedOutput());
+		SmartDashboard.putNumber("arm.rotation", armState.getRotationInDegrees());
 		SmartDashboard.putBoolean("arm.rotation.reset", armState.isRotationAtHome());
 		SmartDashboard.putNumber("arm.extension", armState.getExtension());
 		SmartDashboard.putBoolean("arm.extension.reset", armState.isExtensionAtHome());
 	}
 	
 	private SystemState handleClosedLoop(double timestamp) {
-		armState.setRotationDemand(closedLoopInput.getRotationInput());
+		armState.setRotationDemandInDegrees(closedLoopInput.getRotationInput());
 		armState.setExtensionDemand(closedLoopInput.getExtensionInput());
 			
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleOpenLoop(double timestamp) {
-		armState.setRotationDemand(openLoopInput.getRotationInput());
+		armState.setRotationDemandInDegrees(openLoopInput.getRotationInput());
 		armState.setExtensionDemand(openLoopInput.getExtensionInput());
 		
 		return defaultStateTransfer(timestamp);
@@ -183,7 +198,7 @@ public class Arm extends Subsystem {
 	
 	private SystemState handleOff(double timestamp) {
 		armState.setExtensionDemand(0);
-		armState.setRotationDemand(0);
+		armState.setRotationDemandInDegrees(0);
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -218,7 +233,7 @@ public class Arm extends Subsystem {
 			case CLOSED_LOOP:
 				if (rotationHomed) {
 					rotationMotorMaster.getPIDController()
-						.setReference(armState.getRotationDemand(), ControlType.kPosition);
+						.setReference(armState.getRotationDemandInRotations(), ControlType.kPosition);
 				} else {
 					rotationMotorMaster.set(0);
 				}
@@ -234,11 +249,11 @@ public class Arm extends Subsystem {
 			case OPEN_LOOP:
 			case OFF:
 				extensionMotor.set(armState.getExtensionDemand());
-				rotationMotorMaster.set(armState.getRotationDemand());
+				rotationMotorMaster.set(armState.getRotationDemandInDegrees());
 			default:
 		}
 		
-		LOG.info("Extension : homed?: {} pos: {} set: {} - Rotation : homed?: {} pos: {} set: {}",extensionHomed, armState.getExtension(), armState.extensionSetpoint, rotationHomed, armState.getRotation(), armState.rotationSetpoint);
+		LOG.trace("Extension : homed?: {} pos: {} set: {} - Rotation : homed?: {} pos: {} set: {}",extensionHomed, armState.getExtension(), armState.extensionSetpoint, rotationHomed, armState.getRotationInDegrees(), armState.rotationSetpoint);
 	}
 	
 	@Override
@@ -251,18 +266,18 @@ public class Arm extends Subsystem {
 		if(!rotationHomed){
 			if(armState.isRotationAtHome()){
 				LOG.info("rotation homed");
-//				if(CANError.kOK.equals(rotationMotorMaster.setEncPosition(0))) {
-//					rotationHomed = true;
-//				}
+				if(CANError.kOK.equals(rotationMotorMaster.setEncPosition(0))) {
+					rotationHomed = true;
+				}
 			}
 		}
 		
 		if(!extensionHomed){
 			if(armState.isExtensionAtHome()){
-//				LOG.info("extension homed");
-//				if(CANError.kOK.equals(extensionMotor.setEncPosition(0))){
-//					extensionHomed = true;
-//				}
+				LOG.info("extension homed");
+				if(CANError.kOK.equals(extensionMotor.setEncPosition(0))){
+					extensionHomed = true;
+				}
 			}
 		}
 	}
@@ -286,6 +301,13 @@ public class Arm extends Subsystem {
 		}
 	}
 	
+	public void setClosedLoopInput(ArmInput armInput, Boolean negate) {
+		if(negate){
+			armInput.setRotationInput(armInput.getRotationInput()*-1);
+		}
+		setClosedLoopInput(armInput);
+	}
+	
 	public void setClosedLoopInput(ArmInput armInput) {
 		synchronized (closedLoopInput) {
 			closedLoopInput = armInput;
@@ -298,7 +320,7 @@ public class Arm extends Subsystem {
 	}
 	
 	
-	private class ArmState {
+	public class ArmState {
 		
 		// in degrees from vertical
 		private final double rotation;
@@ -318,8 +340,8 @@ public class Arm extends Subsystem {
 			this.extensionAtHome = extensionAtHome;
 		}
 		
-		public double getRotation() {
-			return rotation;
+		public Double getRotationInDegrees() {
+			return rotation / ROTATIONS_PER_DEGREE;
 		}
 		
 		public double getExtension() {
@@ -334,7 +356,7 @@ public class Arm extends Subsystem {
 			return extensionAtHome;
 		}
 		
-		public void setRotationDemand(double demand) {
+		public void setRotationDemandInDegrees(double demand) {
 			rotationSetpoint = demand;
 		}
 		
@@ -342,12 +364,20 @@ public class Arm extends Subsystem {
 			extensionSetpoint = demand;
 		}
 		
-		public double getRotationDemand() {
+		public double getRotationDemandInDegrees() {
 			return rotationSetpoint;
 		}
 		
 		public double getExtensionDemand() {
 			return extensionSetpoint;
 		}
+		
+		public double getRotationDemandInRotations(){
+			return rotationSetpoint * ROTATIONS_PER_DEGREE;
+		}
+	}
+	
+	public ArmState getArmState() {
+		return armState;
 	}
 }

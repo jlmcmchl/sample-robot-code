@@ -129,6 +129,7 @@ public class SpiderLegs extends Subsystem {
 		rearLegHome = new InvertableDigitalInput(RobotMap.REAR_SPIDER_LEG_HOME_SENSOR_ID, true);
 		
 		reloadGains();
+		setVoltageCompensation(false);
 	}
 	
 	private void reloadGains() {
@@ -149,8 +150,8 @@ public class SpiderLegs extends Subsystem {
 	}
 	
 	private SystemState handleOff(double timestamp) {
-		rearLegMotorMaster.set(ControlMode.Disabled, 0);
-		frontLegMotor.set(ControlMode.Disabled, 0);
+		rearLegMotorMaster.set(ControlMode.MotionMagic, 0);
+		frontLegMotor.set(ControlMode.MotionMagic, 0);
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -158,22 +159,28 @@ public class SpiderLegs extends Subsystem {
 	private SystemState handlePendingClimb(double timestamp) {
 		frontLegMotor.set(ControlMode.MotionMagic, 4000);
 		rearLegMotorMaster.set(ControlMode.MotionMagic, 7500);
-		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.position", String.valueOf(rearLegMotorMaster.getSelectedSensorPosition()));
-		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.velocity", String.valueOf(rearLegMotorMaster.getSelectedSensorVelocity()));
+//		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.position", String.valueOf(rearLegMotorMaster.getSelectedSensorPosition()));
+//		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.velocity", String.valueOf(rearLegMotorMaster.getSelectedSensorVelocity()));
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleClimb(double timestamp) {
-		frontLegMotor.set(ControlMode.MotionMagic, 10000);
+		if(rearLegMotorMaster.getSelectedSensorPosition() > 8200){
+			frontLegMotor.set(ControlMode.MotionMagic, 10500);
+		}
 		rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
+		
+		if(Math.abs(frontLegMotor.getSelectedSensorPosition() - 10500) < 250){
+			return SystemState.CLIMBING_HOLD;
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleClimbHold(double timestamp) {
-//		frontLegMotor.set(ControlMode.MotionMagic, 10000);
-//		rearLegMotorMaster.set(ControlMode.MotionMagic, 12350);
+		frontLegMotor.set(ControlMode.MotionMagic, 10500);
+		rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
 		if(stateChanged) {
 			setVoltageCompensation(true);
 		}
@@ -183,7 +190,7 @@ public class SpiderLegs extends Subsystem {
 	
 	private void setVoltageCompensation(boolean enabled) {
 		if(enabled){
-			frontLegMotor.configVoltageCompSaturation(3);
+			frontLegMotor.configVoltageCompSaturation(4);
 			frontLegMotor.enableVoltageCompensation(true);
 		} else {
 			frontLegMotor.enableVoltageCompensation(false);
@@ -196,6 +203,9 @@ public class SpiderLegs extends Subsystem {
 			case PENDING_CLIMB:
 				return SystemState.PENDING_CLIMB;
 			case CLIMB:
+				if(SystemState.CLIMBING_HOLD.equals(systemState)){
+					return SystemState.CLIMBING_HOLD;
+				}
 				return SystemState.CLIMBING;
 			default:
 			case OFF:
@@ -215,7 +225,7 @@ public class SpiderLegs extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
-		LOG.trace("front {} {} - rear {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(),rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition());
+//		LOG.info("front {} {} - rear {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(),rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition());
 		
 		SmartDashboard
 			.putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
@@ -232,20 +242,20 @@ public class SpiderLegs extends Subsystem {
 	
 	@Override
 	public void zeroSensors() {
-		if(!frontHomed){
-			if(frontLegHome.get()){
-				frontLegMotor.setSelectedSensorPosition(0);
-				frontHomed = true;
+		if(frontLegHome.get()){
+			frontLegMotor.setSelectedSensorPosition(0);
+			if(!frontHomed){
 				LOG.info("front spiderlegs homed");
 			}
+			frontHomed = true;
 		}
 		
-		if(!rearHomed){
-			if(rearLegHome.get()){
-				rearLegMotorMaster.setSelectedSensorPosition(0);
-				rearHomed = true;
+		if(rearLegHome.get()){
+			rearLegMotorMaster.setSelectedSensorPosition(0);
+			if(!rearHomed){
 				LOG.info("rear spiderlegs homed");
 			}
+			rearHomed = true;
 		}
 	}
 	

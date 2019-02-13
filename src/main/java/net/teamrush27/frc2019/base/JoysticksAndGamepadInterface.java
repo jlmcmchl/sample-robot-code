@@ -36,17 +36,47 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	@Override
 	public ArmInput getArmInput() {
 		Double armExtension = gamePad.getTriggerAxis(Hand.kRight) - gamePad.getTriggerAxis(Hand.kLeft);
-		return new ArmInput(armExtension * .1, gamePad.getX(Hand.kLeft));
+		return new ArmInput(armExtension * .5, 0d);
 	}
 	
 	@Override
 	public Boolean getWantManipulateHatch() {
-		return gamePad.getTriangleButtonPressed();
+		return gamePad.getXButtonPressed();
 	}
 	
 	@Override
 	public Boolean getWantManipulateCargo() {
-		return gamePad.getXButton();
+		return gamePad.getTriangleButtonPressed();
+	}
+	
+	@Override
+	public Boolean wantsStow() {
+		return gamePad.getPadButton();
+	}
+	
+	@Override
+	public Boolean wantsGroundPickup() {
+		return gamePad.getPOV() > 0 && Math.abs(gamePad.getPOV() - 270) <= 10;
+	}
+	
+	@Override
+	public Boolean wantsLevel1HumanLoad() {
+		return gamePad.getPOV() > 0 && Math.abs(gamePad.getPOV() - 180) <= 10;
+	}
+	
+	@Override
+	public Boolean wantsLevel2() {
+		return gamePad.getPOV() > 0 && Math.abs(gamePad.getPOV() - 90) <= 10;
+	}
+	
+	@Override
+	public Boolean wantsLevel3() {
+		return gamePad.getPOV() > 0 && gamePad.getPOV() <= 10;
+	}
+	
+	@Override
+	public Boolean getWantsInvert() {
+		return gamePad.getBumper(Hand.kRight);
 	}
 	
 	@Override
@@ -56,11 +86,13 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	
 	@Override
 	public Boolean wantsPreClimb() {
-		return gamePad.getShareButtonPressed();
+		return gamePad.getShareButton();
 	}
 	
 	@Override
 	public Boolean wantsClimb() {
-		return gamePad.getOptionsButtonPressed() && gamePad.getShareButton();
+		return gamePad.getOptionsButton() && gamePad.getShareButton();
 	}
+	
+	
 }

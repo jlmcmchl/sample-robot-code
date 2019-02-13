@@ -16,6 +16,7 @@ import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
@@ -40,7 +41,8 @@ public class Robot extends TimedRobot {
 	private Wrist wrist = Wrist.getInstance();
 	private SpiderLegs spiderLegs = SpiderLegs.getInstance();
 	private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
-	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper, spiderLegs, wrist, arm);
+	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
+		spiderLegs, wrist, arm);
 	private final Looper enabledLooper = new Looper();
 	private final Looper disabledLooper = new Looper();
 	
@@ -65,7 +67,7 @@ public class Robot extends TimedRobot {
 	public void autonomousInit() {
 		disabledLooper.stop();
 //		drivetrain.startLogging();
-		subsystemManager.startLogging();
+//		subsystemManager.startLogging();
 		//robotStateEstimator.startLogging();
 		enabledLooper.start();
 		
@@ -88,35 +90,56 @@ public class Robot extends TimedRobot {
 		gripper.setWantedState(Gripper.WantedState.OFF);
 		wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
 		drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-		
-		subsystemManager.startLogging();
+//		arm.setClosedLoopInput(new ArmInput(0d, 0d));
+
+//		subsystemManager.startLogging();
 	}
+	
+	boolean wantedClimb = false;
 	
 	@Override
 	public void teleopPeriodic() {
-	
-		if(operatorInterface.getWantManipulateCargo()){
-			arm
-		} else {
-		}
+
+
+		arm.setOpenLoopInput(operatorInterface.getArmInput());
 		
-//		arm.setOpenLoopInput(operatorInterface.getArmInput());
-		
-		
-//		if (operatorInterface.getWantManipulateCargo()) {
-//			gripper.transitionCargo();
-//		} else if (operatorInterface.getWantManipulateHatch()) {
-//			gripper.transitionHatch();
-//		}
-		
-//		if(operatorInterface.wantsPreClimb()){
+//		// bail everything if we're climbing
+//		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
 //			spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
-//		}
-//		if(operatorInterface.wantsClimb()){
+//			arm.setClosedLoopInput(new ArmInput(0d, -45d));
+//		} else if (operatorInterface.wantsClimb()) {
+//			arm.setClosedLoopInput(new ArmInput(0d, -45d));
 //			spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+//			drivetrain.setOpenLoop(new DriveCommand(-.3, -.3));
+//		} else {
+//			// non-climb teleop
+//
+//			if (operatorInterface.getWantManipulateCargo()) {
+//				gripper.transitionCargo();
+//			} else if (operatorInterface.getWantManipulateHatch()) {
+//				gripper.transitionHatch();
+//			}
+//
+//			if(operatorInterface.wantsStow()){
+//				arm.setClosedLoopInput(new ArmInput(0d,0d));
+//			} else if(operatorInterface.wantsGroundPickup()){
+//
+//			} else if(operatorInterface.wantsLevel1HumanLoad()){
+//				arm.setClosedLoopInput(new ArmInput(0d,45d), operatorInterface.getWantsInvert());
+//			} else if(operatorInterface.wantsLevel2()){
+//
+//			} else if(operatorInterface.wantsLevel3()){
+//
+//			}
 //		}
-		
-//		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+//
+//		if (!operatorInterface.wantsClimb()) {
+//			drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+//		}
+//
+//		if (!operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
+//			spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
+//		}
 	}
 	
 	@Override
@@ -132,10 +155,11 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void disabledInit() {
+		wantedClimb = false;
 		SmartDashboard.putString("Match Cycle", "DISABLED");
 		try {
 			TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");
-		} catch(IOException e){
+		} catch (IOException e) {
 			LOG.error("could not write telemetry", e);
 		}
 		
@@ -146,11 +170,11 @@ public class Robot extends TimedRobot {
 		try {
 			CrashTracker.logDisabledInit();
 			enabledLooper.stop();
-			
-			subsystemManager.stopLogging();
+
+//			subsystemManager.stopLogging();
 //			drivetrain.stopLogging();
 			//robotStateEstimator.stopLogging();
-			
+
 //			Drivetrain.getInstance().zeroSensors();
 //			RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2d.identity());
 			
@@ -166,5 +190,6 @@ public class Robot extends TimedRobot {
 	@Override
 	public void disabledPeriodic() {
 		spiderLegs.zeroSensors();
+		arm.zeroSensors();
 	}
 }
