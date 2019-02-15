@@ -45,6 +45,8 @@ public class RobotMap {
 	
 	public static final int FRONT_SPIDER_LEG_MOTOR_CAN_ID = 25;
 	public static final int FRONT_SPIDER_LEG_HOME_SENSOR_ID = 5;
-
+	
+	public static final int SPIDER_LEG_FRONT_FLOOR_SENSOR_ID = 2;
+	public static final int SPIDER_LEG_REAR_FLOOR_SENSOR_ID = 3;
 	
 }

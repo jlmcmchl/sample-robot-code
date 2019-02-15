@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -99,8 +100,13 @@ public class SpiderLegs extends Subsystem {
 	private final DigitalInput frontLegHome;
 	private final DigitalInput rearLegHome;
 	
+	private final AnalogInput underFrontWheel;
+	private final AnalogInput underRearMiddleWheel;
+	
 	private Boolean frontHomed = false;
 	private Boolean rearHomed = false;
+	private Boolean frontOnGround = true;
+	private Boolean rearOnGround = true;
 	
 	public SpiderLegs() {
 		frontLegMotor = new TalonSRX(RobotMap.FRONT_SPIDER_LEG_MOTOR_CAN_ID);
@@ -109,6 +115,8 @@ public class SpiderLegs extends Subsystem {
 			RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.setInverted(false);
 		frontLegMotor.setNeutralMode(NeutralMode.Coast);
+		frontLegMotor.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
+		frontLegMotor.enableCurrentLimit(true);
 		
 		rearLegMotorMaster = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_MASTER_CAN_ID);
 		rearLegMotorMaster.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -116,17 +124,22 @@ public class SpiderLegs extends Subsystem {
 			RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.setInverted(true);
 		rearLegMotorMaster.setNeutralMode(NeutralMode.Coast);
-		
+		rearLegMotorMaster.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
+		rearLegMotorMaster.enableCurrentLimit(true);
 		
 		rearLegMotorSlave = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_SLAVE_CAN_ID);
 		rearLegMotorSlave.configFactoryDefault();
 		rearLegMotorSlave.setInverted(true);
 		rearLegMotorSlave.follow(rearLegMotorMaster);
 		rearLegMotorSlave.setNeutralMode(NeutralMode.Coast);
-		
+		rearLegMotorSlave.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
+		rearLegMotorSlave.enableCurrentLimit(true);
 		
 		frontLegHome = new InvertableDigitalInput(RobotMap.FRONT_SPIDER_LEG_HOME_SENSOR_ID, true);
 		rearLegHome = new InvertableDigitalInput(RobotMap.REAR_SPIDER_LEG_HOME_SENSOR_ID, true);
+		
+		underFrontWheel = new AnalogInput(RobotMap.SPIDER_LEG_FRONT_FLOOR_SENSOR_ID);
+		underRearMiddleWheel = new AnalogInput(RobotMap.SPIDER_LEG_REAR_FLOOR_SENSOR_ID);
 		
 		reloadGains();
 		setVoltageCompensation(false);
@@ -179,10 +192,19 @@ public class SpiderLegs extends Subsystem {
 	}
 	
 	private SystemState handleClimbHold(double timestamp) {
-		frontLegMotor.set(ControlMode.MotionMagic, 10500);
-		rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
 		if(stateChanged) {
 			setVoltageCompensation(true);
+		}
+		
+		if(frontOnGround){
+			frontLegMotor.set(ControlMode.MotionMagic, 0);
+		} else {
+			frontLegMotor.set(ControlMode.MotionMagic, 10500);
+		}
+		if(rearOnGround){
+			rearLegMotorMaster.set(ControlMode.MotionMagic, 0);
+		} else {
+			rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
 		}
 		
 		return defaultStateTransfer(timestamp);
@@ -220,6 +242,17 @@ public class SpiderLegs extends Subsystem {
 	
 	@Override
 	public void readPeriodicInputs(){
+		if(underFrontWheel.getAverageVoltage() > 1){
+			frontOnGround = true;
+		} else {
+			frontOnGround = false;
+		}
+		
+		if(underRearMiddleWheel.getAverageVoltage() > 1){
+			rearOnGround = true;
+		} else {
+			rearOnGround = false;
+		}
 	}
 	
 	
@@ -245,6 +278,7 @@ public class SpiderLegs extends Subsystem {
 		if(frontLegHome.get()){
 			frontLegMotor.setSelectedSensorPosition(0);
 			if(!frontHomed){
+				LED.getInstance().setFrontSpiderLegsHomed(true);
 				LOG.info("front spiderlegs homed");
 			}
 			frontHomed = true;
@@ -253,6 +287,7 @@ public class SpiderLegs extends Subsystem {
 		if(rearLegHome.get()){
 			rearLegMotorMaster.setSelectedSensorPosition(0);
 			if(!rearHomed){
+				LED.getInstance().setRearSpiderLegsHomed(true);
 				LOG.info("rear spiderlegs homed");
 			}
 			rearHomed = true;
