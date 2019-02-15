@@ -32,6 +32,16 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	public DriveCommand getTankCommand() {
 		return new DriveCommand(-driverLeftJoystick.getY(), -driverRightJoystick.getY());
 	}
+
+	@Override
+	public boolean shouldShiftLowGear() {
+		return driverRightJoystick.getZ() > 0.8;
+	}
+
+	@Override
+	public boolean shouldShiftHighGear() {
+		return driverRightJoystick.getZ() < 0.2;
+	}
 	
 	@Override
 	public ArmInput getArmInput() {

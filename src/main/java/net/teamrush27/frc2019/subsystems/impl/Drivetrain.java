@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Objects;
 import net.teamrush27.frc2019.base.RobotMap;
@@ -22,6 +23,7 @@ import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
+import net.teamrush27.frc2019.subsystems.impl.enumerated.ShiftState;
 import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
@@ -71,6 +73,9 @@ public class Drivetrain extends Subsystem {
 	private final TalonSRX leftSlave2;
 	private final TalonSRX rightSlave2;
 	private double timeSinceModeSwitch;
+
+	private final Servo leftShifter;
+	private final Servo rightShifter;
 	
 	private final int DRIVE_CONTROL_SLOT = 0;
 	private final int VELOCITY_CONTROL_SLOT = 1;
@@ -79,6 +84,7 @@ public class Drivetrain extends Subsystem {
 	private final AHRS navX;
 	
 	private DriveMode driveMode = DriveMode.OPEN_LOOP;
+	private ShiftState shiftState = ShiftState.UNKNOWN;
 	private RobotState robotState = RobotState.getInstance();
 	private Trajectory trajectory = null;
 	private DriveMotionPlanner motionPlanner;
@@ -269,6 +275,9 @@ public class Drivetrain extends Subsystem {
 		rightMaster.setInverted(false);
 		rightSlave1.setInverted(false);
 		rightSlave2.setInverted(false);
+
+		leftShifter = new Servo(RobotMap.LEFT_DRIVE_SHIFT_SERVO_ID);
+		rightShifter = new Servo(RobotMap.RIGHT_DRIVE_SHIFT_SERVO_ID);
 		
 		setCurrentLimiting(false);
 		reloadGains();
@@ -466,6 +475,14 @@ public class Drivetrain extends Subsystem {
 		//if (CSVWriter != null) {
 		//            CSVWriter.write();
 		//        }
+	}
+
+	public synchronized void shift(ShiftState newState) {
+		if (shiftState != newState) {
+			shiftState = newState;
+			leftShifter.set(shiftState.getLeft());
+			rightShifter.set(shiftState.getRight());
+		}
 	}
 	
 	/**

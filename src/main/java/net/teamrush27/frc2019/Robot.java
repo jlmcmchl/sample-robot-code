@@ -7,7 +7,6 @@
 
 package net.teamrush27.frc2019;
 
-import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.loops.Looper;
-import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
@@ -24,8 +22,8 @@ import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
-import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+import net.teamrush27.frc2019.subsystems.impl.enumerated.ShiftState;
 import net.teamrush27.frc2019.util.TelemetryUtil;
 import net.teamrush27.frc2019.util.crash.CrashTracker;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
@@ -100,8 +98,15 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 
+		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
 
 		arm.setOpenLoopInput(operatorInterface.getArmInput());
+
+		if (operatorInterface.shouldShiftHighGear()) {
+			drivetrain.shift(ShiftState.HIGH_GEAR);
+		} else if (operatorInterface.shouldShiftLowGear()) {
+			drivetrain.shift(ShiftState.LOW_GEAR);
+		}
 		
 //		// bail everything if we're climbing
 //		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {

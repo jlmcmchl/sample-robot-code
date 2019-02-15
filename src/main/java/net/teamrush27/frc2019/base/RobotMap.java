@@ -10,8 +10,8 @@ public class RobotMap {
 	public static final int DRIVE_LEFT_SLAVE_1_CAN_ID = 14;
 	public static final int DRIVE_LEFT_SLAVE_2_CAN_ID = 16;
 	
-	private static final int LEFT_DRIVE_SHIFT_SERVO_ID = 0;
-	private static final int RIGHT_DRIVE_SHIFT_SERVO_ID = 1;
+	public static final int LEFT_DRIVE_SHIFT_SERVO_ID = 0;
+	public static final int RIGHT_DRIVE_SHIFT_SERVO_ID = 1;
 	
 	
 	// Arm
