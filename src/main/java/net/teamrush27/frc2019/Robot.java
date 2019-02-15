@@ -19,6 +19,7 @@ import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.Gripper;
+import net.teamrush27.frc2019.subsystems.impl.LED;
 import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
@@ -39,8 +40,9 @@ public class Robot extends TimedRobot {
 	private Wrist wrist = Wrist.getInstance();
 	private SpiderLegs spiderLegs = SpiderLegs.getInstance();
 	private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
+	private LED led = LED.getInstance();
 	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
-		spiderLegs, wrist, arm);
+		spiderLegs, wrist, arm, led);
 	private final Looper enabledLooper = new Looper();
 	private final Looper disabledLooper = new Looper();
 	
@@ -63,6 +65,7 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void autonomousInit() {
+		led.setWantedState(LED.WantedState.ENABLED);
 		disabledLooper.stop();
 //		drivetrain.startLogging();
 //		subsystemManager.startLogging();
@@ -80,6 +83,7 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void teleopInit() {
+		led.setWantedState(LED.WantedState.ENABLED);
 		disabledLooper.stop();
 		enabledLooper.start();
 		
@@ -158,6 +162,7 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void disabledInit() {
+		led.setWantedState(LED.WantedState.DISABLED);
 		wantedClimb = false;
 		SmartDashboard.putString("Match Cycle", "DISABLED");
 		try {
