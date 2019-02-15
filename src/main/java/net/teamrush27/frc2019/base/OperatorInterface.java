@@ -6,8 +6,7 @@ import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 public interface OperatorInterface {
     // DRIVER CONTROLS
     DriveCommand getTankCommand();
-    boolean shouldShiftLowGear();
-    boolean shouldShiftHighGear();
+    boolean getShift();
     
     // OPERATOR CONTROLS
 	

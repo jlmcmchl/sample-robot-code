@@ -98,14 +98,12 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 
-		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+		//drivetrain.setOpenLoop(operatorInterface.getTankCommand());
 
-		arm.setOpenLoopInput(operatorInterface.getArmInput());
+		//arm.setOpenLoopInput(operatorInterface.getArmInput());
 
-		if (operatorInterface.shouldShiftHighGear()) {
-			drivetrain.shift(ShiftState.HIGH_GEAR);
-		} else if (operatorInterface.shouldShiftLowGear()) {
-			drivetrain.shift(ShiftState.LOW_GEAR);
+		if (operatorInterface.getShift()) {
+			drivetrain.shift();
 		}
 		
 //		// bail everything if we're climbing

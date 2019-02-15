@@ -33,14 +33,17 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		return new DriveCommand(-driverLeftJoystick.getY(), -driverRightJoystick.getY());
 	}
 
-	@Override
-	public boolean shouldShiftLowGear() {
-		return driverRightJoystick.getZ() > 0.8;
-	}
+	private boolean shiftLatch = false;
 
 	@Override
-	public boolean shouldShiftHighGear() {
-		return driverRightJoystick.getZ() < 0.2;
+	public boolean getShift() {
+		if (!shiftLatch && driverRightJoystick.getZ() > 0.75) {
+			shiftLatch = true;
+			return true;
+		} else if (driverRightJoystick.getZ() < 0.75) {
+			shiftLatch = false;
+		}
+		return false;
 	}
 	
 	@Override
