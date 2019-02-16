@@ -23,6 +23,7 @@ import net.teamrush27.frc2019.subsystems.impl.LED;
 import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
+import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.ShiftState;
 import net.teamrush27.frc2019.util.TelemetryUtil;
@@ -61,6 +62,8 @@ public class Robot extends TimedRobot {
 	public void robotPeriodic() {
 		subsystemManager.outputToSmartDashboard();
 		enabledLooper.outputToSmartDashboard();
+		LOG.trace("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
+			arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
 	}
 	
 	@Override
@@ -87,7 +90,7 @@ public class Robot extends TimedRobot {
 		disabledLooper.stop();
 		enabledLooper.start();
 		
-		arm.setWantedState(Arm.WantedState.OPEN_LOOP);
+		arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
 		spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
 		gripper.setWantedState(Gripper.WantedState.OFF);
 		wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
@@ -101,15 +104,37 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void teleopPeriodic() {
-
-		//drivetrain.setOpenLoop(operatorInterface.getTankCommand());
-
-		//arm.setOpenLoopInput(operatorInterface.getArmInput());
-
+		
+		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+		
 		if (operatorInterface.getShift()) {
 			drivetrain.shift();
 		}
 		
+		if (operatorInterface.getWantManipulateCargo()) {
+			gripper.transitionCargo();
+		} else if (operatorInterface.getWantManipulateHatch()) {
+			gripper.transitionHatch();
+		}
+		if (operatorInterface.wantsStow()) {
+			arm.setClosedLoopInput(new ArmInput(5d, 0d));
+			wrist.setClosedLoopInput(0d);
+		} else if (operatorInterface.wantsGroundPickup()) {
+			arm.setClosedLoopInput(new ArmInput(5d, 88d), operatorInterface.getWantsInvert());
+			wrist.setClosedLoopInput(50d * (operatorInterface.getWantsInvert() ? -1 : 1));
+		} else if(operatorInterface.wantsLevel1HumanLoad()){
+			arm.setClosedLoopInput(new ArmInput(5d, 86d), operatorInterface.getWantsInvert());
+			wrist.setClosedLoopInput(0d);
+		} else if(operatorInterface.wantsLevel2()){
+			arm.setClosedLoopInput(new ArmInput(12.5d, 27d), operatorInterface.getWantsInvert());
+			if(operatorInterface.getWantsInvert()){
+				wrist.setClosedLoopInput(-90d+27d);
+			} else {
+				wrist.setClosedLoopInput(90d-27d);
+			}
+			
+		}
+
 //		// bail everything if we're climbing
 //		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
 //			spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);

@@ -22,6 +22,10 @@ public class Wrist extends Subsystem {
 	private static String TAG = "WRIST";
 	private static Wrist INSTANCE = null;
 	
+	private static final int MAX_PWM = 3040;
+	private static final int MID_PWM = 2040;
+	private static final int MIN_PWM = 1040;
+	
 	public static Wrist getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new Wrist();
@@ -34,12 +38,13 @@ public class Wrist extends Subsystem {
 	}
 	
 	private enum SystemState {
-		OFF, OPEN_LOOP, CLOSED_LOOP
+		OFF, OPEN_LOOP, CLOSED_LOOP, HOLD
 	}
 	
 	private WantedState wantedState = WantedState.OFF;
 	private SystemState systemState = SystemState.OFF;
 	
+	private boolean zeroed = false;
 	private boolean stateChanged = false;
 	private double currentStateStartTime;
 	
@@ -59,6 +64,9 @@ public class Wrist extends Subsystem {
 					break;
 				case CLOSED_LOOP:
 					newState = handleClosedLoop(timestamp);
+					break;
+				case HOLD:
+					newState = handleHold(timestamp);
 					break;
 				case OFF:
 				default:
@@ -97,7 +105,7 @@ public class Wrist extends Subsystem {
 		wristMotor = new TalonSRX(RobotMap.WRIST_MOTOR_CAN_ID);
 		wristMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.configVoltageCompSaturation(4, RobotConstants.TALON_CONFIG_TIMEOUT);
-		wristMotor.enableVoltageCompensation(true);
+		wristMotor.enableVoltageCompensation(false);
 		
 		wristMotor.configRemoteFeedbackFilter(RobotMap.WRIST_CANIFIER_CAN_ID, RemoteSensorSource.CANifier_Quadrature, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0, 0 ,RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -128,9 +136,30 @@ public class Wrist extends Subsystem {
 	}
 	
 	private SystemState handleClosedLoop(double timestamp) {
-		wristMotor.set(ControlMode.Position, 0);
+		if(stateChanged){
+			wristMotor.enableVoltageCompensation(false);
+		}
+		wristMotor.set(ControlMode.Position, ((closedLoopInput / 90d) * 1024));
 		
-		return defaultStateTransfer(timestamp);
+		if(WantedState.CLOSED_LOOP.equals(wantedState) && Math.abs(getEncoderAngle() - closedLoopInput) < 3){
+			return SystemState.HOLD;
+		} else {
+			return defaultStateTransfer(timestamp);
+		}
+	}
+	
+	private SystemState handleHold(double timestamp) {
+		if(stateChanged){
+			LOG.info("ENABLING WRIST VOLTAGE COMP");
+			wristMotor.enableVoltageCompensation(true);
+		}
+		
+		
+		if(WantedState.CLOSED_LOOP.equals(wantedState) && Math.abs(getEncoderAngle() - closedLoopInput) < 3){
+			return SystemState.HOLD;
+		} else {
+			return defaultStateTransfer(timestamp);
+		}
 	}
 	
 	private SystemState handleOpenLoop(double timestamp) {
@@ -159,9 +188,7 @@ public class Wrist extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
-		LOG.trace("wrist.position : {}",wristMotor.getSelectedSensorPosition());
-		
-		SmartDashboard.putNumber("wrist.position", wristMotor.getSelectedSensorPosition());
+		SmartDashboard.putNumber("wrist.position", getEncoderAngle());
 	}
 	
 	@Override
@@ -171,7 +198,25 @@ public class Wrist extends Subsystem {
 	
 	@Override
 	public void zeroSensors() {
-		wristSensor.setQuadraturePosition(0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		if(!zeroed) {
+			wristSensor
+				.setQuadraturePosition(-Double.valueOf((getPWMAngle() / 90) * 1024).intValue(),
+					RobotConstants.TALON_CONFIG_TIMEOUT);
+			LOG.info("INITIAL POSITION {} {}", getPWMAngle(),getEncoderAngle());
+			zeroed = true;
+		}
+	}
+	
+	public double getEncoderAngle(){
+		return ((wristMotor.getSelectedSensorPosition()*1d) / 1024d) * 90d;
+	}
+	
+	public double getPWMAngle(){
+		double[] array = new double[2];
+		wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
+		double value = array[0];
+		
+		return (((value - MID_PWM) / (MAX_PWM - MIN_PWM))*-1)*180;
 	}
 	
 	@Override

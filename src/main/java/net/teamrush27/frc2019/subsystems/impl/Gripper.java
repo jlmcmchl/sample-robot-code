@@ -219,6 +219,22 @@ public class Gripper extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
+		if(SystemState.HOLD_CARGO.equals(systemState) || SystemState.HOLD_HATCH.equals(systemState)){
+			LED.getInstance().setHasGamePiece(true);
+		} else {
+			LED.getInstance().setHasGamePiece(false);
+		}
+		if(SystemState.INTAKE_HATCH.equals(systemState) || SystemState.INTAKE_CARGO.equals(systemState)){
+			LED.getInstance().setIntaking(true);
+		} else {
+			LED.getInstance().setIntaking(false);
+		}
+		if(SystemState.EXHAUST_CARGO.equals(systemState)){
+			LED.getInstance().setExhausting(true);
+		} else {
+			LED.getInstance().setExhausting(false);
+		}
+		
 		
 		if(i++ % 100 == 0){
 			LOG.trace("analogInput: {}", detective.getVoltage());

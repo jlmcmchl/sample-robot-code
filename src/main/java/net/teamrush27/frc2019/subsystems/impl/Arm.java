@@ -25,6 +25,7 @@ public class Arm extends Subsystem {
 	private static Arm INSTANCE = null;
 	
 	private static final double ROTATIONS_PER_DEGREE = 0.297349654;
+	private static final double ROTATIONS_PER_INCH = 1.0642462836;
 	
 	public static Arm getInstance() {
 		if (INSTANCE == null) {
@@ -111,6 +112,7 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.restoreFactoryDefaults();
 		rotationMotorMaster.setIdleMode(IdleMode.kBrake);
 		rotationMotorMaster.setSmartCurrentLimit(50);
+		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 5);
 		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
 		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
 		rotationMotorMaster.setInverted(false);
@@ -121,11 +123,17 @@ public class Arm extends Subsystem {
 		rotationMotorSlave.restoreFactoryDefaults();
 		rotationMotorSlave.setIdleMode(IdleMode.kBrake);
 		rotationMotorSlave.setSmartCurrentLimit(50);
+		rotationMotorSlave.follow(rotationMotorMaster);
+		rotationMotorSlave.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 100);
+		rotationMotorSlave.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 500);
+		rotationMotorSlave.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500);
 		
 		extensionMotor = new CANSparkMax(RobotMap.ARM_EXTENSION_CAN_ID, MotorType.kBrushless);
 		extensionMotor.restoreFactoryDefaults();
-		extensionMotor.enableVoltageCompensation(12);
+		extensionMotor.disableVoltageCompensation();
 		extensionMotor.setIdleMode(IdleMode.kBrake);
+		extensionMotor.setInverted(true);
+		extensionMotor.setSmartCurrentLimit(50);
 		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
 		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
 		
@@ -141,7 +149,7 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.getPIDController().setI(0, 0);
 		rotationMotorMaster.getPIDController().setD(0, 0);
 		rotationMotorMaster.getPIDController().setFF(0, 0);
-		rotationMotorMaster.getPIDController().setOutputRange(-0.25, 0.25);
+		rotationMotorMaster.getPIDController().setOutputRange(-0.375, 0.375);
 		rotationMotorMaster.getPIDController()
 			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 		rotationMotorMaster.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
@@ -149,55 +157,43 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(500, 0);
 		rotationMotorMaster.getPIDController().setSmartMotionMinOutputVelocity(500, 0);
 		
-		rotationMotorSlave.getPIDController().setP(.1, 0);
-		rotationMotorSlave.getPIDController().setI(0, 0);
-		rotationMotorSlave.getPIDController().setD(0, 0);
-		rotationMotorSlave.getPIDController().setFF(0, 0);
-		rotationMotorSlave.getPIDController().setOutputRange(-0.5, 0.5);
-		rotationMotorSlave.getPIDController()
-			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
-		rotationMotorSlave.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
-		rotationMotorSlave.getPIDController().setSmartMotionMaxAccel(500, 0);
-		rotationMotorSlave.getPIDController().setSmartMotionMaxVelocity(500, 0);
-		rotationMotorSlave.getPIDController().setSmartMotionMinOutputVelocity(500, 0);
-		
 		extensionMotor.getPIDController().setP(.1, 0);
 		extensionMotor.getPIDController().setI(0, 0);
 		extensionMotor.getPIDController().setD(0, 0);
-		extensionMotor.getPIDController().setOutputRange(-.75, .75, 0);
+		extensionMotor.getPIDController().setOutputRange(-.5, .5, 0);
 		extensionMotor.getPIDController()
 			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 		extensionMotor.getPIDController().setSmartMotionAllowedClosedLoopError(.1, 0);
-		extensionMotor.getPIDController().setSmartMotionMaxAccel(1, 0);
-		extensionMotor.getPIDController().setSmartMotionMaxVelocity(1, 0);
-		extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(1, 0);
+		extensionMotor.getPIDController().setSmartMotionMaxAccel(570, 0);
+		extensionMotor.getPIDController().setSmartMotionMaxVelocity(570, 0);
+		extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(57, 0);
 	}
 	
 	@Override
 	public void outputToSmartDashboard() {
-//		LOG.info("arm.extension: {}", extensionMotor.getAppliedOutput());
+		LOG.trace("arm.extension: {}", armState.getExtensionInInches());
 		SmartDashboard.putNumber("arm.rotation", armState.getRotationInDegrees());
 		SmartDashboard.putBoolean("arm.rotation.reset", armState.isRotationAtHome());
-		SmartDashboard.putNumber("arm.extension", armState.getExtension());
+		SmartDashboard.putNumber("arm.extension", armState.getExtensionInInches());
 		SmartDashboard.putBoolean("arm.extension.reset", armState.isExtensionAtHome());
 	}
 	
 	private SystemState handleClosedLoop(double timestamp) {
 		armState.setRotationDemandInDegrees(closedLoopInput.getRotationInput());
-		armState.setExtensionDemand(closedLoopInput.getExtensionInput());
+		armState.setExtensionDemandInInches(closedLoopInput.getExtensionInput());
 			
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleOpenLoop(double timestamp) {
 		armState.setRotationDemandInDegrees(openLoopInput.getRotationInput());
-		armState.setExtensionDemand(openLoopInput.getExtensionInput());
+		armState.setExtensionDemandInInches(openLoopInput.getExtensionInput());
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleOff(double timestamp) {
-		armState.setExtensionDemand(0);
+		armState.setExtensionDemandInInches(0);
 		armState.setRotationDemandInDegrees(0);
 		
 		return defaultStateTransfer(timestamp);
@@ -240,7 +236,7 @@ public class Arm extends Subsystem {
 				
 				if (extensionHomed) {
 					extensionMotor.getPIDController()
-						.setReference(armState.getExtensionDemand(), ControlType.kPosition);
+						.setReference(armState.getExtensionDemandInRotations(), ControlType.kPosition);
 				} else {
 					extensionMotor.set(0);
 				}
@@ -248,12 +244,10 @@ public class Arm extends Subsystem {
 			
 			case OPEN_LOOP:
 			case OFF:
-				extensionMotor.set(armState.getExtensionDemand());
+				extensionMotor.set(armState.getExtensionDemandInInches());
 				rotationMotorMaster.set(armState.getRotationDemandInDegrees());
 			default:
 		}
-		
-		LOG.trace("Extension : homed?: {} pos: {} set: {} - Rotation : homed?: {} pos: {} set: {}",extensionHomed, armState.getExtension(), armState.extensionSetpoint, rotationHomed, armState.getRotationInDegrees(), armState.rotationSetpoint);
 	}
 	
 	@Override
@@ -265,18 +259,20 @@ public class Arm extends Subsystem {
 	public void zeroSensors() {
 		if(!rotationHomed){
 			if(armState.isRotationAtHome()){
-				LOG.info("rotation homed");
 				if(CANError.kOK.equals(rotationMotorMaster.setEncPosition(0))) {
+					LOG.info("rotation homed");
 					rotationHomed = true;
+					LED.getInstance().setRotationHomed(true);
 				}
 			}
 		}
 		
 		if(!extensionHomed){
 			if(armState.isExtensionAtHome()){
-				LOG.info("extension homed");
 				if(CANError.kOK.equals(extensionMotor.setEncPosition(0))){
+					LOG.info("extension homed");
 					extensionHomed = true;
+					LED.getInstance().setExtensionHomed(true);
 				}
 			}
 		}
@@ -344,8 +340,8 @@ public class Arm extends Subsystem {
 			return rotation / ROTATIONS_PER_DEGREE;
 		}
 		
-		public double getExtension() {
-			return extension;
+		public Double getExtensionInInches() {
+			return extension / ROTATIONS_PER_INCH;
 		}
 		
 		public boolean isRotationAtHome() {
@@ -360,16 +356,20 @@ public class Arm extends Subsystem {
 			rotationSetpoint = demand;
 		}
 		
-		public void setExtensionDemand(double demand) {
-			extensionSetpoint = demand;
+		public void setExtensionDemandInInches(double extensionSetpoint) {
+			this.extensionSetpoint = extensionSetpoint;
 		}
 		
 		public double getRotationDemandInDegrees() {
 			return rotationSetpoint;
 		}
 		
-		public double getExtensionDemand() {
+		public double getExtensionDemandInInches() {
 			return extensionSetpoint;
+		}
+		
+		public double getExtensionDemandInRotations() {
+			return extensionSetpoint * ROTATIONS_PER_INCH;
 		}
 		
 		public double getRotationDemandInRotations(){

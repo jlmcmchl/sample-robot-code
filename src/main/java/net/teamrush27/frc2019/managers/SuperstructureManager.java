@@ -9,6 +9,8 @@ import net.teamrush27.frc2019.subsystems.impl.Arm.ArmState;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
 import net.teamrush27.frc2019.util.interpolate.InterpolatingDouble;
 import net.teamrush27.frc2019.util.math.MathUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SuperstructureManager extends Subsystem {
 
@@ -20,6 +22,8 @@ public class SuperstructureManager extends Subsystem {
   private static final double ARM_BASE_LENGTH = 0d;
   private static final double ARM_MAX_EXTENSION = 0d;
   private static final double MAX_LATERAL_EXTENSION = 32d;
+  
+  private static final Logger LOG = LogManager.getLogger(SuperstructureManager.class);
 
   private static final double NUM_SEGMENTS = 200;
 
@@ -35,7 +39,7 @@ public class SuperstructureManager extends Subsystem {
   private Wrist wrist = Wrist.getInstance();
 
   public enum WantedState {
-    CARGO_GROUND_PICKUP(-50d, 5d),
+    CARGO_GROUND_PICKUP(-88d, 2.5d),
     HATCH_HUMAN_PICKUP(-90d, 5d),
     CARGO_SHIP(-90d, 5d),
     ROCKET_LEVEL_1(-90d, 5d),
@@ -68,7 +72,7 @@ public class SuperstructureManager extends Subsystem {
 
   @Override
   public void outputToSmartDashboard() {
-
+    //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(), arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
   }
 
   @Override
@@ -135,24 +139,12 @@ public class SuperstructureManager extends Subsystem {
 
   private void recomputeOperations() {
     ArmState armState = arm.getArmState();
-    InterpolatingDouble initialRotation = new InterpolatingDouble(
-        armState.getRotationDemandInDegrees());
+    InterpolatingDouble initialRotation = new InterpolatingDouble(armState.getRotationDemandInDegrees());
     InterpolatingDouble wantedRotation = new InterpolatingDouble(getWantedRotation());
-    InterpolatingDouble initialExtension = new InterpolatingDouble(armState.getExtension());
+    InterpolatingDouble initialExtension = new InterpolatingDouble(armState.getExtensionInInches());
     InterpolatingDouble wantedExtension = new InterpolatingDouble(wantedState.getExtension());
 
     // needs to travel towards rear of robot
-
-    // new setpoint is -90
-    // start at 0
-    // look at every angle from 0 to -90
-    // at the first angle that current extension is not allowed
-    // add command with extension limit at some slightly earlier angle
-    // add command after with
-
-    new Command(5d, -45d, Limit.EXTENSION);
-    new Command(5d, -60d, Limit.ROTATION);
-    new Command(0d, -90d, Limit.NONE);
 
     boolean extension_bound = false;
 
@@ -185,7 +177,7 @@ public class SuperstructureManager extends Subsystem {
     }
 
     if (current.getLimitType() == Limit.EXTENSION || current.getLimitType() == Limit.NONE) {
-      complete = complete && MathUtils.epsilonEquals(arm.getArmState().getExtension(),
+      complete = complete && MathUtils.epsilonEquals(arm.getArmState().getExtensionInInches(),
           current.getExtensionDemand(), EXTENSION_EPSILON);
     }
 
@@ -193,9 +185,9 @@ public class SuperstructureManager extends Subsystem {
   }
 
   private void executeCommand(Command command) {
-    ArmState state = arm.getArmState();
-    state.setRotationDemandInDegrees(command.getRotationDemand());
-    state.setExtensionDemand(command.getExtensionDemand());
+//    ArmState state = arm.getArmState();
+//    state.setRotationDemandInDegrees(command.getRotationDemand());
+//    state.setExtensionDemand(command.getExtensionDemand());
   }
 
   private double getWantedRotation() {
