@@ -117,6 +117,7 @@ public class SpiderLegs extends Subsystem {
 		frontLegMotor.setNeutralMode(NeutralMode.Coast);
 		frontLegMotor.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.enableCurrentLimit(true);
+		frontLegMotor.setSensorPhase(true);
 		
 		rearLegMotorMaster = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_MASTER_CAN_ID);
 		rearLegMotorMaster.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
