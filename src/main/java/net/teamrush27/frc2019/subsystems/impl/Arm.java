@@ -26,6 +26,8 @@ public class Arm extends Subsystem {
 	
 	private static final double ROTATIONS_PER_DEGREE = 0.2877777778;
 	private static final double ROTATIONS_PER_INCH = 1.0642462836;
+
+	private static final double TICKS_PER_DEGREE = 0;
 	
 	public static Arm getInstance() {
 		if (INSTANCE == null) {
@@ -159,7 +161,7 @@ public class Arm extends Subsystem {
 		extensionMotor.getPIDController().setP(.1, 0);
 		extensionMotor.getPIDController().setI(0, 0);
 		extensionMotor.getPIDController().setD(0, 0);
-		extensionMotor.getPIDController().setOutputRange(-.25, .25, 0);
+		extensionMotor.getPIDController().setOutputRange(-.25, 1, 0);
 		extensionMotor.getPIDController()
 			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 		extensionMotor.getPIDController().setSmartMotionAllowedClosedLoopError(.1, 0);
@@ -232,7 +234,7 @@ public class Arm extends Subsystem {
 				} else {
 					rotationMotorMaster.set(0);
 				}
-				
+
 				if (extensionHomed) {
 					extensionMotor.getPIDController()
 						.setReference(armState.getExtensionDemandInRotations(), ControlType.kPosition);

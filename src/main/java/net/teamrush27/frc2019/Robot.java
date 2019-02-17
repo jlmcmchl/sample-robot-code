@@ -7,7 +7,9 @@
 
 package net.teamrush27.frc2019;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
@@ -15,6 +17,8 @@ import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.managers.SuperstructureManager;
+import net.teamrush27.frc2019.managers.SuperstructureManager.WantedState;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
@@ -42,8 +46,9 @@ public class Robot extends TimedRobot {
 	private SpiderLegs spiderLegs = SpiderLegs.getInstance();
 	private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
 	private LED led = LED.getInstance();
+	private final SuperstructureManager superman = SuperstructureManager.getInstance();
 	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
-		spiderLegs, wrist, arm, led);
+		spiderLegs, wrist, arm, led, superman);
 	private final Looper enabledLooper = new Looper();
 	private final Looper disabledLooper = new Looper();
 	
@@ -56,12 +61,13 @@ public class Robot extends TimedRobot {
 		subsystemManager.registerEnabledLoops(enabledLooper);
 		subsystemManager.registerDisabledLoops(disabledLooper);
 		TrajectoryGenerator.getInstance().generateTrajectories();
+		superman.zeroSensors();
 	}
 	
 	@Override
 	public void robotPeriodic() {
-		subsystemManager.outputToSmartDashboard();
-		enabledLooper.outputToSmartDashboard();
+		//subsystemManager.outputToSmartDashboard();
+		//enabledLooper.outputToSmartDashboard();
 		LOG.trace("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
 			arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
 	}
@@ -94,6 +100,7 @@ public class Robot extends TimedRobot {
 		spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
 		gripper.setWantedState(Gripper.WantedState.OFF);
 		wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+		drivetrain.shiftIntoHighGear();
 		drivetrain.setOpenLoop(DriveCommand.defaultCommand());
 //		arm.setClosedLoopInput(new ArmInput(0d, 0d));
 
@@ -104,18 +111,33 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void teleopPeriodic() {
+
+		if (operatorInterface.wantsStow()) {
+			superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert());
+		} else if (operatorInterface.wantsLevel1HumanLoad()) {
+			superman.setWantedState(WantedState.HATCH_HUMAN_PICKUP, operatorInterface.getWantsInvert());
+		} else if (operatorInterface.wantsGroundPickup()) {
+			superman.setWantedState(WantedState.CARGO_GROUND_PICKUP, operatorInterface.getWantsInvert());
+		} else if (operatorInterface.getWantsCargoShip()) {
+			superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert());
+		} else if (operatorInterface.wantsLevel2()) {
+			superman.setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert());
+		} else if (operatorInterface.wantsLevel3()) {
+			superman.setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert());
+		}
 		
 		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
 		
 		if (operatorInterface.getShift()) {
 			drivetrain.shift();
 		}
-		
+
 		if (operatorInterface.getWantManipulateCargo()) {
 			gripper.transitionCargo();
 		} else if (operatorInterface.getWantManipulateHatch()) {
 			gripper.transitionHatch();
 		}
+		/*
 		if (operatorInterface.wantsStow()) {
 			arm.setClosedLoopInput(new ArmInput(5d, 0d));
 			wrist.setClosedLoopInput(0d);
@@ -134,6 +156,7 @@ public class Robot extends TimedRobot {
 			}
 			
 		}
+		*/
 
 //		// bail everything if we're climbing
 //		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
@@ -204,6 +227,8 @@ public class Robot extends TimedRobot {
 			CrashTracker.logDisabledInit();
 			enabledLooper.stop();
 
+			//drivetrain.startLogging();
+
 //			subsystemManager.stopLogging();
 //			drivetrain.stopLogging();
 			//robotStateEstimator.stopLogging();
@@ -219,7 +244,7 @@ public class Robot extends TimedRobot {
 			throw t;
 		}
 	}
-	
+
 	@Override
 	public void disabledPeriodic() {
 		spiderLegs.zeroSensors();
