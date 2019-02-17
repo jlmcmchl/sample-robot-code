@@ -151,7 +151,7 @@ public class SuperstructureManager extends Subsystem {
 		InterpolatingDouble wantedRotation = new InterpolatingDouble(getWantedRotation());
 		InterpolatingDouble initialExtension = new InterpolatingDouble(
 			armState.getExtensionInInches());
-		InterpolatingDouble wantedExtension = new InterpolatingDouble(wantedState.getExtension());
+		InterpolatingDouble wantedExtension = new InterpolatingDouble(wantedState.getDefaultInput().getExtensionInput());
 		
 		// needs to travel towards rear of robot
 		
@@ -201,7 +201,7 @@ public class SuperstructureManager extends Subsystem {
 	}
 	
 	private double getWantedRotation() {
-		return wantedState.getRotation() * (invertedRotation ? -1 : 1);
+		return wantedState.getDefaultInput().getRotationInput() * (invertedRotation ? -1 : 1);
 	}
 	
 	private double boundExtensionForAngle(final double angle, final double extension) {
