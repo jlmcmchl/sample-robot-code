@@ -22,9 +22,9 @@ public class Wrist extends Subsystem {
 	private static String TAG = "WRIST";
 	private static Wrist INSTANCE = null;
 	
-	private static final int MAX_PWM = 3040;
-	private static final int MID_PWM = 2040;
-	private static final int MIN_PWM = 1040;
+	private static final int MAX_PWM = 3500;
+	private static final int MID_PWM = 2500;
+	private static final int MIN_PWM = 1500;
 	
 	public static Wrist getInstance() {
 		if (INSTANCE == null) {
@@ -118,13 +118,13 @@ public class Wrist extends Subsystem {
 	}
 	
 	private void reloadGains() {
-		wristMotor.config_kP(0, 10, RobotConstants.TALON_CONFIG_TIMEOUT);
+		wristMotor.config_kP(0, 5, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.config_kI(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-		wristMotor.config_kD(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+		wristMotor.config_kD(0, .1, RobotConstants.TALON_CONFIG_TIMEOUT);
 		wristMotor.config_kF(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-		wristMotor.configMotionAcceleration(((4096 / 360) * 180) / 10,
+		wristMotor.configMotionAcceleration(degreesToTicks(180) / 10,
 			RobotConstants.TALON_CONFIG_TIMEOUT);
-		wristMotor.configMotionCruiseVelocity(((4096 / 360) * 90) / 10,
+		wristMotor.configMotionCruiseVelocity(degreesToTicks(90) / 10,
 			RobotConstants.TALON_CONFIG_TIMEOUT);
 		
 	}
@@ -137,9 +137,9 @@ public class Wrist extends Subsystem {
 	
 	private SystemState handleClosedLoop(double timestamp) {
 		if(stateChanged){
-			wristMotor.enableVoltageCompensation(false);
+			wristMotor.configVoltageCompSaturation(6);
 		}
-		wristMotor.set(ControlMode.Position, ((closedLoopInput / 90d) * 1024));
+		wristMotor.set(ControlMode.MotionMagic, degreesToTicks(closedLoopInput));
 		
 		if(WantedState.CLOSED_LOOP.equals(wantedState) && Math.abs(getEncoderAngle() - closedLoopInput) < 3){
 			return SystemState.HOLD;
@@ -148,10 +148,13 @@ public class Wrist extends Subsystem {
 		}
 	}
 	
+	private int degreesToTicks(double degrees){
+		return Double.valueOf(((degrees / 90d) * 1024d)).intValue();
+	}
+	
 	private SystemState handleHold(double timestamp) {
 		if(stateChanged){
-			LOG.info("ENABLING WRIST VOLTAGE COMP");
-			wristMotor.enableVoltageCompensation(true);
+			wristMotor.configVoltageCompSaturation(4);
 		}
 		
 		
@@ -188,6 +191,10 @@ public class Wrist extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
+//		double[] array = new double[2];
+//		wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
+//		LOG.info("{} {}", getEncoderAngle(), array[0]);
+		
 		SmartDashboard.putNumber("wrist.position", getEncoderAngle());
 	}
 	
@@ -232,6 +239,8 @@ public class Wrist extends Subsystem {
 	
 	public void setClosedLoopInput(double closedLoopInput) {
 		synchronized (this.closedLoopInput) {
+			closedLoopInput = Math.max(closedLoopInput, -90);
+			closedLoopInput = Math.min(closedLoopInput, 90);
 			this.closedLoopInput = closedLoopInput;
 		}
 	}
