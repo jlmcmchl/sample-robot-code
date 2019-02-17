@@ -134,8 +134,11 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleHoldHatch(double timestamp) {
-		topJawServo.set(0);
-		bottomJawServo.set(0);
+		if(timestamp - currentStateStartTime > .05){
+			bottomJawServo.set(.3875);
+		}
+		
+		topJawServo.set(.3875);
 		
 		if(WantedState.INTAKE_HATCH.equals(wantedState)){
 			return SystemState.HOLD_HATCH;
@@ -145,8 +148,9 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleIntakeHatch(double timestamp) {
-		topJawServo.set(.5);
+
 		bottomJawServo.set(.5);
+		topJawServo.set(.5);
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -285,6 +289,7 @@ public class Gripper extends Subsystem {
 				case INTAKE_HATCH:
 					wantedState = WantedState.INTAKE_HATCH;
 					systemState = SystemState.HOLD_HATCH;
+					currentStateStartTime = Timer.getFPGATimestamp();
 					break;
 				case HOLD_HATCH:
 					wantedState = WantedState.OFF;
