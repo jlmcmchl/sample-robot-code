@@ -3,6 +3,7 @@ package net.teamrush27.frc2019.subsystems.impl;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import net.teamrush27.frc2019.base.RobotMap;
@@ -101,6 +102,7 @@ public class Gripper extends Subsystem {
 	private final Servo bottomJawServo;
 	
 	private final AnalogInput detective;
+	private final DigitalInput whatchman;
 	
 	public Gripper() {
 		gripperMotorTop = new TalonSRX(RobotMap.GRIPPER_MOTOR_MASTER_CAN_ID);
@@ -121,7 +123,7 @@ public class Gripper extends Subsystem {
 		bottomJawServo = new Servo(RobotMap.GRIPPER_JAWS_BOTTOM_SERVO_ID);
 		
 		detective = new AnalogInput(RobotMap.GRIPPER_CARGO_ANALOG_SENSOR_ID);
-		
+		whatchman = new DigitalInput(RobotMap.GRIPPER_HATCH_DIGITAL_SENSOR_ID);
 	}
 	
 	
@@ -148,9 +150,12 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleIntakeHatch(double timestamp) {
-
 		bottomJawServo.set(.5);
 		topJawServo.set(.5);
+
+		if (!whatchman.get()) {
+			return SystemState.HOLD_HATCH;
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -240,7 +245,6 @@ public class Gripper extends Subsystem {
 		} else {
 			LED.getInstance().setExhausting(false);
 		}
-		
 	}
 	
 	@Override
@@ -256,6 +260,11 @@ public class Gripper extends Subsystem {
 	@Override
 	public void test() {
 	
+	}
+
+	@Override
+	public void writePeriodicOutputs() {
+		//System.out.println(whatchman.get());
 	}
 	
 	public void setWantedState(WantedState wantedState) {
