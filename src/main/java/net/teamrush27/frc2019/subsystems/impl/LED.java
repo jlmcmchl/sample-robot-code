@@ -48,7 +48,8 @@ public class LED extends Subsystem {
 	private boolean isIntaking = false;
 	
 	private final Loop loop = new Loop() {
-
+		private SystemState lastState = null;
+		
 		@Override
 		public void onStart(double timestamp) {
 			currentStateStartTime = timestamp;
@@ -56,12 +57,9 @@ public class LED extends Subsystem {
 
 		@Override
 		public void onLoop(double timestamp) {
-			SystemState newState;
-			newState = handleState(timestamp);
-			
-			if (newState != systemState) {
-				LOG.info("LED state " + systemState + " to " + newState);
-				systemState = newState;
+			if (lastState != systemState) {
+				LOG.info("LED state " + lastState + " to " + systemState);
+				lastState = systemState;
 				currentStateStartTime = timestamp;
 				stateChanged = true;
 			} else {
@@ -89,7 +87,6 @@ public class LED extends Subsystem {
 
 	@Override
 	public void outputToSmartDashboard() {
-		handleState(0);
 	}
 	
 	private SystemState defaultStateTransfer() {
@@ -102,7 +99,7 @@ public class LED extends Subsystem {
 		}
 	}
 	
-	private SystemState handleState(double timestamp) {
+	private SystemState handleState() {
 		String data = systemState.name() + ":";
 		switch (systemState){
 			case ENABLED:
@@ -122,6 +119,11 @@ public class LED extends Subsystem {
 		boolean success = arduino.transaction(data.getBytes(), data.getBytes().length, new byte[0], 0);
 		LOG.trace("writing {} to arduino - success? : {}", data, success);
 		return defaultStateTransfer();
+	}
+	
+	@Override
+	public void writePeriodicOutputs(){
+		handleState();
 	}
 
 	@Override
