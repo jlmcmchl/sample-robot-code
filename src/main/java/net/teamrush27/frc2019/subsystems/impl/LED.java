@@ -123,12 +123,12 @@ public class LED extends Subsystem {
 	
 	@Override
 	public void writePeriodicOutputs(){
-		handleState();
+		systemState = handleState();
 	}
 
 	@Override
 	public void stop() {
-		wantedState = WantedState.ENABLED;
+		wantedState = WantedState.DISABLED;
 	}
 
 	@Override
