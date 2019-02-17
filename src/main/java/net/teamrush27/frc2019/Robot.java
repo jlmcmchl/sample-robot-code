@@ -224,5 +224,9 @@ public class Robot extends TimedRobot {
 	public void disabledPeriodic() {
 		spiderLegs.zeroSensors();
 		arm.zeroSensors();
+		
+		if(operatorInterface.getWantManipulateHatch() && operatorInterface.getWantManipulateCargo()){
+			drivetrain.resetArmPosition(0);
+		}
 	}
 }

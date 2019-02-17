@@ -24,7 +24,7 @@ public class Arm extends Subsystem {
 	private static final Logger LOG = LogManager.getLogger(Arm.class);
 	private static Arm INSTANCE = null;
 	
-	private static final double ROTATIONS_PER_DEGREE = 0.297349654;
+	private static final double ROTATIONS_PER_DEGREE = 0.2877777778;
 	private static final double ROTATIONS_PER_INCH = 1.0642462836;
 	
 	public static Arm getInstance() {
@@ -116,7 +116,6 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
 		rotationMotorMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
 		rotationMotorMaster.setInverted(false);
-		
 		
 		rotationMotorSlave = new CANSparkMax(RobotMap.ARM_ROTATION_SLAVE_CAN_ID,
 			MotorType.kBrushless);
@@ -320,6 +319,7 @@ public class Arm extends Subsystem {
 		
 		// in degrees from vertical
 		private final double rotation;
+		private Double absoluteRotation = null;
 		private double rotationSetpoint;
 		// in inches
 		private final double extension;
@@ -379,5 +379,9 @@ public class Arm extends Subsystem {
 	
 	public ArmState getArmState() {
 		return armState;
+	}
+	
+	public void setAbsolutePosition(double selectedSensorPosition) {
+		armState.absoluteRotation = (selectedSensorPosition / 1024d) * 90d;
 	}
 }

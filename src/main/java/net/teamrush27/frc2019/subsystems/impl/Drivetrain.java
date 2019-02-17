@@ -35,8 +35,6 @@ import net.teamrush27.frc2019.util.motion.DriveMotionPlanner;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryIterator;
 import net.teamrush27.frc2019.util.trajectory.timing.TimedState;
-import net.teamrush27.frc2019.wrappers.CANTalonFactory;
-import net.teamrush27.frc2019.wrappers.LazyCANTalon;
 import net.teamrush27.frc2019.wrappers.NavX;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -203,6 +201,10 @@ public class Drivetrain extends Subsystem {
 
     leftSlave1 = new TalonSRX(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID);
     leftSlave1.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.setSensorPhase(true);
+    leftSlave1.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.configPeakCurrentDuration(DriveConstants.PEAK_CURRENT_DURATION,
@@ -796,6 +798,10 @@ public class Drivetrain extends Subsystem {
       CSVWriter = null;
     }
   }
+  
+  public void resetArmPosition(int armPositionTicks){
+    leftSlave1.setSelectedSensorPosition(armPositionTicks, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+  }
 
   @Override
   public synchronized void readPeriodicInputs() {
@@ -809,6 +815,8 @@ public class Drivetrain extends Subsystem {
     periodicIO.gyro_heading = Rotation2d
         .fromDegrees(navX.getFusedHeading()).rotateBy(gyroOffset);
     periodicIO.can_read_delta = Timer.getFPGATimestamp() - periodicIO.timestamp;
+    
+    Arm.getInstance().setAbsolutePosition(leftSlave1.getSelectedSensorPosition());
 
     double deltaLeftTicks =
         ((periodicIO.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
