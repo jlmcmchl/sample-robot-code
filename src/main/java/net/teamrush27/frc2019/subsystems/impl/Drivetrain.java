@@ -497,12 +497,8 @@ public class Drivetrain extends Subsystem {
   }
 
   public synchronized void shiftIntoHighGear() {
-    if (shiftState != ShiftState.HIGH_GEAR) {
-      shiftState = ShiftState.HIGH_GEAR;
-
-      leftShifter.set(shiftState.getLeft());
-      rightShifter.set(shiftState.getRight());
-    }
+    shiftState = ShiftState.LOW_GEAR;
+    shift();
   }
 
   /**

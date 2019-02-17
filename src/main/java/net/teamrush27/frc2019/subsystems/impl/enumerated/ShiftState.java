@@ -1,8 +1,8 @@
 package net.teamrush27.frc2019.subsystems.impl.enumerated;
 
 public enum ShiftState {
-  LOW_GEAR(0,0),
-  HIGH_GEAR(1,1),
+  LOW_GEAR(1,0),
+  HIGH_GEAR(0,1),
   UNKNOWN(.5,.5);
 
   private final double leftSetpoint;
