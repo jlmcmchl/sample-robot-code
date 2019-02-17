@@ -113,7 +113,7 @@ public class SpiderLegs extends Subsystem {
 		frontLegMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
 			RobotConstants.TALON_CONFIG_TIMEOUT);
-		frontLegMotor.setInverted(false);
+		frontLegMotor.setInverted(true);
 		frontLegMotor.setNeutralMode(NeutralMode.Coast);
 		frontLegMotor.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.enableCurrentLimit(true);
@@ -129,7 +129,7 @@ public class SpiderLegs extends Subsystem {
 		
 		rearLegMotorSlave = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_SLAVE_CAN_ID);
 		rearLegMotorSlave.configFactoryDefault();
-		rearLegMotorSlave.setInverted(true);
+		rearLegMotorSlave.setInverted(false);
 		rearLegMotorSlave.follow(rearLegMotorMaster);
 		rearLegMotorSlave.setNeutralMode(NeutralMode.Coast);
 		rearLegMotorSlave.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -163,8 +163,8 @@ public class SpiderLegs extends Subsystem {
 	}
 	
 	private SystemState handleOff(double timestamp) {
-		rearLegMotorMaster.set(ControlMode.MotionMagic, 0);
-		frontLegMotor.set(ControlMode.MotionMagic, 0);
+		rearLegMotorMaster.set(ControlMode.Disabled, 0);
+		frontLegMotor.set(ControlMode.Disabled, 0);
 		
 		return defaultStateTransfer(timestamp);
 	}
@@ -197,12 +197,12 @@ public class SpiderLegs extends Subsystem {
 		}
 		
 		if(frontOnGround){
-			frontLegMotor.set(ControlMode.MotionMagic, 0);
+			frontLegMotor.set(ControlMode.MotionMagic, 1000);
 		} else {
 			frontLegMotor.set(ControlMode.MotionMagic, 10500);
 		}
 		if(rearOnGround){
-			rearLegMotorMaster.set(ControlMode.MotionMagic, 0);
+			rearLegMotorMaster.set(ControlMode.MotionMagic, 1000);
 		} else {
 			rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
 		}
@@ -258,7 +258,7 @@ public class SpiderLegs extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
-//		LOG.info("front {} {} - rear {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(),rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition());
+		LOG.info("front {} {} - rear {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(),rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition());
 		
 		SmartDashboard
 			.putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
