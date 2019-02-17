@@ -37,6 +37,7 @@ public class Gripper extends Subsystem {
 	private WantedState wantedState = WantedState.OFF;
 	private SystemState systemState = SystemState.OFF;
 	
+	private boolean hasGamepiece = false;
 	private boolean stateChanged = false;
 	private double currentStateStartTime;
 	
@@ -154,7 +155,7 @@ public class Gripper extends Subsystem {
 		firstFoundBall=0;
 		gripperMotorTop.set(ControlMode.PercentOutput, -1);
 		
-		if(WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 2.5){
+		if(WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 1.5){
 			wantedState = WantedState.OFF;
 			return SystemState.OFF;
 		}
@@ -182,7 +183,7 @@ public class Gripper extends Subsystem {
 	private SystemState handleIntakeCargo(double timestamp) {
 		gripperMotorTop.set(ControlMode.PercentOutput, 1);
 		
-		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 2.5){
+		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1.5){
 			if(firstFoundBall == 0) {
 				firstFoundBall = Timer.getFPGATimestamp();
 			}
@@ -222,6 +223,7 @@ public class Gripper extends Subsystem {
 		if(SystemState.HOLD_CARGO.equals(systemState) || SystemState.HOLD_HATCH.equals(systemState)){
 			LED.getInstance().setHasGamePiece(true);
 		} else {
+			hasGamepiece = false;
 			LED.getInstance().setHasGamePiece(false);
 		}
 		if(SystemState.INTAKE_HATCH.equals(systemState) || SystemState.INTAKE_CARGO.equals(systemState)){
@@ -293,6 +295,10 @@ public class Gripper extends Subsystem {
 					break;
 			}
 		}
+	}
+	
+	public boolean isHasGamepiece() {
+		return SystemState.HOLD_CARGO.equals(systemState) || SystemState.HOLD_HATCH.equals(systemState);
 	}
 	
 	@Override
