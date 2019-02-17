@@ -237,10 +237,6 @@ public class Gripper extends Subsystem {
 			LED.getInstance().setExhausting(false);
 		}
 		
-		
-		if(i++ % 100 == 0){
-			LOG.trace("analogInput: {}", detective.getVoltage());
-		}
 	}
 	
 	@Override
