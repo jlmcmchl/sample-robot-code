@@ -130,7 +130,7 @@ public class Arm extends Subsystem {
 		
 		extensionMotor = new CANSparkMax(RobotMap.ARM_EXTENSION_CAN_ID, MotorType.kBrushless);
 		extensionMotor.restoreFactoryDefaults();
-		extensionMotor.disableVoltageCompensation();
+		extensionMotor.enableVoltageCompensation(12);
 		extensionMotor.setIdleMode(IdleMode.kBrake);
 		extensionMotor.setInverted(true);
 		extensionMotor.setSmartCurrentLimit(50);
@@ -149,7 +149,7 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.getPIDController().setI(0, 0);
 		rotationMotorMaster.getPIDController().setD(0, 0);
 		rotationMotorMaster.getPIDController().setFF(0, 0);
-		rotationMotorMaster.getPIDController().setOutputRange(-0.375, 0.375);
+		rotationMotorMaster.getPIDController().setOutputRange(-.25, .25);
 		rotationMotorMaster.getPIDController()
 			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 		rotationMotorMaster.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
@@ -160,7 +160,7 @@ public class Arm extends Subsystem {
 		extensionMotor.getPIDController().setP(.1, 0);
 		extensionMotor.getPIDController().setI(0, 0);
 		extensionMotor.getPIDController().setD(0, 0);
-		extensionMotor.getPIDController().setOutputRange(-.5, .5, 0);
+		extensionMotor.getPIDController().setOutputRange(-.25, .25, 0);
 		extensionMotor.getPIDController()
 			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 		extensionMotor.getPIDController().setSmartMotionAllowedClosedLoopError(.1, 0);
