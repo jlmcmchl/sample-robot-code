@@ -17,6 +17,7 @@ public interface OperatorInterface {
 	// arm
 	Boolean wantsStow();
 	Boolean wantsGroundPickup();
+	Boolean getWantsCargoShip();
 	Boolean wantsLevel1HumanLoad();
 	Boolean wantsLevel2();
 	Boolean wantsLevel3();

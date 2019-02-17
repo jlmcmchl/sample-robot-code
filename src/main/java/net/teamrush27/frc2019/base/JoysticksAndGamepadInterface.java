@@ -73,6 +73,11 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	}
 	
 	@Override
+	public Boolean getWantsCargoShip() {
+		return gamePad.getBumper(Hand.kLeft);
+	}
+	
+	@Override
 	public Boolean wantsLevel1HumanLoad() {
 		return gamePad.getPOV() > 0 && Math.abs(gamePad.getPOV() - 180) <= 10;
 	}
@@ -84,7 +89,7 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	
 	@Override
 	public Boolean wantsLevel3() {
-		return gamePad.getPOV() > 0 && gamePad.getPOV() <= 10;
+		return gamePad.getPOV() >= 0 && gamePad.getPOV() <= 10;
 	}
 	
 	@Override
