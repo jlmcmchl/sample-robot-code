@@ -257,7 +257,7 @@ public class SpiderLegs extends Subsystem {
 	
 	@Override
 	public void outputToSmartDashboard() {
-		LOG.info("front {} {} - rear {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(),rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition());
+		LOG.trace("front {} {} {} - rear {} {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(), frontOnGround,rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition(), rearOnGround);
 		
 		SmartDashboard
 			.putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
