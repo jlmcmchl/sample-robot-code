@@ -47,22 +47,8 @@ public class Arm extends Subsystem {
 	private WantedState wantedState = WantedState.OFF;
 	private SystemState systemState = SystemState.OFF;
 	
-	private final CANSparkMax rotationMotorMaster;
-	private final CANSparkMax rotationMotorSlave;
-	private final CANSparkMax extensionMotor;
-	
-	private final DigitalInput rotationHomeSensor;
-	private final DigitalInput extensionHomeSensor;
-	
 	private boolean stateChanged = false;
 	private double currentStateStartTime = 0d;
-	private Boolean rotationHomed = false;
-	private Boolean extensionHomed = false;
-	
-	private ArmInput openLoopInput = new ArmInput(0d, 0d);
-	private ArmInput closedLoopInput = new ArmInput(0d, 0d);
-	
-	private ArmState armState = new ArmState(0, 0, false, false);
 	
 	private Loop loop = new Loop() {
 		
@@ -107,6 +93,21 @@ public class Arm extends Subsystem {
 		}
 		
 	};
+	
+	private final CANSparkMax rotationMotorMaster;
+	private final CANSparkMax rotationMotorSlave;
+	private final CANSparkMax extensionMotor;
+	
+	private final DigitalInput rotationHomeSensor;
+	private final DigitalInput extensionHomeSensor;
+	
+	private Boolean rotationHomed = false;
+	private Boolean extensionHomed = false;
+	
+	private ArmInput openLoopInput = new ArmInput(0d, 0d);
+	private ArmInput closedLoopInput = new ArmInput(0d, 0d);
+	
+	private ArmState armState = new ArmState(0, 0, false, false);
 	
 	public Arm() {
 		rotationMotorMaster = new CANSparkMax(RobotMap.ARM_ROTATION_MASTER_CAN_ID,
