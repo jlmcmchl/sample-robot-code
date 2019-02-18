@@ -40,7 +40,7 @@ public class SuperstructureManager extends Subsystem {
 
   public enum WantedState {
     CARGO_GROUND_PICKUP(new ArmInput(5d, 88d), 50d),
-    HATCH_HUMAN_PICKUP(null, new ArmInput(5d, 86d), 4d),
+    HATCH_HUMAN_PICKUP(null, new ArmInput(5d, 90d), 0d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(5d, 81d), new ArmInput(5d, 86d), 9d),
     ROCKET_LEVEL_2(new ArmInput(22d, 6d), new ArmInput(22d, 6d), 84d),
