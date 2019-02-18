@@ -385,6 +385,8 @@ public class Arm extends Subsystem {
 	}
 	
 	public void setAbsolutePosition(double selectedSensorPosition) {
-		armState.absoluteRotation = (selectedSensorPosition / 1024d) * 90d;
+		double absolutePosition = (selectedSensorPosition / 1024d) * 90d;
+		rotationMotorMaster.setEncPosition(absolutePosition * ROTATIONS_PER_DEGREE);
+		rotationHomed = true;
 	}
 }
