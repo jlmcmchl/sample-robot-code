@@ -82,7 +82,7 @@ public class Drivetrain extends Subsystem {
   private final AHRS navX;
 
   private DriveMode driveMode = DriveMode.OPEN_LOOP;
-  private ShiftState shiftState = ShiftState.UNKNOWN;
+  private Boolean inHighGear = false;
   private RobotState robotState = RobotState.getInstance();
   private Trajectory trajectory = null;
   private DriveMotionPlanner motionPlanner;
@@ -92,7 +92,7 @@ public class Drivetrain extends Subsystem {
 
   private PeriodicIO periodicIO;
 
-  private boolean brakeMode;
+  private boolean brakeMode = true;
 
   private boolean modeChanged = false;
   private boolean isTrajectoryInverted = false;
@@ -287,11 +287,11 @@ public class Drivetrain extends Subsystem {
     periodicIO = new PeriodicIO();
     navX = new NavX(SPI.Port.kMXP);
 
-    brakeMode = true;
     setBrakeMode(false);
+    
+    shift(true);
 
     motionPlanner = new DriveMotionPlanner();
-
   }
 
   private void setCurrentLimiting(boolean shouldCurrentLimit) {
@@ -478,27 +478,29 @@ public class Drivetrain extends Subsystem {
     //            CSVWriter.write();
     //        }
   }
-
-  public synchronized void shift() {
-    switch (shiftState) {
-      case HIGH_GEAR:
-        shiftState = ShiftState.LOW_GEAR;
-        System.out.println("Shifted to Low Gear");
-        break;
-      case LOW_GEAR:
-      case UNKNOWN:
-      default:
-        shiftState = ShiftState.HIGH_GEAR;
-        System.out.println("Shifted to High Gear");
+  
+  public void shift(){
+    synchronized (inHighGear){
+      shift(!inHighGear);
     }
-
-    leftShifter.set(shiftState.getLeft());
-    rightShifter.set(shiftState.getRight());
   }
 
-  public synchronized void shiftIntoHighGear() {
-    shiftState = ShiftState.LOW_GEAR;
-    shift();
+  public void shift(boolean wantsHighGear) {
+    synchronized (inHighGear) {
+      if (wantsHighGear != inHighGear) {
+        if (wantsHighGear) {
+          System.out.println("Shifted to High Gear");
+          leftShifter.set(0);
+          rightShifter.set(1);
+          inHighGear = true;
+        } else {
+          LOG.info("Shifted to Low Gear");
+          leftShifter.set(1);
+          rightShifter.set(0);
+          inHighGear = false;
+        }
+      }
+    }
   }
 
   /**
