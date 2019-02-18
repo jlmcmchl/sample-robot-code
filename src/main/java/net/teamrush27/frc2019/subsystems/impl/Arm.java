@@ -24,10 +24,10 @@ public class Arm extends Subsystem {
 	private static final Logger LOG = LogManager.getLogger(Arm.class);
 	private static Arm INSTANCE = null;
 	
-	private static final double ROTATIONS_PER_DEGREE = 0.2877777778;
-	private static final double ROTATIONS_PER_INCH = 1.0642462836;
-
-	private static final double TICKS_PER_DEGREE = 0;
+	// gear ratio / degrees in a full rotation (360)
+	private static final double ROTATIONS_PER_DEGREE = 103.6 / 360d;
+	// gear ratio / (sprocket diameter * 2 [accts for 3rd stage] * pi)
+	private static final double ROTATIONS_PER_INCH = 13.39 / (1.75 * 2d * Math.PI);
 	
 	public static Arm getInstance() {
 		if (INSTANCE == null) {
