@@ -295,6 +295,21 @@ public class SpiderLegs extends Subsystem {
 		}
 	}
 	
+	public boolean shouldDrive(){
+		if(SystemState.CLIMBING_HOLD.equals(systemState)){
+			if(!rearOnGround){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		if(SystemState.CLIMBING.equals(systemState)){
+			return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public void test() {
 	
