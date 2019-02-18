@@ -171,7 +171,7 @@ public class SpiderLegs extends Subsystem {
 	}
 	
 	private SystemState handlePendingClimb(double timestamp) {
-		frontLegMotor.set(ControlMode.MotionMagic, 4000);
+		frontLegMotor.set(ControlMode.MotionMagic, 3500);
 		rearLegMotorMaster.set(ControlMode.MotionMagic, 7500);
 //		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.position", String.valueOf(rearLegMotorMaster.getSelectedSensorPosition()));
 //		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.velocity", String.valueOf(rearLegMotorMaster.getSelectedSensorVelocity()));
@@ -180,9 +180,7 @@ public class SpiderLegs extends Subsystem {
 	}
 	
 	private SystemState handleClimb(double timestamp) {
-		if(rearLegMotorMaster.getSelectedSensorPosition() > 8200){
-			frontLegMotor.set(ControlMode.MotionMagic, 10500);
-		}
+		frontLegMotor.set(ControlMode.MotionMagic, 10500);
 		rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
 		
 		if(Math.abs(frontLegMotor.getSelectedSensorPosition() - 10500) < 250){
