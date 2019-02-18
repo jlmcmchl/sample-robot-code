@@ -73,7 +73,7 @@ public class Arm extends Subsystem {
 					break;
 			}
 			if (newState != systemState) {
-				LOG.info("Arm state {} to {}",systemState,newState);
+				LOG.info("Arm state {} to {}", systemState, newState);
 				systemState = newState;
 				currentStateStartTime = timestamp;
 				stateChanged = true;
@@ -139,9 +139,9 @@ public class Arm extends Subsystem {
 		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
 		extensionMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
 		
-		
 		rotationHomeSensor = new InvertableDigitalInput(RobotMap.ARM_ROTATION_HOME_SENSOR_ID, true);
-		extensionHomeSensor = new InvertableDigitalInput(RobotMap.ARM_EXTENSION_HOME_SENSOR_ID, true);
+		extensionHomeSensor = new InvertableDigitalInput(RobotMap.ARM_EXTENSION_HOME_SENSOR_ID,
+			true);
 		
 		reloadGains();
 	}
@@ -183,7 +183,7 @@ public class Arm extends Subsystem {
 	private SystemState handleClosedLoop(double timestamp) {
 		armState.setRotationDemandInDegrees(closedLoopInput.getRotationInput());
 		armState.setExtensionDemandInInches(closedLoopInput.getExtensionInput());
-			
+		
 		return defaultStateTransfer(timestamp);
 	}
 	
@@ -224,21 +224,23 @@ public class Arm extends Subsystem {
 	
 	@Override
 	public void writePeriodicOutputs() {
-		if(stateChanged){
+		if (stateChanged) {
 			return;
 		}
 		switch (systemState) {
 			case CLOSED_LOOP:
 				if (rotationHomed) {
 					rotationMotorMaster.getPIDController()
-						.setReference(armState.getRotationDemandInRotations(), ControlType.kPosition);
+						.setReference(armState.getRotationDemandInRotations(),
+							ControlType.kPosition);
 				} else {
 					rotationMotorMaster.set(0);
 				}
-
+				
 				if (extensionHomed) {
 					extensionMotor.getPIDController()
-						.setReference(armState.getExtensionDemandInRotations(), ControlType.kPosition);
+						.setReference(armState.getExtensionDemandInRotations(),
+							ControlType.kPosition);
 				} else {
 					extensionMotor.set(0);
 				}
@@ -259,9 +261,9 @@ public class Arm extends Subsystem {
 	
 	@Override
 	public void zeroSensors() {
-		if(!rotationHomed){
-			if(armState.isRotationAtHome()){
-				if(CANError.kOK.equals(rotationMotorMaster.setEncPosition(0))) {
+		if (!rotationHomed) {
+			if (armState.isRotationAtHome()) {
+				if (CANError.kOK.equals(rotationMotorMaster.setEncPosition(0))) {
 					LOG.info("rotation homed");
 					rotationHomed = true;
 					LED.getInstance().setRotationHomed(true);
@@ -269,9 +271,9 @@ public class Arm extends Subsystem {
 			}
 		}
 		
-		if(!extensionHomed){
-			if(armState.isExtensionAtHome()){
-				if(CANError.kOK.equals(extensionMotor.setEncPosition(0))){
+		if (!extensionHomed) {
+			if (armState.isExtensionAtHome()) {
+				if (CANError.kOK.equals(extensionMotor.setEncPosition(0))) {
 					LOG.info("extension homed");
 					extensionHomed = true;
 					LED.getInstance().setExtensionHomed(true);
@@ -300,8 +302,8 @@ public class Arm extends Subsystem {
 	}
 	
 	public void setClosedLoopInput(ArmInput armInput, Boolean negate) {
-		if(negate){
-			armInput.setRotationInput(armInput.getRotationInput()*-1);
+		if (negate) {
+			armInput.setRotationInput(armInput.getRotationInput() * -1);
 		}
 		setClosedLoopInput(armInput);
 	}
@@ -313,7 +315,7 @@ public class Arm extends Subsystem {
 	}
 	
 	@Override
-	public String id(){
+	public String id() {
 		return TAG;
 	}
 	
@@ -322,7 +324,6 @@ public class Arm extends Subsystem {
 		
 		// in degrees from vertical
 		private final double rotation;
-		private Double absoluteRotation = null;
 		private double rotationSetpoint;
 		// in inches
 		private final double extension;
@@ -375,7 +376,7 @@ public class Arm extends Subsystem {
 			return extensionSetpoint * ROTATIONS_PER_INCH;
 		}
 		
-		public double getRotationDemandInRotations(){
+		public double getRotationDemandInRotations() {
 			return rotationSetpoint * ROTATIONS_PER_DEGREE;
 		}
 	}
