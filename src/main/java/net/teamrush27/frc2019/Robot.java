@@ -7,9 +7,7 @@
 
 package net.teamrush27.frc2019;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
@@ -27,9 +25,7 @@ import net.teamrush27.frc2019.subsystems.impl.LED;
 import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
-import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
-import net.teamrush27.frc2019.subsystems.impl.enumerated.ShiftState;
 import net.teamrush27.frc2019.util.TelemetryUtil;
 import net.teamrush27.frc2019.util.crash.CrashTracker;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
@@ -100,7 +96,7 @@ public class Robot extends TimedRobot {
 		spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
 		gripper.setWantedState(Gripper.WantedState.OFF);
 		wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
-		drivetrain.shiftIntoHighGear();
+		drivetrain.shift(true);
 		drivetrain.setOpenLoop(DriveCommand.defaultCommand());
 //		arm.setClosedLoopInput(new ArmInput(0d, 0d));
 
@@ -111,90 +107,51 @@ public class Robot extends TimedRobot {
 	
 	@Override
 	public void teleopPeriodic() {
-
-		if (operatorInterface.wantsStow()) {
-			superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert());
-		} else if (operatorInterface.wantsLevel1HumanLoad()) {
-			superman.setWantedState(WantedState.HATCH_HUMAN_PICKUP, operatorInterface.getWantsInvert());
-		} else if (operatorInterface.wantsGroundPickup()) {
-			superman.setWantedState(WantedState.CARGO_GROUND_PICKUP, operatorInterface.getWantsInvert());
-		} else if (operatorInterface.getWantsCargoShip()) {
-			superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert());
-		} else if (operatorInterface.wantsLevel2()) {
-			superman.setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert());
-		} else if (operatorInterface.wantsLevel3()) {
-			superman.setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert());
-		}
 		
-		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
-		
-		if (operatorInterface.getShift()) {
-			drivetrain.shift();
-		}
-
-		if (operatorInterface.getWantManipulateCargo()) {
-			gripper.transitionCargo();
-		} else if (operatorInterface.getWantManipulateHatch()) {
-			gripper.transitionHatch();
-		}
-		/*
-		if (operatorInterface.wantsStow()) {
-			arm.setClosedLoopInput(new ArmInput(5d, 0d));
-			wrist.setClosedLoopInput(0d);
-		} else if (operatorInterface.wantsGroundPickup()) {
-			arm.setClosedLoopInput(new ArmInput(5d, 88d), operatorInterface.getWantsInvert());
-			wrist.setClosedLoopInput(50d * (operatorInterface.getWantsInvert() ? -1 : 1));
-		} else if(operatorInterface.wantsLevel1HumanLoad()){
-			arm.setClosedLoopInput(new ArmInput(5d, 86d), operatorInterface.getWantsInvert());
-			wrist.setClosedLoopInput(0d);
-		} else if(operatorInterface.wantsLevel2()){
-			arm.setClosedLoopInput(new ArmInput(12.5d, 27d), operatorInterface.getWantsInvert());
-			if(operatorInterface.getWantsInvert()){
-				wrist.setClosedLoopInput(-90d+27d);
-			} else {
-				wrist.setClosedLoopInput(90d-27d);
+		// bail everything if we're climbing
+		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
+			spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
+			superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true);
+		} else if (operatorInterface.wantsClimb()) {
+			drivetrain.shift(false);
+			superman.setWantedState(SuperstructureManager.WantedState.CLIMB);
+			spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+		} else {
+			
+			if (operatorInterface.wantsStow()) {
+				superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert());
+			} else if (operatorInterface.wantsLevel1HumanLoad()) {
+				superman.setWantedState(WantedState.HATCH_HUMAN_PICKUP,
+					operatorInterface.getWantsInvert());
+			} else if (operatorInterface.wantsGroundPickup()) {
+				superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
+					operatorInterface.getWantsInvert());
+			} else if (operatorInterface.getWantsCargoShip()) {
+				superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert());
+			} else if (operatorInterface.wantsLevel2()) {
+				superman
+					.setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert());
+			} else if (operatorInterface.wantsLevel3()) {
+				superman
+					.setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert());
 			}
 			
+			if (operatorInterface.getShift()) {
+				drivetrain.shift();
+			}
+			
+			if (operatorInterface.getWantManipulateCargo()) {
+				gripper.transitionCargo();
+			} else if (operatorInterface.getWantManipulateHatch()) {
+				gripper.transitionHatch();
+			}
 		}
-		*/
-
-//		// bail everything if we're climbing
-//		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-//			spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
-//			arm.setClosedLoopInput(new ArmInput(0d, -45d));
-//		} else if (operatorInterface.wantsClimb()) {
-//			arm.setClosedLoopInput(new ArmInput(0d, -45d));
-//			spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
-//			drivetrain.setOpenLoop(new DriveCommand(-.3, -.3));
-//		} else {
-//			// non-climb teleop
-//
-//			if (operatorInterface.getWantManipulateCargo()) {
-//				gripper.transitionCargo();
-//			} else if (operatorInterface.getWantManipulateHatch()) {
-//				gripper.transitionHatch();
-//			}
-//
-//			if(operatorInterface.wantsStow()){
-//				arm.setClosedLoopInput(new ArmInput(0d,0d));
-//			} else if(operatorInterface.wantsGroundPickup()){
-//
-//			} else if(operatorInterface.wantsLevel1HumanLoad()){
-//				arm.setClosedLoopInput(new ArmInput(0d,45d), operatorInterface.getWantsInvert());
-//			} else if(operatorInterface.wantsLevel2()){
-//
-//			} else if(operatorInterface.wantsLevel3()){
-//
-//			}
-//		}
-//
-//		if (!operatorInterface.wantsClimb()) {
-//			drivetrain.setOpenLoop(operatorInterface.getTankCommand());
-//		}
-//
-//		if (!operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-//			spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-//		}
+		
+		if (spiderLegs.shouldDrive()) {
+			drivetrain.setOpenLoop(new DriveCommand(-.3, -.3, true));
+		} else {
+			drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+		}
 	}
 	
 	@Override
