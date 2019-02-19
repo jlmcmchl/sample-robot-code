@@ -202,7 +202,7 @@ public class Drivetrain extends Subsystem {
     leftSlave1 = new TalonSRX(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID);
     leftSlave1.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.setSensorPhase(true);
+    leftSlave1.setSensorPhase(false);
     leftSlave1.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
@@ -636,10 +636,6 @@ public class Drivetrain extends Subsystem {
   public synchronized void resetEncoders() {
     leftMaster.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave1.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    rightSlave2.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
   }
 
 
@@ -893,7 +889,7 @@ public class Drivetrain extends Subsystem {
   public String id() {
     return TAG;
   }
-
+  
   public static class PeriodicIO {
 
     public double timestamp;

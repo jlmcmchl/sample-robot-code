@@ -40,35 +40,29 @@ public class SuperstructureManager extends Subsystem {
 
   public enum WantedState {
     CARGO_GROUND_PICKUP(new ArmInput(5d, 88d), 50d),
-    HATCH_HUMAN_PICKUP(null, new ArmInput(5d, 90d), 0d),
+    HUMAN_LOAD(new ArmInput(10d, 32d), new ArmInput(5d, 90d), 52d, 0d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
-    ROCKET_LEVEL_1(new ArmInput(5d, 81d), new ArmInput(5d, 86d), 9d),
-    ROCKET_LEVEL_2(new ArmInput(22d, 6d), new ArmInput(22d, 6d), 84d),
-    ROCKET_LEVEL_3(new ArmInput(45d, 6d), new ArmInput(45d, 6d), 84d),
-    STOW(new ArmInput(5d, 0d), 0d),
+    ROCKET_LEVEL_1(new ArmInput(7d, 70d), new ArmInput(5d, 90d), 21d, 0d),
+    ROCKET_LEVEL_2(new ArmInput(26d, 32d), new ArmInput(18d, 39d), 57d, 48d),
+    ROCKET_LEVEL_3(new ArmInput(47d, 18d), new ArmInput(44d, 22d), 45d, 67d),
+    STOW(new ArmInput(5d, 25d), 0d),
     CLIMB(new ArmInput(5d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
 
     private final ArmInput defaultInput;
     private final ArmInput hatchInput;
-    private double wristAngle;
-
-    WantedState(ArmInput armInput) {
-      this(armInput, null, 0d);
-    }
-
+    private Double defaultWristAngle;
+    private Double hatchWristAngle;
+    
     WantedState(ArmInput armInput, double wristAngle) {
-      this(armInput, null, wristAngle);
+      this(armInput, null, wristAngle, null);
     }
 
-    WantedState(ArmInput armInput, ArmInput hatchInput) {
-      this(armInput, hatchInput, 0d);
-    }
-
-    WantedState(ArmInput armInput, ArmInput hatchInput, double wristAngle) {
+    WantedState(ArmInput armInput, ArmInput hatchInput, Double defaultWristAngle, Double hatchWristAngle) {
       this.defaultInput = armInput;
       this.hatchInput = hatchInput;
-      this.wristAngle = wristAngle;
+      this.defaultWristAngle = defaultWristAngle;
+      this.hatchWristAngle = hatchWristAngle;
     }
 
     public ArmInput getDefaultInput() {
@@ -79,8 +73,12 @@ public class SuperstructureManager extends Subsystem {
       return hatchInput;
     }
 
-    public double getWristAngle() {
-      return wristAngle;
+    public Double getDefaultWristAngle() {
+      return defaultWristAngle;
+    }
+  
+    public Double getHatchWristAngle() {
+      return hatchWristAngle;
     }
   }
 
@@ -88,17 +86,15 @@ public class SuperstructureManager extends Subsystem {
   private WantedState wantedState = WantedState.START;
   private Boolean newInvertedRotation = false;
   private Boolean invertedRotation = false;
+  private Boolean hasHatch = false;
   private Command origin = new Command(0d, 0d, null);
   private LinkedList<Command> commands = new LinkedList<>();
 
-  public synchronized void setWantedState(WantedState wantedState) {
-    setWantedState(wantedState, true);
-  }
-  public synchronized void setWantedState(WantedState wantedState, Boolean invertedRotation) {
+  public synchronized void setWantedState(WantedState wantedState, Boolean invertedRotation, Boolean hasHatch) {
     this.newWantedState = wantedState;
     this.newInvertedRotation = invertedRotation;
+    this.hasHatch = hasHatch;
   }
-
 
   @Override
   public void outputToSmartDashboard() {
@@ -127,9 +123,9 @@ public class SuperstructureManager extends Subsystem {
     wantedState = WantedState.CARGO_SHIP;
     recomputeOperations();
 
-    LOG.info("Stow to HATCH_HUMAN_PICKUP");
+    LOG.info("Stow to HUMAN_LOAD");
     origin = new Command(0d, 5d, null);
-    wantedState = WantedState.HATCH_HUMAN_PICKUP;
+    wantedState = WantedState.HUMAN_LOAD;
     recomputeOperations();*/
 
     /*LOG.info("Stow to ROCKET_LEVEL_1");
@@ -233,7 +229,7 @@ public class SuperstructureManager extends Subsystem {
             armState.getExtensionInInches(), wrist.getPWMAngle()));
     /*LOG.info(
         String.format("Origin: Rot: %s\tExt: %s\tWrs: %s", origin.getArmInput().getRotationInput(),
-            origin.getArmInput().getExtensionInput(), origin.getWristAngle()));*/
+            origin.getArmInput().getExtensionInput(), origin.getDefaultWristAngle()));*/
     LOG.info(String.format("Wanted: Rot: %s\tExt: %s\tWrs: %s", getWantedRotation(),
         getWantedExtension(), getWantedWristAngle()));
 
@@ -246,7 +242,7 @@ public class SuperstructureManager extends Subsystem {
         armState.getExtensionInInches());
     InterpolatingDouble wantedExtension = new InterpolatingDouble(getWantedExtension());
     InterpolatingDouble initialWristAngle = new InterpolatingDouble(
-        //    origin.getWristAngle());
+        //    origin.getDefaultWristAngle());
         wrist.getPWMAngle());
     InterpolatingDouble wantedWristAngle = new InterpolatingDouble(getWantedWristAngle());
 
@@ -351,21 +347,24 @@ public class SuperstructureManager extends Subsystem {
   }
 
   private double getWantedRotation() {
-    if (wantedState.getDefaultInput() == null) {
+    if ((hasHatch && wantedState.getHatchInput() != null) || wantedState.getDefaultInput() == null) {
       return wantedState.getHatchInput().getRotationInput() * (invertedRotation ? -1 : 1);
     }
     return wantedState.getDefaultInput().getRotationInput() * (invertedRotation ? -1 : 1);
   }
 
   private double getWantedExtension() {
-    if (wantedState.getDefaultInput() == null) {
+    if ((hasHatch && wantedState.getHatchInput() != null) || wantedState.getDefaultInput() == null) {
       return wantedState.getHatchInput().getExtensionInput();
     }
     return wantedState.getDefaultInput().getExtensionInput();
   }
 
   private double getWantedWristAngle() {
-    return wantedState.getWristAngle() * (invertedRotation ? -1 : 1);
+    if((hasHatch && wantedState.getHatchWristAngle() != null) || wantedState.getDefaultWristAngle() == null){
+      return wantedState.getHatchWristAngle() * (invertedRotation ? -1 : 1);
+    }
+    return wantedState.getDefaultWristAngle() * (invertedRotation ? -1 : 1);
   }
 
   private double boundExtensionForAngle(final double angle, final double extension) {

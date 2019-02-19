@@ -4,7 +4,6 @@ import com.ctre.phoenix.CANifier;
 import com.ctre.phoenix.CANifier.PWMChannel;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -196,6 +195,7 @@ public class Wrist extends Subsystem {
 //		LOG.info("{} {}", getEncoderAngle(), array[0]);
 		
 		SmartDashboard.putNumber("wrist.position", getEncoderAngle());
+		SmartDashboard.putNumber("wrist.pwm", getPWMAngle());
 	}
 	
 	@Override

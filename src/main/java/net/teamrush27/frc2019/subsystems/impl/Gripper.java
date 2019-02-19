@@ -307,8 +307,12 @@ public class Gripper extends Subsystem {
 		}
 	}
 	
-	public boolean isHasGamepiece() {
+	public boolean hasGamepiece() {
 		return SystemState.HOLD_CARGO.equals(systemState) || SystemState.HOLD_HATCH.equals(systemState);
+	}
+	
+	public boolean hasHatch(){
+		return SystemState.HOLD_HATCH.equals(systemState);
 	}
 	
 	@Override

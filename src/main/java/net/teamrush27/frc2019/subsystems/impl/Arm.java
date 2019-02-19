@@ -27,7 +27,9 @@ public class Arm extends Subsystem {
 	// gear ratio / degrees in a full rotation (360)
 	private static final double ROTATIONS_PER_DEGREE = 103.6 / 360d;
 	// gear ratio / (sprocket diameter * 2 [accts for 3rd stage] * pi)
-	private static final double ROTATIONS_PER_INCH = 13.39 / (1.75 * 2d * Math.PI);
+	private static final double ROTATIONS_PER_INCH = 1.0642462836;
+	
+	private static final double HOME_POSITION = -67.06054422385905;
 	
 	public static Arm getInstance() {
 		if (INSTANCE == null) {
@@ -151,7 +153,7 @@ public class Arm extends Subsystem {
 		rotationMotorMaster.getPIDController().setI(0, 0);
 		rotationMotorMaster.getPIDController().setD(0, 0);
 		rotationMotorMaster.getPIDController().setFF(0, 0);
-		rotationMotorMaster.getPIDController().setOutputRange(-.25, .25);
+		rotationMotorMaster.getPIDController().setOutputRange(-.375, .375);
 		rotationMotorMaster.getPIDController()
 			.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 		rotationMotorMaster.getPIDController().setSmartMotionAllowedClosedLoopError(1, 0);
@@ -387,7 +389,11 @@ public class Arm extends Subsystem {
 	
 	public void setAbsolutePosition(double selectedSensorPosition) {
 		double absolutePosition = (selectedSensorPosition / 1024d) * 90d;
-		rotationMotorMaster.setEncPosition(absolutePosition * ROTATIONS_PER_DEGREE);
-		rotationHomed = true;
+//		LOG.info("abs: {}", absolutePosition);
+		rotationMotorMaster.setEncPosition((absolutePosition-HOME_POSITION) * ROTATIONS_PER_DEGREE);
+		if(!rotationHomed){
+			rotationHomed = true;
+			LED.getInstance().setRotationHomed(true);
+		}
 	}
 }

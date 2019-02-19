@@ -64,8 +64,10 @@ public class Robot extends TimedRobot {
 	public void robotPeriodic() {
 		//subsystemManager.outputToSmartDashboard();
 		//enabledLooper.outputToSmartDashboard();
-		LOG.trace("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
-			arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
+		//LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
+		//	arm.getArmState().getExtensionInInches(), wrist.getPWMAngle());
+		
+		gripper.outputToSmartDashboard();
 	}
 	
 	@Override
@@ -111,29 +113,32 @@ public class Robot extends TimedRobot {
 		// bail everything if we're climbing
 		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
 			spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
-			superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true);
+			superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
 		} else if (operatorInterface.wantsClimb()) {
 			drivetrain.shift(false);
-			superman.setWantedState(SuperstructureManager.WantedState.CLIMB);
+			superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
 			spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
 		} else {
-			
 			if (operatorInterface.wantsStow()) {
-				superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert());
+				superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(), gripper.hasHatch());
+			} else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
+				superman.setWantedState(WantedState.ROCKET_LEVEL_1, operatorInterface.getWantsInvert(), gripper.hasHatch());
 			} else if (operatorInterface.wantsLevel1HumanLoad()) {
-				superman.setWantedState(WantedState.HATCH_HUMAN_PICKUP,
-					operatorInterface.getWantsInvert());
+				superman.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), true);
 			} else if (operatorInterface.wantsGroundPickup()) {
 				superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
-					operatorInterface.getWantsInvert());
+					operatorInterface.getWantsInvert(), false);
 			} else if (operatorInterface.getWantsCargoShip()) {
-				superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert());
-			} else if (operatorInterface.wantsLevel2()) {
+				superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert(), gripper.hasHatch());
+			} else if (operatorInterface.wantsLevel2() && gripper.hasGamepiece()) {
 				superman
-					.setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert());
+					.setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert(), gripper.hasHatch());
+			} else if(operatorInterface.wantsLevel2()){
+				superman
+					.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), false);
 			} else if (operatorInterface.wantsLevel3()) {
 				superman
-					.setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert());
+					.setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert(), gripper.hasHatch());
 			}
 			
 			if (operatorInterface.getShift()) {
@@ -207,8 +212,8 @@ public class Robot extends TimedRobot {
 		spiderLegs.zeroSensors();
 		arm.zeroSensors();
 		
-		if(operatorInterface.getWantManipulateHatch() && operatorInterface.getWantManipulateCargo()){
-			drivetrain.resetArmPosition(0);
-		}
+		spiderLegs.outputToSmartDashboard();
+		
+		wrist.outputToSmartDashboard();
 	}
 }
