@@ -105,6 +105,14 @@ public class SuperstructureManager extends Subsystem {
     wantedState = WantedState.STOW;
   }
 
+  private void printCommands() {
+    for (Command command : commands) {
+      LOG.info(String.format("COMMAND ROT: %s\tEXT: %s\tWRS: %s\tLIM: %s",
+          command.getArmInput().getRotationInput(), command.getArmInput().getExtensionInput(),
+          command.getWristAngle(), command.getLimitType()));
+    }
+  }
+
   @Override
   public void zeroSensors() {
     /*LOG.info("Package to Stow");
@@ -228,11 +236,19 @@ public class SuperstructureManager extends Subsystem {
             armState.getExtensionInInches(), wrist.getPWMAngle()));
     /*LOG.info(
         String.format("Origin: Rot: %s\tExt: %s\tWrs: %s", origin.getArmInput().getRotationInput(),
-            origin.getArmInput().getExtensionInput(), origin.getDefaultWristAngle()));*/
+            origin.getArmInput().getExtensionInput(), origin.getWristAngle()));*/
     LOG.info(String.format("Wanted: Rot: %s\tExt: %s\tWrs: %s", getWantedRotation(),
         getWantedExtension(), getWantedWristAngle()));
 
-    InterpolatingDouble initialRotation = new InterpolatingDouble(
+    //commands.add(new Command(origin.getArmInput().getRotationInput(), 5d, 0d, Limit.EXTENSION));
+    commands.add(new Command(armState.getRotationInDegrees(), 5d, 0d, Limit.EXTENSION));
+    commands.add(new Command(getWantedRotation(), 5d, 0d, Limit.ROTATION));
+    commands.add(
+        new Command(getWantedRotation(), getWantedExtension(), getWantedWristAngle(), Limit.NONE));
+
+    printCommands();
+
+    /*InterpolatingDouble initialRotation = new InterpolatingDouble(
         //    origin.getArmInput().getRotationInput());
         armState.getRotationInDegrees());
     InterpolatingDouble wantedRotation = new InterpolatingDouble(getWantedRotation());
@@ -315,7 +331,7 @@ public class SuperstructureManager extends Subsystem {
     LOG.info("");
 
     commands.add(new Command(wantedRotation.value, wantedExtension.value, wantedWristAngle.value,
-        Limit.NONE));
+        Limit.NONE));*/
   }
 
   private boolean operationComplete(Command current) {
@@ -327,16 +343,10 @@ public class SuperstructureManager extends Subsystem {
     switch (current.getLimitType()) {
       case ROTATION:
         return MathUtils.epsilonEquals(currentRotation, goalRotation, ROTATION_EPSILON);
-      case EXTENSION_MINIMUM:
-        return MathUtils.epsilonEquals(currentRotation, goalRotation, ROTATION_EPSILON)
-            && (currentExtension > goalExtension
-              || MathUtils.epsilonEquals(currentExtension, goalExtension, EXTENSION_EPSILON));
-      case EXTENSION_MAXIMUM:
-        return MathUtils.epsilonEquals(currentRotation, goalRotation, ROTATION_EPSILON)
-            && (currentExtension < goalExtension
-              || MathUtils.epsilonEquals(currentExtension, goalExtension, EXTENSION_EPSILON));
+      case EXTENSION:
+        return MathUtils.epsilonEquals(currentExtension, goalExtension, EXTENSION_EPSILON);
       default:
-        return false;
+        return true;
     }
   }
 
@@ -437,7 +447,7 @@ public class SuperstructureManager extends Subsystem {
 
 
   private enum Limit {
-    ROTATION, EXTENSION_MINIMUM, EXTENSION_MAXIMUM, NONE
+    ROTATION, EXTENSION, NONE
   }
 
   private class Command {
