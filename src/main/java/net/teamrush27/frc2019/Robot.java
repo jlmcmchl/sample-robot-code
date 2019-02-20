@@ -100,6 +100,8 @@ public class Robot extends TimedRobot {
 		wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
 		drivetrain.shift(true);
 		drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+
+		superman.setWantedState(WantedState.STOW, false, false);
 //		arm.setClosedLoopInput(new ArmInput(0d, 0d));
 
 //		subsystemManager.startLogging();

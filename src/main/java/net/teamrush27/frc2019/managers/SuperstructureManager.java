@@ -37,15 +37,14 @@ public class SuperstructureManager extends Subsystem {
 
   private Arm arm = Arm.getInstance();
   private Wrist wrist = Wrist.getInstance();
-
   public enum WantedState {
     CARGO_GROUND_PICKUP(new ArmInput(5d, 88d), 50d),
     HUMAN_LOAD(new ArmInput(10d, 32d), new ArmInput(5d, 90d), 52d, 0d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(7d, 70d), new ArmInput(5d, 90d), 21d, 0d),
-    ROCKET_LEVEL_2(new ArmInput(26d, 32d), new ArmInput(18d, 39d), 57d, 48d),
-    ROCKET_LEVEL_3(new ArmInput(47d, 18d), new ArmInput(44d, 22d), 45d, 67d),
-    STOW(new ArmInput(5d, 25d), 0d),
+    ROCKET_LEVEL_2(new ArmInput(15d, 7.3d), new ArmInput(13d, 15.5d), 60d, 71d),
+    ROCKET_LEVEL_3(new ArmInput(43d, 3d), new ArmInput(40d, 7.7d), 63d, 80d),
+    STOW(new ArmInput(5d, 30d), 0d),
     CLIMB(new ArmInput(5d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
 
@@ -98,7 +97,7 @@ public class SuperstructureManager extends Subsystem {
 
   @Override
   public void outputToSmartDashboard() {
-    //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(), arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
+    LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(), arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
   }
 
   @Override
@@ -339,6 +338,23 @@ public class SuperstructureManager extends Subsystem {
       default:
         return false;
     }
+  }
+
+  private Command getNextCommand(LinkedList<Command> commands) {
+    double rotation = 0;
+
+    for (Command command : commands) {
+      if (command.getLimitType() == Limit.ROTATION || command.getLimitType() == Limit.NONE) {
+        rotation = command.getArmInput().getRotationInput();
+        break;
+      }
+    }
+
+    double extension = commands.peek().getArmInput().getExtensionInput();
+    double wristAngle = commands.peek().getWristAngle();
+    Limit limit = commands.peek().getLimitType();
+
+    return new Command(rotation, extension, wristAngle, limit);
   }
 
   private void executeCommand(Command command) {

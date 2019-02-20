@@ -151,7 +151,7 @@ public class Arm extends Subsystem {
 	private void reloadGains() {
 		rotationMotorMaster.getPIDController().setP(.1, 0);
 		rotationMotorMaster.getPIDController().setI(0, 0);
-		rotationMotorMaster.getPIDController().setD(0, 0);
+		rotationMotorMaster.getPIDController().setD(1, 0);
 		rotationMotorMaster.getPIDController().setFF(0, 0);
 		rotationMotorMaster.getPIDController().setOutputRange(-.375, .375);
 		rotationMotorMaster.getPIDController()

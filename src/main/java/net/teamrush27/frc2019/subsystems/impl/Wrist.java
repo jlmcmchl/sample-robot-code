@@ -21,9 +21,9 @@ public class Wrist extends Subsystem {
 	private static String TAG = "WRIST";
 	private static Wrist INSTANCE = null;
 	
-	private static final int MAX_PWM = 3500;
-	private static final int MID_PWM = 2500;
-	private static final int MIN_PWM = 1500;
+	private static final int MAX_PWM = 2188;
+	private static final int MID_PWM = 1232;
+	private static final int MIN_PWM = 314;
 	
 	public static Wrist getInstance() {
 		if (INSTANCE == null) {
@@ -193,9 +193,13 @@ public class Wrist extends Subsystem {
 //		double[] array = new double[2];
 //		wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
 //		LOG.info("{} {}", getEncoderAngle(), array[0]);
-		
+
+		double[] array = new double[2];
+		wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
+		double value = array[0];
+
 		SmartDashboard.putNumber("wrist.position", getEncoderAngle());
-		SmartDashboard.putNumber("wrist.pwm", getPWMAngle());
+		SmartDashboard.putNumber("wrist.pwm", array[0]);
 	}
 	
 	@Override
