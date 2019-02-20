@@ -21,9 +21,9 @@ public class Wrist extends Subsystem {
 	private static String TAG = "WRIST";
 	private static Wrist INSTANCE = null;
 	
-	private static final int MAX_PWM = 2188;
-	private static final int MID_PWM = 1232;
-	private static final int MIN_PWM = 314;
+	private static final int MAX_PWM = 3500;
+	private static final int MID_PWM = 2500;
+	private static final int MIN_PWM = 1500;
 	
 	public static Wrist getInstance() {
 		if (INSTANCE == null) {
