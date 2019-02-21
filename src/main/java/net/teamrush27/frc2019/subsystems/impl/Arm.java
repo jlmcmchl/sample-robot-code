@@ -29,7 +29,7 @@ public class Arm extends Subsystem {
 	// gear ratio / (sprocket diameter * 2 [accts for 3rd stage] * pi)
 	private static final double ROTATIONS_PER_INCH = 1.0642462836;
 	
-	private static final double HOME_POSITION = -67.06054422385905;
+	private static final double HOME_POSITION = -15.1171875;
 	
 	public static Arm getInstance() {
 		if (INSTANCE == null) {
