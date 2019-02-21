@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
@@ -245,6 +246,8 @@ public class Gripper extends Subsystem {
 		} else {
 			LED.getInstance().setExhausting(false);
 		}
+
+		SmartDashboard.putNumber("detective", detective.getVoltage());
 	}
 	
 	@Override
@@ -264,6 +267,7 @@ public class Gripper extends Subsystem {
 
 	@Override
 	public void writePeriodicOutputs() {
+		//System.out.println(detective.getVoltage());
 		//System.out.println(whatchman.get());
 	}
 	

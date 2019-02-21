@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.Objects;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.base.RobotState;
@@ -464,6 +465,10 @@ public class Drivetrain extends Subsystem {
   public void outputToSmartDashboard() {
     LOG.trace("left {} - right {}", leftMaster.getSelectedSensorPosition(),
         rightMaster.getSelectedSensorPosition());
+    SmartDashboard.putNumber("arm.absolute_rotation", leftSlave1.getSelectedSensorPosition());
+    SmartDashboard.putNumber("drivetrain.left.position", leftMaster.getSelectedSensorPosition());
+    SmartDashboard.putNumber("drivetrain.right.position", rightMaster.getSelectedSensorPosition());
+
 
 //    SmartDashboard.putBoolean("climb", DriveMode.CLIMB.equals(driveMode));
 //		double currentleftMax = Math.max(leftMaster.getOutputCurrent(),leftMax);
@@ -489,7 +494,7 @@ public class Drivetrain extends Subsystem {
     synchronized (inHighGear) {
       if (wantsHighGear != inHighGear) {
         if (wantsHighGear) {
-          System.out.println("Shifted to High Gear");
+          LOG.info("Shifted to High Gear");
           leftShifter.set(0);
           rightShifter.set(1);
           inHighGear = true;
