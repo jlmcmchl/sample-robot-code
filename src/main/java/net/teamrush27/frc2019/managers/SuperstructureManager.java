@@ -44,7 +44,7 @@ public class SuperstructureManager extends Subsystem {
     ROCKET_LEVEL_1(new ArmInput(7d, 70d), new ArmInput(5d, 90d), 21d, 0d),
     ROCKET_LEVEL_2(new ArmInput(15d, 7.3d), new ArmInput(13d, 15.5d), 60d, 71d),
     ROCKET_LEVEL_3(new ArmInput(43d, 3d), new ArmInput(40d, 7.7d), 63d, 80d),
-    STOW(new ArmInput(5d, 30d), 0d),
+    STOW(new ArmInput(5d, 0d), 0d),
     CLIMB(new ArmInput(5d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
 
