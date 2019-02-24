@@ -25,14 +25,17 @@ public class RobotMap {
 	
 	
 	// Gripper
-	public static final int GRIPPER_MOTOR_MASTER_CAN_ID = 20;
-	public static final int GRIPPER_MOTOR_SLAVE_CAN_ID = 22;
+	public static final int GRIPPER_JAWS_CAN_ID = 20;
+	public static final int GRIPPER_MOTOR_CAN_ID = 22;
 	
 	public static final int GRIPPER_JAWS_TOP_SERVO_ID = 2;
 	public static final int GRIPPER_JAWS_BOTTOM_SERVO_ID = 3;
 	
 	public static final int GRIPPER_CARGO_ANALOG_SENSOR_ID = 1;
 	public static final int GRIPPER_HATCH_DIGITAL_SENSOR_ID = 0;
+	public static final int GRIPPER_JAW_HOME_SENSOR_ID = 1;
+	public static final int GRIPPER_JAW_MAX_SENSOR_ID = 2;
+	
 	
 	// Wrist
 	public static final int WRIST_MOTOR_CAN_ID = 23;

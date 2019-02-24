@@ -12,6 +12,7 @@ import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,52 +97,65 @@ public class Gripper extends Subsystem {
 	};
 	
 	
-	private final TalonSRX gripperMotorTop;
-	private final TalonSRX gripperMotorBottom;
-	
-	private final Servo topJawServo;
-	private final Servo bottomJawServo;
+	private final TalonSRX gripperMotor;
+	private final TalonSRX jawMotor;
 	
 	private final AnalogInput detective;
 	private final DigitalInput whatchman;
 	
+	private final DigitalInput jawHome;
+	private final DigitalInput jawMax;
+	
 	public Gripper() {
-		gripperMotorTop = new TalonSRX(RobotMap.GRIPPER_MOTOR_MASTER_CAN_ID);
-		gripperMotorTop.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
-		gripperMotorTop.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
-		gripperMotorTop.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
-		gripperMotorTop.enableCurrentLimit(true);
+		gripperMotor = new TalonSRX(RobotMap.GRIPPER_MOTOR_CAN_ID);
+		gripperMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotor.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotor.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
+		gripperMotor.enableCurrentLimit(true);
 		
-		gripperMotorBottom = new TalonSRX(RobotMap.GRIPPER_MOTOR_SLAVE_CAN_ID);
-		gripperMotorBottom.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
-		gripperMotorBottom.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
-		gripperMotorBottom.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
-		gripperMotorBottom.enableCurrentLimit(true);
-		gripperMotorBottom.follow(gripperMotorTop);
-		
-		
-		topJawServo = new Servo(RobotMap.GRIPPER_JAWS_TOP_SERVO_ID);
-		bottomJawServo = new Servo(RobotMap.GRIPPER_JAWS_BOTTOM_SERVO_ID);
+		jawMotor = new TalonSRX(RobotMap.GRIPPER_JAWS_CAN_ID);
+		jawMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
+		jawMotor.configOpenloopRamp(.1, RobotConstants.TALON_CONFIG_TIMEOUT);
+		jawMotor.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
+		jawMotor.enableCurrentLimit(true);
+		jawMotor.setInverted(true);
+		jawMotor.configVoltageCompSaturation(4);
+		jawMotor.enableVoltageCompensation(false);
 		
 		detective = new AnalogInput(RobotMap.GRIPPER_CARGO_ANALOG_SENSOR_ID);
 		whatchman = new DigitalInput(RobotMap.GRIPPER_HATCH_DIGITAL_SENSOR_ID);
+		jawHome = new InvertableDigitalInput(RobotMap.GRIPPER_JAW_HOME_SENSOR_ID, true);
+		jawMax = new InvertableDigitalInput(RobotMap.GRIPPER_JAW_MAX_SENSOR_ID, true);
 	}
 	
+	private double test = 0d;
+	
+	public void setTest(double test) {
+		this.test = test;
+	}
 	
 	private SystemState handleOff(double timestamp) {
-		gripperMotorTop.set(ControlMode.Disabled, 0);
-		topJawServo.set(1);
-		bottomJawServo.set(1);
+		gripperMotor.set(ControlMode.Disabled, 0);
+		
+		if(!jawHome.get()){
+			jawMotor.set(ControlMode.PercentOutput, -1);
+		} else {
+			jawMotor.set(ControlMode.Disabled, 0);
+		}
+		
+		jawMotor.enableVoltageCompensation(false);
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleHoldHatch(double timestamp) {
-		//if(timestamp - currentStateStartTime > .05){
-			bottomJawServo.set(0);
-		//}
+		if(!jawMax.get()){
+			jawMotor.set(ControlMode.PercentOutput, 1);
+		} else {
+			jawMotor.set(ControlMode.Disabled, 1);
+		}
 		
-		topJawServo.set(0);
+		jawMotor.enableVoltageCompensation(true);
 		
 		if(WantedState.INTAKE_HATCH.equals(wantedState)){
 			return SystemState.HOLD_HATCH;
@@ -151,19 +165,25 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleIntakeHatch(double timestamp) {
-		bottomJawServo.set(0);
-		topJawServo.set(0);
-
-		if (!whatchman.get()) {
-			return SystemState.HOLD_HATCH;
+		double delta = timestamp - currentStateStartTime;
+		if(delta <= .5 && !jawMax.get()){
+			jawMotor.set(ControlMode.PercentOutput, 1);
+		} else {
+			jawMotor.set(ControlMode.Disabled, 0);
 		}
+		
+		jawMotor.enableVoltageCompensation(false);
+		
+//		if (!whatchman.get()) {
+//			return SystemState.HOLD_HATCH;
+//		}
 		
 		return defaultStateTransfer(timestamp);
 	}
 	
 	private SystemState handleExhaustCargo(double timestamp) {
 		firstFoundBall=0;
-		gripperMotorTop.set(ControlMode.PercentOutput, -1);
+		gripperMotor.set(ControlMode.PercentOutput, -1);
 		
 		if(WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 1.5){
 			wantedState = WantedState.OFF;
@@ -175,7 +195,7 @@ public class Gripper extends Subsystem {
 	
 	private SystemState handleHoldCargo(double timestamp) {
 		firstFoundBall = 0;
-		gripperMotorTop.set(ControlMode.PercentOutput, .1);
+		gripperMotor.set(ControlMode.PercentOutput, .1);
 		
 		if(WantedState.EXHAUST_CARGO.equals(wantedState)){
 			return SystemState.EXHAUST_CARGO;
@@ -191,7 +211,7 @@ public class Gripper extends Subsystem {
 	private double firstFoundBall = 0;
 	
 	private SystemState handleIntakeCargo(double timestamp) {
-		gripperMotorTop.set(ControlMode.PercentOutput, 1);
+		gripperMotor.set(ControlMode.PercentOutput, 1);
 		
 		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1.75){
 			if(firstFoundBall == 0) {
