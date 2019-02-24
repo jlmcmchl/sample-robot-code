@@ -79,10 +79,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    //subsystemManager.outputToSmartDashboard();
+    subsystemManager.outputToSmartDashboard();
     //enabledLooper.outputToSmartDashboard();
     //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
     //	arm.getArmState().getExtensionInInches(), wrist.getPWMAngle());
+
+    //wrist.outputToSmartDashboard();
 
     //gripper.outputToSmartDashboard();
 
@@ -163,6 +165,8 @@ public class Robot extends TimedRobot {
 //		subsystemManager.startLogging();
   }
 
+  boolean already_holding;
+
 
   @Override
   public void teleopPeriodic() {
@@ -222,9 +226,11 @@ public class Robot extends TimedRobot {
     }
 
     if (spiderLegs.shouldDrive()) {
-      drivetrain.setOpenLoop(new DriveCommand(-.3, -.3, true));
-    } else if (spiderLegs.shouldHoldPosition()) {
-      drivetrain.setHoldPosition(2d, 2d);
+      if (spiderLegs.shouldHoldPosition()) {
+        drivetrain.setHoldPosition(2d, 2d);
+      } else {
+        drivetrain.setOpenLoop(new DriveCommand(-.3, -.3, true));
+      }
     } else {
       drivetrain.setOpenLoop(operatorInterface.getTankCommand());
     }
