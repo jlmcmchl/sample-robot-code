@@ -263,7 +263,7 @@ public class Arm extends Subsystem {
                 EXTENSION_EPSILON);
         if (rotationHomed) {
           if (rotation_close) {
-            System.out.println("Holding Rotation in POSITION PID");
+//            System.out.println("Holding Rotation in POSITION PID");
           }
           rotationMotorMaster.getPIDController()
                 .setReference(armState.getRotationDemandInRotations(),
@@ -274,7 +274,7 @@ public class Arm extends Subsystem {
 
         if (extensionHomed) {
           if (extension_close) {
-            System.out.println("Holding Extension in POSITION PID");
+//            System.out.println("Holding Extension in POSITION PID");
           }
             extensionMotor.getPIDController()
                 .setReference(armState.getExtensionDemandInRotations(),
