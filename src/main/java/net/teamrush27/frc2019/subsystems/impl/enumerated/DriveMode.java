@@ -6,7 +6,8 @@ public enum DriveMode {
   OPEN_LOOP(ControlMode.PercentOutput), // open loop voltage control
   VELOCITY_SETPOINT(ControlMode.Velocity), // velocity PID control
   CHEZY_PATH_FOLLOWING(ControlMode.Velocity), // used for autonomous driving
-  TURN_TO_HEADING(ControlMode.MotionMagic); // turn in place
+  TURN_TO_HEADING(ControlMode.MotionMagic), // turn in place
+  HOLD_POSITION(ControlMode.MotionMagic);
 
   private final ControlMode requestedControlMode;
 

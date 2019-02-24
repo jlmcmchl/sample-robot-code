@@ -3,9 +3,9 @@ package net.teamrush27.frc2019.constants;
 public class RobotConstants {
 	
 	// Wheel Base
-    public static double DRIVE_WHEEL_DIAMETER = 7.75; // in inches
-    public static double TRACK_WIDTH = 28; // in inches
-    public static double SCRUB_FACTOR = 10;
+    public static double DRIVE_WHEEL_DIAMETER = 4; // in inches
+    public static double TRACK_WIDTH = 25; // in inches
+    public static double SCRUB_FACTOR = 1;
 
     // Extremities
     // below in inches

@@ -30,5 +30,10 @@ public interface OperatorInterface {
 	// open loop
 	Double getWristInput();
 	ArmInput getArmInput();
+
+	Boolean wantsSwitchPipeline();
+
+	Boolean wantsIncreaseOffset();
+	Boolean wantsDecreaseOffset();
 	
 }

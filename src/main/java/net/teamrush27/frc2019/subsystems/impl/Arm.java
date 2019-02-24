@@ -9,11 +9,13 @@ import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import javax.naming.ldap.Control;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
+import net.teamrush27.frc2019.util.math.MathUtils;
 import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +31,10 @@ public class Arm extends Subsystem {
   // gear ratio / (sprocket diameter * 2 [accts for 3rd stage] * pi)
   private static final double ROTATIONS_PER_INCH = 1.0642462836;
 
-  private static final double HOME_POSITION = -214.1015625;
+  private static final double HOME_POSITION = 214.541015625;
+
+  private static final double ROTATION_EPSILON = 3;
+  private static final double EXTENSION_EPSILON = 1;
 
   public static Arm getInstance() {
     if (INSTANCE == null) {
@@ -153,7 +158,7 @@ public class Arm extends Subsystem {
     rotationMotorMaster.getPIDController().setI(0, 0);
     rotationMotorMaster.getPIDController().setD(0.0004, 0);
     rotationMotorMaster.getPIDController().setFF(0.000156, 0);
-    rotationMotorMaster.getPIDController().setOutputRange(-.375, .375);
+    rotationMotorMaster.getPIDController().setOutputRange(-.75, .75, 0);
     rotationMotorMaster.getPIDController().setDFilter(0.25, 0);
     rotationMotorMaster.getPIDController()
         .setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
@@ -162,6 +167,13 @@ public class Arm extends Subsystem {
     rotationMotorMaster.getPIDController().setSmartMotionMaxAccel(4000, 0);
     rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(3000, 0);
     rotationMotorMaster.getPIDController().setSmartMotionMinOutputVelocity(0, 0);
+
+    rotationMotorMaster.getPIDController().setP(0.1, 1);
+    rotationMotorMaster.getPIDController().setI(0, 1);
+    rotationMotorMaster.getPIDController().setD(2, 1);
+    rotationMotorMaster.getPIDController().setFF(0, 1);
+    rotationMotorMaster.getPIDController().setOutputRange(-.375, .375, 1);
+    rotationMotorMaster.getPIDController().setDFilter(0.25, 1);
 
     extensionMotor.getPIDController().setP(0.00016, 0);
     extensionMotor.getPIDController().setI(0, 0);
@@ -176,6 +188,13 @@ public class Arm extends Subsystem {
     extensionMotor.getPIDController().setSmartMotionMaxAccel(5700, 0);
     extensionMotor.getPIDController().setSmartMotionMaxVelocity(5700, 0);
     extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(0, 0);
+
+    extensionMotor.getPIDController().setP(0.1, 1);
+    extensionMotor.getPIDController().setI(0, 1);
+    extensionMotor.getPIDController().setD(0, 1);
+    extensionMotor.getPIDController().setFF(0, 1);
+    extensionMotor.getPIDController().setOutputRange(-1, 1, 1);
+    extensionMotor.getPIDController().setDFilter(0.25, 1);
   }
 
   @Override
@@ -236,18 +255,30 @@ public class Arm extends Subsystem {
     }
     switch (systemState) {
       case CLOSED_LOOP:
+        boolean rotation_close = MathUtils
+            .epsilonEquals(armState.getRotationInDegrees(), armState.getRotationDemandInDegrees(),
+                ROTATION_EPSILON);
+        boolean extension_close = MathUtils
+            .epsilonEquals(armState.getExtensionInInches(), armState.getExtensionDemandInInches(),
+                EXTENSION_EPSILON);
         if (rotationHomed) {
+          if (rotation_close) {
+            System.out.println("Holding Rotation in POSITION PID");
+          }
           rotationMotorMaster.getPIDController()
-              .setReference(armState.getRotationDemandInRotations(),
-                  ControlType.kSmartMotion);
+                .setReference(armState.getRotationDemandInRotations(),
+                    rotation_close ? ControlType.kPosition : ControlType.kSmartMotion, rotation_close ? 1 : 0);
         } else {
           rotationMotorMaster.set(0);
         }
 
         if (extensionHomed) {
-          extensionMotor.getPIDController()
-              .setReference(armState.getExtensionDemandInRotations(),
-                  ControlType.kSmartMotion);
+          if (extension_close) {
+            System.out.println("Holding Extension in POSITION PID");
+          }
+            extensionMotor.getPIDController()
+                .setReference(armState.getExtensionDemandInRotations(),
+                    extension_close ? ControlType.kPosition : ControlType.kSmartMotion, extension_close ? 1 : 0);
         } else {
           extensionMotor.set(0);
         }
@@ -393,9 +424,9 @@ public class Arm extends Subsystem {
   }
 
   public void setAbsolutePosition(double selectedSensorPosition) {
-    double absolutePosition = (selectedSensorPosition / 1024d) * 90d;
+    double absolutePosition = selectedSensorPosition / 1024d * 90d * -1d;
 //		LOG.info("abs: {}", absolutePosition);
-    rotationMotorMaster.setEncPosition((absolutePosition - HOME_POSITION) * ROTATIONS_PER_DEGREE);
+    rotationMotorMaster.setEncPosition((absolutePosition + HOME_POSITION) * ROTATIONS_PER_DEGREE);
     if (!rotationHomed) {
       rotationHomed = true;
       LED.getInstance().setRotationHomed(true);

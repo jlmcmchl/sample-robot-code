@@ -137,11 +137,11 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleHoldHatch(double timestamp) {
-		if(timestamp - currentStateStartTime > .05){
-			bottomJawServo.set(.3875);
-		}
+		//if(timestamp - currentStateStartTime > .05){
+			bottomJawServo.set(0);
+		//}
 		
-		topJawServo.set(.3875);
+		topJawServo.set(0);
 		
 		if(WantedState.INTAKE_HATCH.equals(wantedState)){
 			return SystemState.HOLD_HATCH;
@@ -151,8 +151,8 @@ public class Gripper extends Subsystem {
 	}
 	
 	private SystemState handleIntakeHatch(double timestamp) {
-		bottomJawServo.set(.5);
-		topJawServo.set(.5);
+		bottomJawServo.set(0);
+		topJawServo.set(0);
 
 		if (!whatchman.get()) {
 			return SystemState.HOLD_HATCH;
@@ -193,7 +193,7 @@ public class Gripper extends Subsystem {
 	private SystemState handleIntakeCargo(double timestamp) {
 		gripperMotorTop.set(ControlMode.PercentOutput, 1);
 		
-		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1.5){
+		if(WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1.75){
 			if(firstFoundBall == 0) {
 				firstFoundBall = Timer.getFPGATimestamp();
 			}

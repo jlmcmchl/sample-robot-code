@@ -7,6 +7,9 @@
 
 package net.teamrush27.frc2019;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Counter;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
@@ -33,189 +36,250 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Robot extends TimedRobot {
-	
-	private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
-	private Drivetrain drivetrain = Drivetrain.getInstance();
-	private Arm arm = Arm.getInstance();
-	private Gripper gripper = Gripper.getInstance();
-	private Wrist wrist = Wrist.getInstance();
-	private SpiderLegs spiderLegs = SpiderLegs.getInstance();
-	private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
-	private LED led = LED.getInstance();
-	private final SuperstructureManager superman = SuperstructureManager.getInstance();
-	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
-		spiderLegs, wrist, arm, led, superman);
-	private final Looper enabledLooper = new Looper();
-	private final Looper disabledLooper = new Looper();
-	
-	private final Logger LOG = LogManager.getLogger(Robot.class);
-	
-	private AutoModeExecutor autoModeExecutor;
-	
-	@Override
-	public void robotInit() {
-		subsystemManager.registerEnabledLoops(enabledLooper);
-		subsystemManager.registerDisabledLoops(disabledLooper);
-		TrajectoryGenerator.getInstance().generateTrajectories();
-		superman.zeroSensors();
-	}
-	
-	@Override
-	public void robotPeriodic() {
-		//subsystemManager.outputToSmartDashboard();
-		//enabledLooper.outputToSmartDashboard();
-		//LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
-		//	arm.getArmState().getExtensionInInches(), wrist.getPWMAngle());
-		
-		gripper.outputToSmartDashboard();
-	}
-	
-	@Override
-	public void autonomousInit() {
-		led.setWantedState(LED.WantedState.ENABLED);
-		disabledLooper.stop();
-//		drivetrain.startLogging();
-//		subsystemManager.startLogging();
-		//robotStateEstimator.startLogging();
-		enabledLooper.start();
-		
-		autoModeExecutor = new AutoModeExecutor();
-		autoModeExecutor.setAutoMode(new TestMode());
-		autoModeExecutor.start();
-	}
-	
-	@Override
-	public void autonomousPeriodic() {
-	}
-	
-	@Override
-	public void teleopInit() {
-		led.setWantedState(LED.WantedState.ENABLED);
-		disabledLooper.stop();
-		enabledLooper.start();
-		
-		arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
-		spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-		gripper.setWantedState(Gripper.WantedState.OFF);
-		wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
-		drivetrain.shift(true);
-		drivetrain.setOpenLoop(DriveCommand.defaultCommand());
 
-		superman.setWantedState(WantedState.STOW, false, false);
+  private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
+  private Drivetrain drivetrain = Drivetrain.getInstance();
+  private Arm arm = Arm.getInstance();
+  private Gripper gripper = Gripper.getInstance();
+  private Wrist wrist = Wrist.getInstance();
+  private SpiderLegs spiderLegs = SpiderLegs.getInstance();
+  private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
+  private LED led = LED.getInstance();
+  private final SuperstructureManager superman = SuperstructureManager.getInstance();
+  private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
+      spiderLegs, wrist, arm, led, superman);
+  private final Looper enabledLooper = new Looper();
+  private final Looper disabledLooper = new Looper();
+
+  private final Logger LOG = LogManager.getLogger(Robot.class);
+
+  private AutoModeExecutor autoModeExecutor;
+  private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
+
+
+  private Counter tickCounter = new Counter(new DigitalInput(7));
+  private double counter;
+  private boolean forward;
+
+  Number driveCam;
+  Double[] camtran_last = new Double[]{0d, 0d, 0d, 0d, 0d, 0d};
+
+  int sample_count;
+  Double[][] camtran_buffer = new Double[10][6];
+
+  @Override
+  public void robotInit() {
+    subsystemManager.registerEnabledLoops(enabledLooper);
+    subsystemManager.registerDisabledLoops(disabledLooper);
+    TrajectoryGenerator.getInstance().generateTrajectories();
+    superman.zeroSensors();
+
+    driveCam = networkTableInstance.getTable("limelight-front").getEntry("camMode").getNumber(0);
+  }
+
+  @Override
+  public void robotPeriodic() {
+    //subsystemManager.outputToSmartDashboard();
+    //enabledLooper.outputToSmartDashboard();
+    //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
+    //	arm.getArmState().getExtensionInInches(), wrist.getPWMAngle());
+
+    //gripper.outputToSmartDashboard();
+
+    if (operatorInterface.wantsSwitchPipeline()) {
+      driveCam = 1 - driveCam.intValue();
+
+      networkTableInstance.getTable("limelight-front").getEntry("camMode").setNumber(driveCam);
+      networkTableInstance.getTable("limelight-front").getEntry("ledMode").setNumber(driveCam);
+
+      networkTableInstance.getTable("limelight-rear").getEntry("camMode").setNumber(driveCam);
+      networkTableInstance.getTable("limelight-rear").getEntry("ledMode").setNumber(driveCam);
+    }
+
+    if (driveCam.intValue() == 0) {
+      Double[] camtran = networkTableInstance.getTable("limelight-rear")
+          .getEntry("camtran").getDoubleArray(camtran_last);
+
+      if (camtran[0] != camtran_last[0]) {
+        // we have a match!
+        camtran_buffer[sample_count++] = camtran;
+        if (sample_count == 10) {
+          sample_count = 0;
+          //Predict target location
+
+        }
+//      LOG.info(String.format("TARGET FOUND: %s", camtran));
+      }
+    }
+
+    /*if (SmartDashboard.getBoolean("SeatMotor.direction", true)) {
+      counter += tickCounter.get();
+    } else {
+      counter -= tickCounter.get();
+    }
+    tickCounter.reset();
+
+    SmartDashboard.putNumber("SeatMotor.position", counter / 174.9); // 174.9:1 reduction
+*/
+
+  }
+
+  @Override
+  public void autonomousInit() {
+    led.setWantedState(LED.WantedState.ENABLED);
+    disabledLooper.stop();
+    //drivetrain.startLogging();
+//		subsystemManager.startLogging();
+    //robotStateEstimator.startLogging();
+    enabledLooper.start();
+
+    autoModeExecutor = new AutoModeExecutor();
+    autoModeExecutor.setAutoMode(new TestMode());
+    autoModeExecutor.start();
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+  }
+
+  @Override
+  public void teleopInit() {
+    led.setWantedState(LED.WantedState.ENABLED);
+    disabledLooper.stop();
+    enabledLooper.start();
+
+    arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
+    spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
+    gripper.setWantedState(Gripper.WantedState.OFF);
+    wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+    drivetrain.shift(true);
+    drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+
+    superman.setWantedState(WantedState.STOW, false, false);
+    superman.must_recompute();
+
 //		arm.setClosedLoopInput(new ArmInput(0d, 0d));
 
 //		subsystemManager.startLogging();
-	}
-	
-	boolean wantedClimb = false;
-	
-	@Override
-	public void teleopPeriodic() {
-		
-		// bail everything if we're climbing
-		if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-			spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
-			superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-		} else if (operatorInterface.wantsClimb()) {
-			drivetrain.shift(false);
-			superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-			spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
-		} else {
-			if (operatorInterface.wantsStow()) {
-				superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(), gripper.hasHatch());
-			} else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
-				superman.setWantedState(WantedState.ROCKET_LEVEL_1, operatorInterface.getWantsInvert(), gripper.hasHatch());
-			} else if (operatorInterface.wantsLevel1HumanLoad()) {
-				superman.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), true);
-			} else if (operatorInterface.wantsGroundPickup()) {
-				superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
-					operatorInterface.getWantsInvert(), false);
-			} else if (operatorInterface.getWantsCargoShip()) {
-				superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert(), gripper.hasHatch());
-			} else if (operatorInterface.wantsLevel2() && gripper.hasGamepiece()) {
-				superman
-					.setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert(), gripper.hasHatch());
-			} else if(operatorInterface.wantsLevel2()){
-				superman
-					.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), false);
-			} else if (operatorInterface.wantsLevel3()) {
-				superman
-					.setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert(), gripper.hasHatch());
-			}
-			
-			if (operatorInterface.getShift()) {
-				drivetrain.shift();
-			}
-			
-			if (operatorInterface.getWantManipulateCargo()) {
-				gripper.transitionCargo();
-			} else if (operatorInterface.getWantManipulateHatch()) {
-				gripper.transitionHatch();
-			}
-		}
-		
-		if (spiderLegs.shouldDrive()) {
-			drivetrain.setOpenLoop(new DriveCommand(-.3, -.3, true));
-		} else {
-			drivetrain.setOpenLoop(operatorInterface.getTankCommand());
-		}
-	}
-	
-	@Override
-	public void testInit() {
-		enabledLooper.stop();
-		disabledLooper.stop();
-		
-	}
-	
-	@Override
-	public void testPeriodic() {
-	}
-	
-	@Override
-	public void disabledInit() {
-		led.setWantedState(LED.WantedState.DISABLED);
-		wantedClimb = false;
-		SmartDashboard.putString("Match Cycle", "DISABLED");
-		try {
-			TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");
-		} catch (IOException e) {
-			LOG.error("could not write telemetry", e);
-		}
-		
-		if (autoModeExecutor != null) {
-			autoModeExecutor.stop();
-		}
-		
-		try {
-			CrashTracker.logDisabledInit();
-			enabledLooper.stop();
+  }
 
-			//drivetrain.startLogging();
+
+  @Override
+  public void teleopPeriodic() {
+
+    // bail everything if we're climbing
+    if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
+      spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
+      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
+    } else if (operatorInterface.wantsClimb()) {
+      drivetrain.shift(false);
+      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
+      spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+    } else {
+      if (operatorInterface.wantsStow()) {
+        superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(),
+            gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
+        superman.setWantedState(WantedState.ROCKET_LEVEL_1, operatorInterface.getWantsInvert(),
+            gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel1HumanLoad()) {
+        superman.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), true);
+      } else if (operatorInterface.wantsGroundPickup()) {
+        superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
+            operatorInterface.getWantsInvert(), false);
+      } else if (operatorInterface.getWantsCargoShip()) {
+        superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert(),
+            gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel2() && gripper.hasGamepiece()) {
+        superman
+            .setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert(),
+                gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel2()) {
+        superman
+            .setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), false);
+      } else if (operatorInterface.wantsLevel3()) {
+        superman
+            .setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert(),
+                gripper.hasHatch());
+      }
+
+      if (operatorInterface.getShift()) {
+        drivetrain.shift();
+      }
+
+      if (operatorInterface.getWantManipulateCargo()) {
+        gripper.transitionCargo();
+      } else if (operatorInterface.getWantManipulateHatch()) {
+        gripper.transitionHatch();
+      }
+
+      if (operatorInterface.wantsIncreaseOffset()) {
+        superman.increaseOffset();
+      }
+      if (operatorInterface.wantsDecreaseOffset()) {
+        superman.decreaseOffset();
+      }
+    }
+
+    if (spiderLegs.shouldDrive()) {
+      drivetrain.setOpenLoop(new DriveCommand(-.3, -.3, true));
+    } else if (spiderLegs.shouldHoldPosition()) {
+      drivetrain.setHoldPosition(2d, 2d);
+    } else {
+      drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+    }
+  }
+
+  @Override
+  public void testInit() {
+    enabledLooper.stop();
+    disabledLooper.stop();
+
+  }
+
+  @Override
+  public void testPeriodic() {
+  }
+
+  @Override
+  public void disabledInit() {
+    led.setWantedState(LED.WantedState.DISABLED);
+    SmartDashboard.putString("Match Cycle", "DISABLED");
+    try {
+      TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");
+    } catch (IOException e) {
+      LOG.error("could not write telemetry", e);
+    }
+
+    if (autoModeExecutor != null) {
+      autoModeExecutor.stop();
+    }
+
+    try {
+      CrashTracker.logDisabledInit();
+      enabledLooper.stop();
+
+      //drivetrain.startLogging();
 
 //			subsystemManager.stopLogging();
-//			drivetrain.stopLogging();
-			//robotStateEstimator.stopLogging();
+      drivetrain.stopLogging();
+      //robotStateEstimator.stopLogging();
 
 //			Drivetrain.getInstance().zeroSensors();
 //			RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2d.identity());
-			
-			wrist.zeroSensors();
-			disabledLooper.start();
-			
-		} catch (Throwable t) {
-			CrashTracker.logThrowableCrash(t);
-			throw t;
-		}
-	}
 
-	@Override
-	public void disabledPeriodic() {
-		spiderLegs.zeroSensors();
-		arm.zeroSensors();
-		
-		spiderLegs.outputToSmartDashboard();
-		
-		wrist.outputToSmartDashboard();
-	}
+      disabledLooper.start();
+
+    } catch (Throwable t) {
+      CrashTracker.logThrowableCrash(t);
+      throw t;
+    }
+  }
+
+  @Override
+  public void disabledPeriodic() {
+    spiderLegs.zeroSensors();
+    arm.zeroSensors();
+    wrist.zeroSensors();
+  }
 }

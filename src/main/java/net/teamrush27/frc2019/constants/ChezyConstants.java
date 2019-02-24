@@ -83,7 +83,7 @@ public class ChezyConstants {
 
     // Drive Motion Constants
     public static double kDriveKv = 0.240;
-    public static double kDriveWheelDiameterInches = 7.75;
+    public static double kDriveWheelDiameterInches = 4;
     public static double kDriveWheelRadiusInches = kDriveWheelDiameterInches / 2;
     public static double kRobotLinearInertia = 70.0; // fat boy
     public static double kDriveKa = 0.043;

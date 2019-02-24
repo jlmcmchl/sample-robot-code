@@ -19,8 +19,11 @@ public class SuperstructureManager extends Subsystem {
   private static SuperstructureManager INSTANCE = null;
   private static final double ROTATION_EPSILON = 10d;
   private static final double EXTENSION_EPSILON = 4d;
+  private static final double WRIST_EPSILON = 20d;
   private static final double ARM_BASE_LENGTH = 15.5d;
+  private static final double ARM_MIN_EXTENSION = 5;
   private static final double ARM_MAX_EXTENSION = 47d;
+  private static final double MIN_LATERAL_EXTENSION = 2d;
   private static final double MAX_LATERAL_EXTENSION = 32d;
 
   private static final Logger LOG = LogManager.getLogger(SuperstructureManager.class);
@@ -37,13 +40,14 @@ public class SuperstructureManager extends Subsystem {
 
   private Arm arm = Arm.getInstance();
   private Wrist wrist = Wrist.getInstance();
+
   public enum WantedState {
-    CARGO_GROUND_PICKUP(new ArmInput(5d, 88d), 50d),
-    HUMAN_LOAD(new ArmInput(10d, 32d), new ArmInput(5d, 90d), 52d, 0d),
+    CARGO_GROUND_PICKUP(new ArmInput(5d, 93d), 50d),
+    HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(5d, 90d), 52d, 0d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
-    ROCKET_LEVEL_1(new ArmInput(7d, 70d), new ArmInput(5d, 90d), 21d, 0d),
-    ROCKET_LEVEL_2(new ArmInput(15d, 7.3d), new ArmInput(13d, 15.5d), 60d, 71d),
-    ROCKET_LEVEL_3(new ArmInput(43d, 3d), new ArmInput(40d, 7.7d), 63d, 80d),
+    ROCKET_LEVEL_1(new ArmInput(8.1d, 63.8d), new ArmInput(5d, 90d), 21d, 0d),
+    ROCKET_LEVEL_2(new ArmInput(18d, 6.7d), new ArmInput(13d, 15.5d), 60d, 71d),
+    ROCKET_LEVEL_3(new ArmInput(46d, 2.85d), new ArmInput(40d, 7.7d), 63d, 80d),
     STOW(new ArmInput(5d, 0d), 0d),
     CLIMB(new ArmInput(5d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
@@ -52,12 +56,13 @@ public class SuperstructureManager extends Subsystem {
     private final ArmInput hatchInput;
     private Double defaultWristAngle;
     private Double hatchWristAngle;
-    
+
     WantedState(ArmInput armInput, double wristAngle) {
       this(armInput, null, wristAngle, null);
     }
 
-    WantedState(ArmInput armInput, ArmInput hatchInput, Double defaultWristAngle, Double hatchWristAngle) {
+    WantedState(ArmInput armInput, ArmInput hatchInput, Double defaultWristAngle,
+        Double hatchWristAngle) {
       this.defaultInput = armInput;
       this.hatchInput = hatchInput;
       this.defaultWristAngle = defaultWristAngle;
@@ -75,7 +80,7 @@ public class SuperstructureManager extends Subsystem {
     public Double getDefaultWristAngle() {
       return defaultWristAngle;
     }
-  
+
     public Double getHatchWristAngle() {
       return hatchWristAngle;
     }
@@ -86,18 +91,26 @@ public class SuperstructureManager extends Subsystem {
   private Boolean newInvertedRotation = false;
   private Boolean invertedRotation = false;
   private Boolean hasHatch = false;
-  private Command origin = new Command(0d, 0d, null);
+  private Boolean force_recompute = true;
+  //private Command origin = new Command(0d, 0d, null);
   private LinkedList<Command> commands = new LinkedList<>();
 
-  public synchronized void setWantedState(WantedState wantedState, Boolean invertedRotation, Boolean hasHatch) {
+  private Double offset;
+
+  public synchronized void setWantedState(WantedState wantedState, Boolean invertedRotation,
+      Boolean hasHatch) {
     this.newWantedState = wantedState;
     this.newInvertedRotation = invertedRotation;
     this.hasHatch = hasHatch;
   }
 
+  public void must_recompute() {
+    force_recompute = true;
+  }
+
   @Override
   public void outputToSmartDashboard() {
-    LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(), arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
+    //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(), arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
   }
 
   @Override
@@ -191,10 +204,13 @@ public class SuperstructureManager extends Subsystem {
   //
 
   public void handlePosition(double timestamp) {
-    if (wantedState != newWantedState || invertedRotation != newInvertedRotation) {
-      LOG.info(String.format("%s : %s - %s : %s", wantedState, invertedRotation, newWantedState, newInvertedRotation));
+    if (wantedState != newWantedState || invertedRotation != newInvertedRotation
+        || force_recompute) {
+      LOG.info(String.format("%s : %s - %s : %s", wantedState, invertedRotation, newWantedState,
+          newInvertedRotation));
       wantedState = newWantedState;
       invertedRotation = newInvertedRotation;
+      force_recompute = false;
       recomputeOperations();
     }
 
@@ -210,23 +226,6 @@ public class SuperstructureManager extends Subsystem {
     }
   }
 
-  // TODO
-  // I don't like how this handles arm extension while at 30" out.
-  // If we're moving from one level to another while at 30", we risk violating our extension limit
-  // if extension and rotation don't move in sync.
-  // Possible solution to put setpoints at 25" out instead
-  // and creep towards like we had kyle move the elevator last year
-
-  // TODO HOW WERE ACTUALLY GOING TO DO IT
-  // 2 INTERMEDIATE POINTS
-  // FIRST IS ANGLE WHERE EXTENSION CAN REACH 5" FROM START POINT
-  // SECOND IS WHERE EXTENSION CAN LEAVE FROM 5" AND REACH GOAL AT SAME TIME AS ROTATION
-
-  // OR
-
-  // 1 SETPOINT WHERE WE CAN GET TO AND THEN GET TO GOAL WITHIN ROTATION'S MOTION
-
-
   private void recomputeOperations() {
     commands.clear();
     ArmState armState = arm.getArmState();
@@ -240,98 +239,35 @@ public class SuperstructureManager extends Subsystem {
     LOG.info(String.format("Wanted: Rot: %s\tExt: %s\tWrs: %s", getWantedRotation(),
         getWantedExtension(), getWantedWristAngle()));
 
-    //commands.add(new Command(origin.getArmInput().getRotationInput(), 5d, 0d, Limit.EXTENSION));
-    commands.add(new Command(armState.getRotationInDegrees(), 5d, 0d, Limit.EXTENSION));
-    commands.add(new Command(getWantedRotation(), 5d, 0d, Limit.ROTATION));
     commands.add(
-        new Command(getWantedRotation(), getWantedExtension(), getWantedWristAngle(), Limit.NONE));
+        new Command(armState.getRotationInDegrees(), armState.getExtensionInInches(),
+            0d, Limit.WRIST));
+
+    double theta0 = armState.getRotationInDegrees();
+    int startingQuadrant = theta0 < -45 ? 0 : theta0 < 0 ? 1 : theta0 < 45 ? 2 : 3;
+
+    double theta1 = getWantedRotation();
+    int finalQuadrant = theta1 < -45 ? 0 : theta1 < 0 ? 1 : theta1 < 45 ? 2 : 3;
+
+    if (startingQuadrant != finalQuadrant) {
+      commands.add(
+          new Command(armState.getRotationInDegrees(), 5d,
+              0d, Limit.EXTENSION));
+
+      commands.add(
+          new Command(getWantedRotation(), 5d,
+              0d, Limit.ROTATION));
+    } else {
+      commands.add(
+          new Command(getWantedRotation(), armState.getExtensionInInches(),
+              0d, Limit.ROTATION));
+    }
+
+    commands.add(
+        new Command(getWantedRotation(), getWantedExtension(),
+            getWantedWristAngle(), Limit.NONE));
 
     printCommands();
-
-    /*InterpolatingDouble initialRotation = new InterpolatingDouble(
-        //    origin.getArmInput().getRotationInput());
-        armState.getRotationInDegrees());
-    InterpolatingDouble wantedRotation = new InterpolatingDouble(getWantedRotation());
-    InterpolatingDouble initialExtension = new InterpolatingDouble(
-        //    origin.getArmInput().getExtensionInput());
-        armState.getExtensionInInches());
-    InterpolatingDouble wantedExtension = new InterpolatingDouble(getWantedExtension());
-    InterpolatingDouble initialWristAngle = new InterpolatingDouble(
-        //    origin.getDefaultWristAngle());
-        wrist.getPWMAngle());
-    InterpolatingDouble wantedWristAngle = new InterpolatingDouble(getWantedWristAngle());
-
-    boolean extension_bound = false;
-
-    double initial_extension_bounded = boundExtensionForAngle(initialRotation.value,
-        initialExtension.value);
-    if (initial_extension_bounded != initialExtension.value) {
-      initialExtension = new InterpolatingDouble(initial_extension_bounded);
-      commands.push(new Command(initialRotation.value, initial_extension_bounded,
-          initialWristAngle.value,
-          initial_extension_bounded < initialExtension.value
-              ? Limit.EXTENSION_MAXIMUM
-              : Limit.EXTENSION_MINIMUM));
-
-      if (initial_extension_bounded < initialExtension.value) {
-        LOG.info(String.format("Command: XTNS_MAX Rot: %s\tExt: %s\tWrs: %s",
-            initialRotation.value, initial_extension_bounded, initialWristAngle.value));
-      } else {
-        LOG.info(String.format("Command: XTNS_MIN Rot: %s\tExt: %s\tWrs: %s",
-            initialRotation.value, initial_extension_bounded, initialWristAngle.value));
-      }
-    }
-
-    // If angle diff is 0 then idgaf idontgiveafuck
-    if (!MathUtils.epsilonEquals(initialExtension.value, wantedExtension.value, EXTENSION_EPSILON)) {
-      for (int i = 1; i < NUM_SEGMENTS; i++) {
-        InterpolatingDouble angle = initialRotation
-            .interpolate(wantedRotation, i * 1.0 / NUM_SEGMENTS);
-
-        InterpolatingDouble extension = initialExtension
-            .interpolate(wantedExtension, i * 1.0 / NUM_SEGMENTS);
-
-        InterpolatingDouble wristAngle = initialWristAngle
-            .interpolate(wantedWristAngle, i * 1.0 / NUM_SEGMENTS);
-
-        double bound_extension = boundExtensionForAngle(angle.value, extension.value);
-
-        double bound_wristAngle = boundWristAngleForExtension(bound_extension, wristAngle.value);
-
-        if (bound_extension != extension.value) {
-          if (bound_extension < extension.value) {
-            LOG.info(String.format("Command: XTNS_MAX Rot: %s\tExt: %s\tWrs: %s",
-                angle.value, bound_extension, bound_wristAngle));
-          } else {
-            LOG.info(String.format("Command: XTNS_MIN Rot: %s\tExt: %s\tWrs: %s",
-                angle.value, bound_extension, bound_wristAngle));
-          }
-          commands
-              .add(new Command(angle.value, bound_extension, bound_wristAngle,
-                  bound_extension < extension.value ? Limit.EXTENSION_MAXIMUM
-                      : Limit.EXTENSION_MINIMUM));
-        } else if (extension_bound && bound_extension == extension.value) {
-          LOG.info(String.format("Command: ROTATION  Rot: %s\tExt: %s\tWrs: %s",
-              angle.value, bound_extension, bound_wristAngle));
-
-          commands.add(new Command(angle.value, bound_extension, bound_wristAngle, Limit.ROTATION));
-        } else {
-          LOG.info(String.format("Command: XTNS_ANY Rot: %s\tExt: %s\tWrs: %s",
-              angle.value, bound_extension, bound_wristAngle));
-
-          commands.add(new Command(angle.value, bound_extension, bound_wristAngle, Limit.EXTENSION_MAXIMUM));
-        }
-
-        extension_bound = bound_extension != extension.value;
-      }
-    }
-
-    LOG.info(String.format("Command: NONE      Rot: %s\tExt: %s\tWrs: %s",
-        wantedRotation.value, wantedExtension.value, wantedWristAngle.value));
-    LOG.info("");
-
-    commands.add(new Command(wantedRotation.value, wantedExtension.value, wantedWristAngle.value,
-        Limit.NONE));*/
   }
 
   private boolean operationComplete(Command current) {
@@ -339,55 +275,50 @@ public class SuperstructureManager extends Subsystem {
     double goalRotation = current.getArmInput().getRotationInput();
     double goalExtension = current.getArmInput().getExtensionInput();
     double currentExtension = arm.getArmState().getExtensionInInches();
+    double currentWrist = wrist.getEncoderAngle();
+    double goalWrist = current.getWristAngle();
 
     switch (current.getLimitType()) {
       case ROTATION:
         return MathUtils.epsilonEquals(currentRotation, goalRotation, ROTATION_EPSILON);
       case EXTENSION:
         return MathUtils.epsilonEquals(currentExtension, goalExtension, EXTENSION_EPSILON);
+      case WRIST:
+        return MathUtils.epsilonEquals(currentWrist, goalWrist, WRIST_EPSILON);
       default:
         return true;
     }
   }
 
-  private Command getNextCommand(LinkedList<Command> commands) {
-    double rotation = 0;
-
-    for (Command command : commands) {
-      if (command.getLimitType() == Limit.ROTATION || command.getLimitType() == Limit.NONE) {
-        rotation = command.getArmInput().getRotationInput();
-        break;
-      }
-    }
-
-    double extension = commands.peek().getArmInput().getExtensionInput();
-    double wristAngle = commands.peek().getWristAngle();
-    Limit limit = commands.peek().getLimitType();
-
-    return new Command(rotation, extension, wristAngle, limit);
-  }
-
   private void executeCommand(Command command) {
+    LOG.info(String.format("Current Command: ROT: %s\tEXT: %s\tWRS: %s",
+        command.getArmInput().getRotationInput(),
+        command.getArmInput().getExtensionInput(),
+        command.getWristAngle()));
+
     arm.setClosedLoopInput(command.getArmInput());
     wrist.setClosedLoopInput(command.getWristAngle());
   }
 
   private double getWantedRotation() {
-    if ((hasHatch && wantedState.getHatchInput() != null) || wantedState.getDefaultInput() == null) {
+    if ((hasHatch && wantedState.getHatchInput() != null)
+        || wantedState.getDefaultInput() == null) {
       return wantedState.getHatchInput().getRotationInput() * (invertedRotation ? -1 : 1);
     }
     return wantedState.getDefaultInput().getRotationInput() * (invertedRotation ? -1 : 1);
   }
 
   private double getWantedExtension() {
-    if ((hasHatch && wantedState.getHatchInput() != null) || wantedState.getDefaultInput() == null) {
+    if ((hasHatch && wantedState.getHatchInput() != null)
+        || wantedState.getDefaultInput() == null) {
       return wantedState.getHatchInput().getExtensionInput();
     }
     return wantedState.getDefaultInput().getExtensionInput();
   }
 
   private double getWantedWristAngle() {
-    if((hasHatch && wantedState.getHatchWristAngle() != null) || wantedState.getDefaultWristAngle() == null){
+    if ((hasHatch && wantedState.getHatchWristAngle() != null)
+        || wantedState.getDefaultWristAngle() == null) {
       return wantedState.getHatchWristAngle() * (invertedRotation ? -1 : 1);
     }
     return wantedState.getDefaultWristAngle() * (invertedRotation ? -1 : 1);
@@ -435,6 +366,75 @@ public class SuperstructureManager extends Subsystem {
     }
   }
 
+  public void increaseOffset() {
+    synchronized (this) {
+      if (this.commands.isEmpty()) {
+        Double[] state = new Double[]{arm.getArmState().getExtensionInInches(),
+            arm.getArmState().getRotationInDegrees()};
+
+        Command command = adjust(state, 1);
+        if (command != null) {
+          executeCommand(command);
+        }
+      }
+    }
+  }
+
+  public void decreaseOffset() {
+    synchronized (this) {
+      if (this.commands.isEmpty()) {
+        Double[] state = new Double[]{arm.getArmState().getExtensionInInches(),
+            arm.getArmState().getRotationInDegrees()};
+
+        Command command = adjust(state, -1);
+        if (command != null) {
+          executeCommand(command);
+        }
+      }
+    }
+  }
+
+  private Command adjust(Double[] state, double deltaX) {
+    Double[] coords = polarToCartesian(state);
+    coords[0] += Math.signum(coords[0]) * deltaX;
+    coords = clampCartesian(coords);
+    Double[] polar = cartesianToPolar(coords);
+
+    if (reachable(state, polar)) {
+      double wristAngle = state[1] + wrist.getEncoderAngle() - polar[1];
+      return new Command(polar[1], polar[0], wristAngle, Limit.NONE);
+    }
+    return null;
+  }
+
+  private Double[] polarToCartesian(Double[] polar) {
+    double x = Math.sin(polar[1]) * (polar[0] + ARM_BASE_LENGTH);
+    double y = Math.cos(polar[1]) * (polar[0] + ARM_BASE_LENGTH);
+
+    return new Double[]{x, y};
+  }
+
+  private Double[] cartesianToPolar(Double[] cartesian) {
+    double ext =
+        Math.sqrt(cartesian[0] * cartesian[0] + cartesian[1] * cartesian[1]) - ARM_BASE_LENGTH;
+    double rot = Math.atan2(cartesian[0], cartesian[1]);
+
+    return new Double[]{ext, rot};
+  }
+
+  private Double[] clampCartesian(Double[] input) {
+    double x = Math.signum(input[0]) * Math
+        .min(Math.max(MIN_LATERAL_EXTENSION, Math.abs(input[0])), MAX_LATERAL_EXTENSION);
+    return new Double[]{x, input[1]};
+  }
+
+  private Boolean reachable(Double[] start, Double[] goal) {
+    return ARM_MIN_EXTENSION < goal[0]
+        && goal[0] < ARM_MAX_EXTENSION
+        && start[1] * goal[1] > 0
+        && Math.abs(start[1]) < 90;
+  }
+
   @Override
   public void test() {
 
@@ -447,7 +447,7 @@ public class SuperstructureManager extends Subsystem {
 
 
   private enum Limit {
-    ROTATION, EXTENSION, NONE
+    ROTATION, EXTENSION, WRIST, NONE
   }
 
   private class Command {

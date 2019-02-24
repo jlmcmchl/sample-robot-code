@@ -143,6 +143,9 @@ public class Drivetrain extends Subsystem {
           case CHEZY_PATH_FOLLOWING:
             updateChezyPathFollower(timestamp);
             break;
+          case HOLD_POSITION:
+            updateHoldPosition(timestamp);
+            break;
           default:
             LOG.warn("Unexpected drive mode: " + driveMode);
             break;
@@ -202,7 +205,8 @@ public class Drivetrain extends Subsystem {
 
     leftSlave1 = new TalonSRX(RobotMap.DRIVE_LEFT_SLAVE_1_CAN_ID);
     leftSlave1.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
-    leftSlave1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+    leftSlave1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,
+        RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.setSensorPhase(false);
     leftSlave1.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5,
         RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -272,12 +276,12 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     rightSlave2.follow(rightMaster);
 
-    leftMaster.setInverted(true);
-    leftSlave1.setInverted(true);
-    leftSlave2.setInverted(true);
-    rightMaster.setInverted(false);
-    rightSlave1.setInverted(false);
-    rightSlave2.setInverted(false);
+    leftMaster.setInverted(false);
+    leftSlave1.setInverted(false);
+    leftSlave2.setInverted(false);
+    rightMaster.setInverted(true);
+    rightSlave1.setInverted(true);
+    rightSlave2.setInverted(true);
 
     leftShifter = new Servo(RobotMap.LEFT_DRIVE_SHIFT_SERVO_ID);
     rightShifter = new Servo(RobotMap.RIGHT_DRIVE_SHIFT_SERVO_ID);
@@ -289,7 +293,7 @@ public class Drivetrain extends Subsystem {
     navX = new NavX(SPI.Port.kMXP);
 
     setBrakeMode(false);
-    
+
     shift(true);
 
     motionPlanner = new DriveMotionPlanner();
@@ -469,7 +473,6 @@ public class Drivetrain extends Subsystem {
     SmartDashboard.putNumber("drivetrain.left.position", leftMaster.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.right.position", rightMaster.getSelectedSensorPosition());
 
-
 //    SmartDashboard.putBoolean("climb", DriveMode.CLIMB.equals(driveMode));
 //		double currentleftMax = Math.max(leftMaster.getOutputCurrent(),leftMax);
 //		double currentRightMax = Math.max(rightMaster.getOutputCurrent(),rightMax);
@@ -483,9 +486,9 @@ public class Drivetrain extends Subsystem {
     //            CSVWriter.write();
     //        }
   }
-  
-  public void shift(){
-    synchronized (inHighGear){
+
+  public void shift() {
+    synchronized (inHighGear) {
       shift(!inHighGear);
     }
   }
@@ -495,13 +498,13 @@ public class Drivetrain extends Subsystem {
       if (wantsHighGear != inHighGear) {
         if (wantsHighGear) {
           LOG.info("Shifted to High Gear");
-          leftShifter.set(0);
-          rightShifter.set(1);
+          leftShifter.set(1);
+          rightShifter.set(0);
           inHighGear = true;
         } else {
           LOG.info("Shifted to Low Gear");
-          leftShifter.set(1);
-          rightShifter.set(0);
+          leftShifter.set(0);
+          rightShifter.set(1);
           inHighGear = false;
         }
       }
@@ -665,6 +668,8 @@ public class Drivetrain extends Subsystem {
   private void configureTalonsForPositionControl() {
     if (!driveMode.getRequestedControlMode().equals(ControlMode.MotionMagic)) {
       // We entered a position control state.
+      leftMaster.selectProfileSlot(TURNING_CONTROL_SLOT, 0);
+      rightMaster.selectProfileSlot(TURNING_CONTROL_SLOT, 0);
       setBrakeMode(true);
     }
   }
@@ -761,6 +766,26 @@ public class Drivetrain extends Subsystem {
     }
   }
 
+  public void setHoldPosition(double leftInchesAhead, double rightInchesAhead) {
+    if (!DriveMode.HOLD_POSITION.equals(driveMode)) {
+      configureTalonsForPositionControl();
+      driveMode = DriveMode.HOLD_POSITION;
+    }
+
+    periodicIO.left_demand =
+        periodicIO.left_position_ticks + DriveUtils.inchesToEncoderCount(leftInchesAhead);
+    periodicIO.right_demand =
+        periodicIO.right_position_ticks + DriveUtils.inchesToEncoderCount(rightInchesAhead);
+  }
+
+  public void updateHoldPosition(double timestamp) {
+    if (driveMode == DriveMode.HOLD_POSITION) {
+
+    } else {
+      DriverStation.reportError("Drive is not in path following state", false);
+    }
+  }
+
   public void defaultState() {
     leftMaster.setNeutralMode(NeutralMode.Coast);
     rightMaster.setNeutralMode(NeutralMode.Coast);
@@ -787,34 +812,47 @@ public class Drivetrain extends Subsystem {
 
   public synchronized void startLogging() {
     if (CSVWriter == null) {
-      CSVWriter = new ReflectingCSVWriter("/home/lvuser/DRIVE-LOGS.csv", PeriodicIO.class);
+      CSVWriter = new ReflectingCSVWriter<>("/media/sda/logs/DRIVE-LOGS.csv", PeriodicIO.class);
     }
   }
 
   public synchronized void stopLogging() {
     if (CSVWriter != null) {
       CSVWriter.flush();
+      LOG.info("Drivetrain DONE logging");
       CSVWriter = null;
     }
   }
-  
-  public void resetArmPosition(int armPositionTicks){
+
+  public void resetArmPosition(int armPositionTicks) {
     leftSlave1.setSelectedSensorPosition(armPositionTicks, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
   }
 
   @Override
   public synchronized void readPeriodicInputs() {
-    periodicIO.timestamp = Timer.getFPGATimestamp();
     double prevLeftTicks = periodicIO.left_position_ticks;
     double prevRightTicks = periodicIO.right_position_ticks;
+    double prevLeftVelocity = periodicIO.left_velocity_ticks_per_100ms;
+    double prevRightVelocity = periodicIO.right_velocity_ticks_per_100ms;
+    double prevTimestamp = periodicIO.timestamp;
+
+    periodicIO.timestamp = Timer.getFPGATimestamp();
     periodicIO.left_position_ticks = leftMaster.getSelectedSensorPosition(0);
     periodicIO.right_position_ticks = rightMaster.getSelectedSensorPosition(0);
     periodicIO.left_velocity_ticks_per_100ms = leftMaster.getSelectedSensorVelocity(0);
     periodicIO.right_velocity_ticks_per_100ms = rightMaster.getSelectedSensorVelocity(0);
+
+    periodicIO.left_accel_ticks_per_100ms_per_1000ms =
+        (periodicIO.left_velocity_ticks_per_100ms - prevLeftVelocity)
+            / (periodicIO.timestamp - prevTimestamp);
+    periodicIO.right_accel_ticks_per_100ms_per_1000ms =
+        (periodicIO.right_velocity_ticks_per_100ms - prevRightVelocity)
+            / (periodicIO.timestamp - prevTimestamp);
+
     periodicIO.gyro_heading = Rotation2d
         .fromDegrees(navX.getFusedHeading()).rotateBy(gyroOffset);
     periodicIO.can_read_delta = Timer.getFPGATimestamp() - periodicIO.timestamp;
-    
+
     Arm.getInstance().setAbsolutePosition(leftSlave1.getSelectedSensorPosition());
 
     double deltaLeftTicks =
@@ -834,7 +872,7 @@ public class Drivetrain extends Subsystem {
     }
 
     if (CSVWriter != null) {
-//			CSVWriter.add(periodicIO);
+      CSVWriter.add(periodicIO);
       periodicIO = new PeriodicIO(periodicIO);
     }
   }
@@ -884,6 +922,14 @@ public class Drivetrain extends Subsystem {
       rightMaster.set(
           ControlMode.Velocity,
           periodicIO.right_demand);
+    } else if (driveMode == DriveMode.HOLD_POSITION) {
+      leftMaster.set(
+          ControlMode.Position,
+          periodicIO.left_demand);
+
+      rightMaster.set(
+          ControlMode.Position,
+          periodicIO.right_demand);
     } else {
       LOG.warn("Hit a bad control state {} {}",
           driveMode.getRequestedControlMode(), driveMode);
@@ -894,7 +940,7 @@ public class Drivetrain extends Subsystem {
   public String id() {
     return TAG;
   }
-  
+
   public static class PeriodicIO {
 
     public double timestamp;
@@ -907,6 +953,9 @@ public class Drivetrain extends Subsystem {
     public double right_distance;
     public int left_velocity_ticks_per_100ms;
     public int right_velocity_ticks_per_100ms;
+    public double left_accel_ticks_per_100ms_per_1000ms;
+    public double right_accel_ticks_per_100ms_per_1000ms;
+
     public Rotation2d gyro_heading = Rotation2d.identity();
     public Pose2d error = Pose2d.identity();
 
@@ -937,6 +986,8 @@ public class Drivetrain extends Subsystem {
       this.right_distance = other.right_distance;
       this.left_velocity_ticks_per_100ms = other.left_velocity_ticks_per_100ms;
       this.right_velocity_ticks_per_100ms = other.right_velocity_ticks_per_100ms;
+      this.left_accel_ticks_per_100ms_per_1000ms = other.left_accel_ticks_per_100ms_per_1000ms;
+      this.right_accel_ticks_per_100ms_per_1000ms = other.left_accel_ticks_per_100ms_per_1000ms;
       this.gyro_heading = new Rotation2d(other.gyro_heading);
       this.error = new Pose2d(other.error);
 

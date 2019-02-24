@@ -3,6 +3,7 @@ package net.teamrush27.frc2019.base;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+import net.teamrush27.frc2019.wrappers.APEMJoystick;
 import net.teamrush27.frc2019.wrappers.FlightstickPro;
 import net.teamrush27.frc2019.wrappers.LogitechPad;
 import net.teamrush27.frc2019.wrappers.PS4Controller;
@@ -18,19 +19,19 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		return INSTANCE;
 	}
 	
-	private final FlightstickPro driverLeftJoystick;
-	private final FlightstickPro driverRightJoystick;
+	private final APEMJoystick driverLeftJoystick;
+	private final APEMJoystick driverRightJoystick;
 	private final PS4Controller gamePad;
 	
 	public JoysticksAndGamepadInterface() {
-		driverLeftJoystick = new FlightstickPro(0);
-		driverRightJoystick = new FlightstickPro(1);
+		driverLeftJoystick = new APEMJoystick(0);
+		driverRightJoystick = new APEMJoystick(1);
 		gamePad = new PS4Controller(2);
 	}
 	
 	@Override
 	public DriveCommand getTankCommand() {
-		return new DriveCommand(-driverLeftJoystick.getY(), -driverRightJoystick.getY());
+		return new DriveCommand(driverLeftJoystick.getY(), driverRightJoystick.getY());
 	}
 
 	private boolean shiftLatch = false;
@@ -94,7 +95,7 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	
 	@Override
 	public Boolean getWantsInvert() {
-		return gamePad.getBumper(Hand.kRight);
+		return !gamePad.getBumper(Hand.kRight);
 	}
 	
 	@Override
@@ -111,6 +112,23 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	public Boolean wantsClimb() {
 		return gamePad.getOptionsButton() && gamePad.getShareButton();
 	}
-	
-	
+
+	private Boolean lastSwitchPipeline = false;
+	@Override
+	public Boolean wantsSwitchPipeline() {
+		Boolean changed = lastSwitchPipeline ^ driverRightJoystick.getLeftButton();
+		lastSwitchPipeline = driverRightJoystick.getLeftButton();
+		return changed && lastSwitchPipeline;
+	}
+
+	@Override
+	public Boolean wantsIncreaseOffset() {
+		return gamePad.getTriggerButtonPressed(Hand.kLeft);
+	}
+
+	@Override
+	public Boolean wantsDecreaseOffset() {
+		return gamePad.getTriggerButtonPressed(Hand.kRight);
+	}
+
 }

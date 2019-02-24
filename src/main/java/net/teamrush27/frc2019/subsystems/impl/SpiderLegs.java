@@ -19,39 +19,39 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class SpiderLegs extends Subsystem {
-	
+
 	private static Logger LOG = LogManager.getLogger(SpiderLegs.class);
 	private static String TAG = "SPIDERLEGS";
 	private static SpiderLegs INSTANCE = null;
-	
+
 	public static SpiderLegs getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new SpiderLegs();
 		}
 		return INSTANCE;
 	}
-	
+
 	public enum WantedState {
 		OFF, PENDING_CLIMB, CLIMB
 	}
-	
+
 	private enum SystemState {
 		OFF, PENDING_CLIMB, CLIMBING, CLIMBING_HOLD
 	}
-	
+
 	private WantedState wantedState = WantedState.OFF;
 	private SystemState systemState = SystemState.OFF;
-	
+
 	private boolean stateChanged = false;
 	private double currentStateStartTime;
-	
+
 	private Loop loop = new Loop() {
-		
+
 		@Override
 		public void onStart(double timestamp) {
 			currentStateStartTime = timestamp;
 		}
-		
+
 		@Override
 		public void onLoop(double timestamp) {
 			SystemState newState;
@@ -79,35 +79,35 @@ public class SpiderLegs extends Subsystem {
 				stateChanged = false;
 			}
 		}
-		
+
 		@Override
 		public void onStop(double timestamp) {
 			stop();
 		}
-		
+
 		@Override
 		public String id() {
 			return TAG;
 		}
-		
+
 	};
-	
+
 	private final TalonSRX frontLegMotor;
-	
+
 	private final TalonSRX rearLegMotorMaster;
 	private final TalonSRX rearLegMotorSlave;
-	
+
 	private final DigitalInput frontLegHome;
 	private final DigitalInput rearLegHome;
-	
+
 	private final AnalogInput underFrontWheel;
 	private final AnalogInput underRearMiddleWheel;
-	
+
 	private Boolean frontHomed = false;
 	private Boolean rearHomed = false;
 	private Boolean frontOnGround = true;
 	private Boolean rearOnGround = true;
-	
+
 	public SpiderLegs() {
 		frontLegMotor = new TalonSRX(RobotMap.FRONT_SPIDER_LEG_MOTOR_CAN_ID);
 		frontLegMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -118,7 +118,7 @@ public class SpiderLegs extends Subsystem {
 		frontLegMotor.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.enableCurrentLimit(true);
 		frontLegMotor.setSensorPhase(true);
-		
+
 		rearLegMotorMaster = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_MASTER_CAN_ID);
 		rearLegMotorMaster.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
@@ -127,7 +127,7 @@ public class SpiderLegs extends Subsystem {
 		rearLegMotorMaster.setNeutralMode(NeutralMode.Coast);
 		rearLegMotorMaster.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.enableCurrentLimit(true);
-		
+
 		rearLegMotorSlave = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_SLAVE_CAN_ID);
 		rearLegMotorSlave.configFactoryDefault();
 		rearLegMotorSlave.setInverted(false);
@@ -135,17 +135,17 @@ public class SpiderLegs extends Subsystem {
 		rearLegMotorSlave.setNeutralMode(NeutralMode.Coast);
 		rearLegMotorSlave.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorSlave.enableCurrentLimit(true);
-		
+
 		frontLegHome = new InvertableDigitalInput(RobotMap.FRONT_SPIDER_LEG_HOME_SENSOR_ID, true);
 		rearLegHome = new InvertableDigitalInput(RobotMap.REAR_SPIDER_LEG_HOME_SENSOR_ID, true);
-		
+
 		underFrontWheel = new AnalogInput(RobotMap.SPIDER_LEG_FRONT_FLOOR_SENSOR_ID);
 		underRearMiddleWheel = new AnalogInput(RobotMap.SPIDER_LEG_REAR_FLOOR_SENSOR_ID);
-		
+
 		reloadGains();
 		setVoltageCompensation(false);
 	}
-	
+
 	private void reloadGains() {
 		frontLegMotor.config_kP(0, 1, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.config_kI(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -153,48 +153,48 @@ public class SpiderLegs extends Subsystem {
 		frontLegMotor.config_kF(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.configMotionCruiseVelocity(400, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.configMotionAcceleration(4000,RobotConstants.TALON_CONFIG_TIMEOUT);
-		
+
 		rearLegMotorMaster.config_kP(0, 1, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.config_kI(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.config_kD(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.config_kF(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.configMotionCruiseVelocity(400, RobotConstants.TALON_CONFIG_TIMEOUT);
 		rearLegMotorMaster.configMotionAcceleration(4000,RobotConstants.TALON_CONFIG_TIMEOUT);
-		
+
 	}
-	
+
 	private SystemState handleOff(double timestamp) {
 		rearLegMotorMaster.set(ControlMode.Disabled, 0);
 		frontLegMotor.set(ControlMode.Disabled, 0);
-		
+
 		return defaultStateTransfer(timestamp);
 	}
-	
+
 	private SystemState handlePendingClimb(double timestamp) {
 		frontLegMotor.set(ControlMode.MotionMagic, 3500);
 		rearLegMotorMaster.set(ControlMode.MotionMagic, 7500);
 //		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.position", String.valueOf(rearLegMotorMaster.getSelectedSensorPosition()));
 //		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.velocity", String.valueOf(rearLegMotorMaster.getSelectedSensorVelocity()));
-		
+
 		return defaultStateTransfer(timestamp);
 	}
-	
+
 	private SystemState handleClimb(double timestamp) {
 		frontLegMotor.set(ControlMode.MotionMagic, 10500);
 		rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
-		
+
 		if(Math.abs(frontLegMotor.getSelectedSensorPosition() - 10500) < 250){
 			return SystemState.CLIMBING_HOLD;
 		}
-		
+
 		return defaultStateTransfer(timestamp);
 	}
-	
+
 	private SystemState handleClimbHold(double timestamp) {
 		if(stateChanged) {
 			setVoltageCompensation(true);
 		}
-		
+
 		if(frontOnGround){
 			frontLegMotor.set(ControlMode.MotionMagic, 1000);
 		} else {
@@ -205,10 +205,10 @@ public class SpiderLegs extends Subsystem {
 		} else {
 			rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
 		}
-		
+
 		return defaultStateTransfer(timestamp);
 	}
-	
+
 	private void setVoltageCompensation(boolean enabled) {
 		if(enabled){
 			frontLegMotor.configVoltageCompSaturation(4);
@@ -217,8 +217,8 @@ public class SpiderLegs extends Subsystem {
 			frontLegMotor.enableVoltageCompensation(false);
 		}
 	}
-	
-	
+
+
 	private SystemState defaultStateTransfer(double timestamp) {
 		switch (wantedState) {
 			case PENDING_CLIMB:
@@ -233,12 +233,12 @@ public class SpiderLegs extends Subsystem {
 				return SystemState.OFF;
 		}
 	}
-	
+
 	@Override
 	public void registerEnabledLoops(ILooper enabledLooper) {
 		enabledLooper.register(loop);
 	}
-	
+
 	@Override
 	public void readPeriodicInputs(){
 		if(underFrontWheel.getAverageVoltage() > 1){
@@ -246,19 +246,19 @@ public class SpiderLegs extends Subsystem {
 		} else {
 			frontOnGround = false;
 		}
-		
+
 		if(underRearMiddleWheel.getAverageVoltage() > 1){
 			rearOnGround = true;
 		} else {
 			rearOnGround = false;
 		}
 	}
-	
-	
+
+
 	@Override
 	public void outputToSmartDashboard() {
 		LOG.trace("front {} {} {} - rear {} {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(), frontOnGround,rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition(), rearOnGround);
-		
+
 		SmartDashboard
 			.putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
 		SmartDashboard
@@ -266,12 +266,12 @@ public class SpiderLegs extends Subsystem {
 		SmartDashboard.putBoolean("spiderlegs.front.home", frontLegHome.get());
 		SmartDashboard.putBoolean("spiderlegs.rear.home", rearLegHome.get());
 	}
-	
+
 	@Override
 	public void stop() {
 		wantedState = WantedState.OFF;
 	}
-	
+
 	@Override
 	public void zeroSensors() {
 		if(frontLegHome.get()){
@@ -282,7 +282,7 @@ public class SpiderLegs extends Subsystem {
 			}
 			frontHomed = true;
 		}
-		
+
 		if(rearLegHome.get()){
 			rearLegMotorMaster.setSelectedSensorPosition(0);
 			if(!rearHomed){
@@ -292,7 +292,7 @@ public class SpiderLegs extends Subsystem {
 			rearHomed = true;
 		}
 	}
-	
+
 	public boolean shouldDrive(){
 		if(SystemState.CLIMBING_HOLD.equals(systemState)){
 			if(!rearOnGround){
@@ -304,23 +304,29 @@ public class SpiderLegs extends Subsystem {
 		if(SystemState.CLIMBING.equals(systemState)){
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
+	public boolean shouldHoldPosition() {
+		return SystemState.CLIMBING_HOLD.equals(systemState) && rearOnGround;
+	}
+
 	@Override
 	public void test() {
-	
+
 	}
-	
+
 	@Override
 	public String id(){
 		return TAG;
 	}
-	
+
 	public void setWantedState(WantedState wantedState) {
 		synchronized (wantedState) {
-			this.wantedState = wantedState;
+			if (!(this.wantedState == WantedState.CLIMB && wantedState == WantedState.PENDING_CLIMB)) {
+				this.wantedState = wantedState;
+			}
 		}
 	}
 }
