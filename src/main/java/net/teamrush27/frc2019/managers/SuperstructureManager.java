@@ -19,7 +19,7 @@ public class SuperstructureManager extends Subsystem {
   private static SuperstructureManager INSTANCE = null;
   private static final double ROTATION_EPSILON = 10d;
   private static final double EXTENSION_EPSILON = 4d;
-  private static final double WRIST_EPSILON = 20d;
+  private static final double WRIST_EPSILON = 10d;
   private static final double ARM_BASE_LENGTH = 15.5d;
   private static final double ARM_MIN_EXTENSION = 5;
   private static final double ARM_MAX_EXTENSION = 47d;
@@ -27,8 +27,6 @@ public class SuperstructureManager extends Subsystem {
   private static final double MAX_LATERAL_EXTENSION = 32d;
 
   private static final Logger LOG = LogManager.getLogger(SuperstructureManager.class);
-
-  private static final double NUM_SEGMENTS = 5;
 
   public static SuperstructureManager getInstance() {
     if (INSTANCE == null) {

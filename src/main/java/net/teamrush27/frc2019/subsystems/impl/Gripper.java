@@ -101,7 +101,7 @@ public class Gripper extends Subsystem {
 	private final TalonSRX jawMotor;
 	
 	private final AnalogInput detective;
-	private final DigitalInput whatchman;
+	private final DigitalInput kermit;
 	
 	private final DigitalInput jawHome;
 	private final DigitalInput jawMax;
@@ -123,7 +123,7 @@ public class Gripper extends Subsystem {
 		jawMotor.enableVoltageCompensation(false);
 		
 		detective = new AnalogInput(RobotMap.GRIPPER_CARGO_ANALOG_SENSOR_ID);
-		whatchman = new DigitalInput(RobotMap.GRIPPER_HATCH_DIGITAL_SENSOR_ID);
+		kermit = new DigitalInput(RobotMap.GRIPPER_HATCH_DIGITAL_SENSOR_ID);
 		jawHome = new InvertableDigitalInput(RobotMap.GRIPPER_JAW_HOME_SENSOR_ID, true);
 		jawMax = new InvertableDigitalInput(RobotMap.GRIPPER_JAW_MAX_SENSOR_ID, true);
 	}
@@ -174,9 +174,9 @@ public class Gripper extends Subsystem {
 		
 		jawMotor.enableVoltageCompensation(false);
 		
-//		if (!whatchman.get()) {
-//			return SystemState.HOLD_HATCH;
-//		}
+		if (!kermit.get()) {
+			return SystemState.HOLD_HATCH;
+		}
 		
 		return defaultStateTransfer(timestamp);
 	}
