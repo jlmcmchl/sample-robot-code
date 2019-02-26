@@ -426,7 +426,12 @@ public class Arm extends Subsystem {
   public void setAbsolutePosition(double selectedSensorPosition) {
     double absolutePosition = selectedSensorPosition / 1024d * 90d * -1d;
 //		LOG.info("abs: {}", absolutePosition);
-    rotationMotorMaster.setEncPosition((absolutePosition + HOME_POSITION) * ROTATIONS_PER_DEGREE);
+    if(rotationHomed && Math.abs(absolutePosition - armState.getRotationInDegrees()) > 5){
+      LOG.warn("rejecting large change in absolute position");
+    } else {
+      rotationMotorMaster.setEncPosition((absolutePosition + HOME_POSITION) * ROTATIONS_PER_DEGREE);
+    }
+    
     if (!rotationHomed) {
       rotationHomed = true;
       LED.getInstance().setRotationHomed(true);
