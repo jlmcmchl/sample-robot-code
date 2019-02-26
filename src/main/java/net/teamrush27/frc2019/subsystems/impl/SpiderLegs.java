@@ -196,7 +196,7 @@ public class SpiderLegs extends Subsystem {
 		}
 
 		if(frontOnGround){
-			frontLegMotor.set(ControlMode.MotionMagic, 1000);
+			frontLegMotor.set(ControlMode.Disabled, 0);
 		} else {
 			frontLegMotor.set(ControlMode.MotionMagic, 10500);
 		}
