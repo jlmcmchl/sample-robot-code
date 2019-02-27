@@ -67,6 +67,9 @@ public class Robot extends TimedRobot {
   int sample_count;
   Double[][] camtran_buffer = new Double[10][6];
 
+  boolean autoRan;
+
+
   @Override
   public void robotInit() {
     subsystemManager.registerEnabledLoops(enabledLooper);
@@ -136,13 +139,24 @@ public class Robot extends TimedRobot {
     //robotStateEstimator.startLogging();
     enabledLooper.start();
 
-    autoModeExecutor = new AutoModeExecutor();
+    /*autoModeExecutor = new AutoModeExecutor();
     autoModeExecutor.setAutoMode(new TestMode());
-    autoModeExecutor.start();
+    autoModeExecutor.start();*/
+
+    arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
+    spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
+    gripper.setWantedState(Gripper.WantedState.OFF);
+    wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+
+    superman.setWantedState(WantedState.STOW,false,false);
+    superman.mustRecompute();
+
+    autoRan = true;
   }
 
   @Override
   public void autonomousPeriodic() {
+    driverControl();
   }
 
   @Override
@@ -151,15 +165,18 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     enabledLooper.start();
 
-    arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
-    spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-    gripper.setWantedState(Gripper.WantedState.OFF);
-    wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+    if (!autoRan) {
+      arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
+      spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
+      gripper.setWantedState(Gripper.WantedState.OFF);
+      wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+
+      superman.setWantedState(WantedState.STOW,false,false);
+      superman.mustRecompute();
+    }
+
     drivetrain.shift(true);
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-
-    superman.setWantedState(WantedState.STOW, false, false);
-    superman.must_recompute();
 
 //		arm.setClosedLoopInput(new ArmInput(0d, 0d));
 
@@ -171,72 +188,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-
-    // bail everything if we're climbing
-    if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-      spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
-      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      drivetrain.setBrakeMode(true);
-      drivetrain.shift(false);
-    } else if (operatorInterface.wantsClimb()) {
-      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
-    } else {
-      if (operatorInterface.wantsStow()) {
-        superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(),
-            gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
-        superman.setWantedState(WantedState.ROCKET_LEVEL_1, operatorInterface.getWantsInvert(),
-            gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel1HumanLoad()) {
-        superman.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), true);
-      } else if (operatorInterface.wantsGroundPickup()) {
-        superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
-            operatorInterface.getWantsInvert(), false);
-      } else if (operatorInterface.getWantsCargoShip()) {
-        superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert(),
-            gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel2() && gripper.hasGamepiece()) {
-        superman
-            .setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert(),
-                gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel2()) {
-        superman
-            .setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), false);
-      } else if (operatorInterface.wantsLevel3()) {
-        superman
-            .setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert(),
-                gripper.hasHatch());
-      }
-
-      if (operatorInterface.getShift()) {
-        drivetrain.shift();
-      }
-
-      if (operatorInterface.getWantManipulateCargo()) {
-        gripper.transitionCargo();
-      } else if (operatorInterface.getWantManipulateHatch()) {
-        gripper.transitionHatch();
-      }
-
-      if (operatorInterface.wantsIncreaseOffset()) {
-        superman.increaseOffset();
-      }
-      if (operatorInterface.wantsDecreaseOffset()) {
-        superman.decreaseOffset();
-      }
-    }
-
-    if (spiderLegs.shouldDrive()) {
-      if (spiderLegs.shouldHoldPosition()) {
-        superman.setWantedState(WantedState.STOW, false, false);
-        drivetrain.setOpenLoop(DriveCommand.BRAKE);
-      } else {
-        drivetrain.setOpenLoop(new DriveCommand(.3, .3, true));
-      }
-    } else {
-      drivetrain.setOpenLoop(operatorInterface.getTankCommand());
-    }
+    driverControl();
   }
 
   @Override
@@ -290,5 +242,75 @@ public class Robot extends TimedRobot {
     spiderLegs.zeroSensors();
     arm.zeroSensors();
     wrist.zeroSensors();
+  }
+
+  private void driverControl() {
+    // bail everything if we're climbing
+    if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
+      spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
+      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
+      drivetrain.setBrakeMode(true);
+      drivetrain.shift(false);
+    } else if (operatorInterface.wantsClimb()) {
+      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
+      spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+    } else {
+      if (operatorInterface.wantsStow()) {
+        superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(),
+            gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
+        superman.setWantedState(WantedState.ROCKET_LEVEL_1, operatorInterface.getWantsInvert(),
+            gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel1HumanLoad()) {
+        superman.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), true);
+      } else if (operatorInterface.wantsGroundPickup()) {
+        superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
+            operatorInterface.getWantsInvert(), false);
+      } else if (operatorInterface.getWantsCargoShip()) {
+        superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert(),
+            gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel2() && gripper.hasGamepiece()) {
+        superman
+            .setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert(),
+                gripper.hasHatch());
+      } else if (operatorInterface.wantsLevel2()) {
+        superman
+            .setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), false);
+      } else if (operatorInterface.wantsLevel3()) {
+        superman
+            .setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert(),
+                gripper.hasHatch());
+      }
+
+      if (operatorInterface.getShift()) {
+        drivetrain.shift();
+      }
+
+      if (operatorInterface.getWantManipulateCargo()) {
+        gripper.transitionCargo();
+      } else if (operatorInterface.getWantManipulateHatch()) {
+        gripper.transitionHatch();
+      }
+
+      double extensionInput = operatorInterface.getArmInput().getExtensionInput();
+
+
+      SmartDashboard.putNumber("extensionInput", operatorInterface.getArmInput().getExtensionInput());
+
+      if (Math.abs(extensionInput) > 0.05) {
+        superman.addOffset(extensionInput * 0.2);
+      }
+    }
+
+    if (spiderLegs.shouldDrive()) {
+      if (spiderLegs.shouldHoldPosition()) {
+        superman.setWantedState(WantedState.STOW, false, false);
+        drivetrain.setOpenLoop(DriveCommand.BRAKE);
+      } else {
+        drivetrain.setOpenLoop(new DriveCommand(.3, .3, true));
+      }
+    } else {
+      drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+    }
   }
 }
