@@ -73,6 +73,7 @@ public class Robot extends TimedRobot {
     subsystemManager.registerDisabledLoops(disabledLooper);
     TrajectoryGenerator.getInstance().generateTrajectories();
     superman.zeroSensors();
+    drivetrain.zeroSensors();
 
     driveCam = networkTableInstance.getTable("limelight-front").getEntry("camMode").getNumber(0);
   }
@@ -175,8 +176,9 @@ public class Robot extends TimedRobot {
     if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
       spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-    } else if (operatorInterface.wantsClimb()) {
+      drivetrain.setBrakeMode(true);
       drivetrain.shift(false);
+    } else if (operatorInterface.wantsClimb()) {
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
       spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
     } else {
@@ -227,9 +229,10 @@ public class Robot extends TimedRobot {
 
     if (spiderLegs.shouldDrive()) {
       if (spiderLegs.shouldHoldPosition()) {
-        drivetrain.setHoldPosition(2d, 2d);
+        superman.setWantedState(WantedState.STOW, false, false);
+        drivetrain.setOpenLoop(DriveCommand.BRAKE);
       } else {
-        drivetrain.setOpenLoop(new DriveCommand(-.3, -.3, true));
+        drivetrain.setOpenLoop(new DriveCommand(.3, .3, true));
       }
     } else {
       drivetrain.setOpenLoop(operatorInterface.getTankCommand());

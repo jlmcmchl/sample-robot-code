@@ -241,13 +241,13 @@ public class SpiderLegs extends Subsystem {
 
 	@Override
 	public void readPeriodicInputs(){
-		if(underFrontWheel.getAverageVoltage() > 1){
+		if(underFrontWheel.getAverageVoltage() > 1.25){
 			frontOnGround = true;
 		} else {
 			frontOnGround = false;
 		}
 
-		if(underRearMiddleWheel.getAverageVoltage() > 1){
+		if(underRearMiddleWheel.getAverageVoltage() > 1.5){
 			rearOnGround = true;
 		} else {
 			rearOnGround = false;

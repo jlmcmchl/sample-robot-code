@@ -119,7 +119,7 @@ public class Gripper extends Subsystem {
 		jawMotor.configContinuousCurrentLimit(30, RobotConstants.TALON_CONFIG_TIMEOUT);
 		jawMotor.enableCurrentLimit(true);
 		jawMotor.setInverted(true);
-		jawMotor.configVoltageCompSaturation(4);
+		jawMotor.configVoltageCompSaturation(6);
 		jawMotor.enableVoltageCompensation(false);
 		
 		detective = new AnalogInput(RobotMap.GRIPPER_CARGO_ANALOG_SENSOR_ID);
@@ -166,7 +166,7 @@ public class Gripper extends Subsystem {
 	
 	private SystemState handleIntakeHatch(double timestamp) {
 		double delta = timestamp - currentStateStartTime;
-		if(delta <= .5 && !jawMax.get()){
+		if(delta <= .375 && !jawMax.get()){
 			jawMotor.set(ControlMode.PercentOutput, 1);
 		} else {
 			jawMotor.set(ControlMode.Disabled, 0);
@@ -180,12 +180,18 @@ public class Gripper extends Subsystem {
 		
 		return defaultStateTransfer(timestamp);
 	}
+
+	double startExhaust = 0;
 	
 	private SystemState handleExhaustCargo(double timestamp) {
+		if (startExhaust == 0) {
+			startExhaust = timestamp;
+		}
 		firstFoundBall=0;
 		gripperMotor.set(ControlMode.PercentOutput, -1);
 		
-		if(WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 1.5){
+		if(WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 1.75 && timestamp - startExhaust > .5){
+			startExhaust = 0;
 			wantedState = WantedState.OFF;
 			return SystemState.OFF;
 		}

@@ -33,6 +33,19 @@ public class CircularBuffer {
         return sum / samples.size();
     }
 
+    public double getMax() {
+        if (samples.isEmpty())
+            return 0.0;
+        double max = Double.NEGATIVE_INFINITY;
+        for (double sample : samples) {
+            if (sample > max) {
+                max = sample;
+            }
+        }
+
+        return max;
+    }
+
     public void recomputeAverage() {
         // Reset any accumulation drift.
         sum = 0.0;

@@ -229,7 +229,6 @@ public class Wrist extends Subsystem {
 
     SmartDashboard.putNumber("wrist.pwm_value", wristState.wristPWMValue);
     SmartDashboard.putNumber("wrist.pwm_degrees", wristState.wristPWMDegrees);
-
   }
 
   @Override

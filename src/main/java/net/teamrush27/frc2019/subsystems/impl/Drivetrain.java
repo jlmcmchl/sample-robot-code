@@ -354,7 +354,7 @@ public class Drivetrain extends Subsystem {
   /**
    * @author team254
    */
-  private void setBrakeMode(boolean requestedBrakeMode) {
+  public void setBrakeMode(boolean requestedBrakeMode) {
     if (brakeMode != requestedBrakeMode) {
       brakeMode = requestedBrakeMode;
       rightMaster.setNeutralMode(brakeMode ? NeutralMode.Brake : NeutralMode.Coast);
@@ -388,6 +388,8 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.config_IntegralZone(DRIVE_CONTROL_SLOT, DriveConstants.PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
+
+
 
     rightMaster.config_kP(DRIVE_CONTROL_SLOT, DriveConstants.PID_P,
         RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -644,6 +646,19 @@ public class Drivetrain extends Subsystem {
   public synchronized void resetEncoders() {
     leftMaster.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     rightMaster.setSelectedSensorPosition(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
+
+    Arm.getInstance().setAbsolutePosition(leftSlave1.getSelectedSensorPosition());
+  }
+
+  public synchronized void fixRotationEncoder() {
+    int rotationTicks = leftSlave1.getSelectedSensorPosition();
+    if  (rotationTicks < -180) {
+      rotationTicks += 360;
+    } else if (rotationTicks > 180) {
+      rotationTicks -= 360;
+    }
+
+    leftSlave1.setSelectedSensorPosition(rotationTicks, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
   }
 
 
@@ -658,6 +673,7 @@ public class Drivetrain extends Subsystem {
     setBrakeMode(command.getBrakeMode());
     updateVelocitySetpoint(command);
   }
+
 
   /**
    * Configures talons for position control <p><i>(Modified for new DriveMode enum)</i></p>
@@ -852,8 +868,6 @@ public class Drivetrain extends Subsystem {
     periodicIO.gyro_heading = Rotation2d
         .fromDegrees(navX.getFusedHeading()).rotateBy(gyroOffset);
     periodicIO.can_read_delta = Timer.getFPGATimestamp() - periodicIO.timestamp;
-
-    Arm.getInstance().setAbsolutePosition(leftSlave1.getSelectedSensorPosition());
 
     double deltaLeftTicks =
         ((periodicIO.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
