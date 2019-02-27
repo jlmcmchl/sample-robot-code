@@ -29,7 +29,7 @@ public class Arm extends Subsystem {
   private static Arm INSTANCE = null;
 
   // gear ratio / degrees in a full rotation (360)
-  private static final double ROTATIONS_PER_DEGREE = 97.4358 / 360d; // 103.6
+  private static final double ROTATIONS_PER_DEGREE = 99.410158 / 360d; // 103.6
   // gear ratio / (sprocket diameter * 2 [accts for 3rd stage] * pi)
   private static final double ROTATIONS_PER_INCH = 1.0642462836;
 
@@ -37,6 +37,8 @@ public class Arm extends Subsystem {
 
   private static final double ROTATION_EPSILON = 3;
   private static final double EXTENSION_EPSILON = 1;
+
+  private boolean lockPosition;
 
   public static Arm getInstance() {
     if (INSTANCE == null) {
@@ -118,8 +120,9 @@ public class Arm extends Subsystem {
 
   private ArmState armState = new ArmState(0, 0, false, false);
 
-  CircularBuffer maxExtOutputBuffer = new CircularBuffer(30);
-  CircularBuffer currentBuffer = new CircularBuffer(30);
+  private CircularBuffer maxExtOutputBuffer = new CircularBuffer(30);
+  private CircularBuffer currentBuffer = new CircularBuffer(30);
+  private boolean forcePosition = false;
 
   public Arm() {
     rotationMotorMaster = new CANSparkMax(RobotMap.ARM_ROTATION_MASTER_CAN_ID,
@@ -262,6 +265,10 @@ public class Arm extends Subsystem {
         extensionHomeSensor.get());
   }
 
+  public void setForcePosition(boolean forcePosition){
+    this.forcePosition = forcePosition;
+  }
+
   @Override
   public void writePeriodicOutputs() {
     if (stateChanged) {
@@ -269,10 +276,10 @@ public class Arm extends Subsystem {
     }
     switch (systemState) {
       case CLOSED_LOOP:
-        boolean rotation_close = MathUtils
+        boolean rotation_close = forcePosition || MathUtils
             .epsilonEquals(armState.getRotationInDegrees(), armState.getRotationDemandInDegrees(),
                 ROTATION_EPSILON);
-        boolean extension_close = MathUtils
+        boolean extension_close = forcePosition || MathUtils
             .epsilonEquals(armState.getExtensionInInches(), armState.getExtensionDemandInInches(),
                 EXTENSION_EPSILON);
         if (rotationHomed) {

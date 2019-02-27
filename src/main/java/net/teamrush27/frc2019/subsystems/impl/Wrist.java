@@ -24,7 +24,7 @@ public class Wrist extends Subsystem {
   private static final double TICKS_PER_DEGREE = 4096d / 360d;
   private static final double DEGREES_PER_TICK = 360d / 4096d;
 
-  private static final int MID_PWM = 2093;
+  private static final int MID_PWM = 2028;
   private static final int PWM_RANGE = 1024;
 
   public static Wrist getInstance() {
