@@ -88,6 +88,7 @@ public class SuperstructureManager extends Subsystem {
   private WantedState wantedState = WantedState.START;
   private Boolean newInvertedRotation = false;
   private Boolean invertedRotation = false;
+  private Boolean newHasHatch = false;
   private Boolean hasHatch = false;
   private Boolean forceRecompute = true;
   //private Command origin = new Command(0d, 0d, null);
@@ -100,7 +101,7 @@ public class SuperstructureManager extends Subsystem {
       Boolean hasHatch) {
     this.newWantedState = wantedState;
     this.newInvertedRotation = invertedRotation;
-    this.hasHatch = hasHatch;
+    this.newHasHatch = hasHatch;
   }
 
   public void mustRecompute() {
@@ -204,12 +205,13 @@ public class SuperstructureManager extends Subsystem {
   //
 
   public void handlePosition(double timestamp) {
-    if (wantedState != newWantedState || invertedRotation != newInvertedRotation
+    if (wantedState != newWantedState || invertedRotation != newInvertedRotation || hasHatch != newHasHatch
         || forceRecompute) {
-      LOG.info(String.format("%s : %s - %s : %s", wantedState, invertedRotation, newWantedState,
-          newInvertedRotation));
+      LOG.info(String.format("%s : %s : %s - %s : %s : %s", wantedState, invertedRotation, hasHatch, newWantedState,
+          newInvertedRotation, newHasHatch));
       wantedState = newWantedState;
       invertedRotation = newInvertedRotation;
+      hasHatch = newHasHatch;
       forceRecompute = false;
       recomputeOperations();
       offset = 0d;
