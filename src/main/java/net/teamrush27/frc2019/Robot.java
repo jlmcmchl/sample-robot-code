@@ -61,13 +61,13 @@ public class Robot extends TimedRobot {
   private double counter;
   private boolean forward;
 
-  Number driveCam;
+  Number driveCam = 1;
   Double[] camtran_last = new Double[]{0d, 0d, 0d, 0d, 0d, 0d};
 
   int sample_count;
   Double[][] camtran_buffer = new Double[10][6];
 
-  boolean autoRan;
+  boolean autoRan = false;
 
 
   @Override
@@ -78,7 +78,15 @@ public class Robot extends TimedRobot {
     superman.zeroSensors();
     drivetrain.zeroSensors();
 
-    driveCam = networkTableInstance.getTable("limelight-front").getEntry("camMode").getNumber(0);
+    toggleLimelights();
+  }
+
+  private void toggleLimelights() {
+    networkTableInstance.getTable("limelight-front").getEntry("camMode").setNumber(driveCam);
+    networkTableInstance.getTable("limelight-front").getEntry("ledMode").setNumber(driveCam);
+
+    networkTableInstance.getTable("limelight-rear").getEntry("camMode").setNumber(driveCam);
+    networkTableInstance.getTable("limelight-rear").getEntry("ledMode").setNumber(driveCam);
   }
 
   @Override
@@ -95,38 +103,8 @@ public class Robot extends TimedRobot {
     if (operatorInterface.wantsSwitchPipeline()) {
       driveCam = 1 - driveCam.intValue();
 
-      networkTableInstance.getTable("limelight-front").getEntry("camMode").setNumber(driveCam);
-      networkTableInstance.getTable("limelight-front").getEntry("ledMode").setNumber(driveCam);
-
-      networkTableInstance.getTable("limelight-rear").getEntry("camMode").setNumber(driveCam);
-      networkTableInstance.getTable("limelight-rear").getEntry("ledMode").setNumber(driveCam);
+      toggleLimelights();
     }
-
-    if (driveCam.intValue() == 0) {
-      Double[] camtran = networkTableInstance.getTable("limelight-rear")
-          .getEntry("camtran").getDoubleArray(camtran_last);
-
-      if (camtran[0] != camtran_last[0]) {
-        // we have a match!
-        camtran_buffer[sample_count++] = camtran;
-        if (sample_count == 10) {
-          sample_count = 0;
-          //Predict target location
-
-        }
-//      LOG.info(String.format("TARGET FOUND: %s", camtran));
-      }
-    }
-
-    /*if (SmartDashboard.getBoolean("SeatMotor.direction", true)) {
-      counter += tickCounter.get();
-    } else {
-      counter -= tickCounter.get();
-    }
-    tickCounter.reset();
-
-    SmartDashboard.putNumber("SeatMotor.position", counter / 174.9); // 174.9:1 reduction
-*/
 
   }
 
@@ -148,7 +126,7 @@ public class Robot extends TimedRobot {
     gripper.setWantedState(Gripper.WantedState.OFF);
     wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
 
-    superman.setWantedState(WantedState.STOW,false,false);
+    superman.setWantedState(WantedState.STOW, false, false);
     superman.mustRecompute();
 
     autoRan = true;
@@ -165,15 +143,16 @@ public class Robot extends TimedRobot {
     disabledLooper.stop();
     enabledLooper.start();
 
-    if (!autoRan) {
-      arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
-      spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-      gripper.setWantedState(Gripper.WantedState.OFF);
-      wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+    arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
+    spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
+    wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
 
-      superman.setWantedState(WantedState.STOW,false,false);
-      superman.mustRecompute();
+    if (!autoRan) {
+      gripper.setWantedState(Gripper.WantedState.OFF);
+      superman.setWantedState(WantedState.STOW, false, false);
     }
+
+    superman.mustRecompute();
 
     drivetrain.shift(true);
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
@@ -294,8 +273,8 @@ public class Robot extends TimedRobot {
 
       double extensionInput = operatorInterface.getArmInput().getExtensionInput();
 
-
-      SmartDashboard.putNumber("extensionInput", operatorInterface.getArmInput().getExtensionInput());
+      SmartDashboard
+          .putNumber("extensionInput", operatorInterface.getArmInput().getExtensionInput());
 
       if (Math.abs(extensionInput) > 0.05) {
         superman.addOffset(extensionInput * 0.2);

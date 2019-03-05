@@ -40,15 +40,17 @@ public class SuperstructureManager extends Subsystem {
   private Wrist wrist = Wrist.getInstance();
 
   public enum WantedState {
-    CARGO_GROUND_PICKUP(new ArmInput(5d, 93d), 50d),
+    CARGO_GROUND_PICKUP(new ArmInput(5d, 94.5d), 50d),
     HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(5d, 90d), 52d, 0d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(8.1d, 63.8d), new ArmInput(5d, 90d), 21d, 0d),
-    ROCKET_LEVEL_2(new ArmInput(18d, 6.7d), new ArmInput(13d, 15.5d), 60d, 71d),
-    ROCKET_LEVEL_3(new ArmInput(46d, 2.85d), new ArmInput(43d, 7.17d), 63d, 83d),
+    ROCKET_LEVEL_2(new ArmInput(18d, 6.7d), new ArmInput(14.9d, 13.4d), 60d, 68d),
+    ROCKET_LEVEL_3(new ArmInput(46d, 2.85d), new ArmInput(46d, 7.17d), 63d, 77d),
     STOW(new ArmInput(5d, 0d), 0d),
     CLIMB(new ArmInput(5d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
+
+
 
     private final ArmInput defaultInput;
     private final ArmInput hatchInput;
@@ -116,7 +118,7 @@ public class SuperstructureManager extends Subsystem {
 
   @Override
   public void stop() {
-    wantedState = WantedState.STOW;
+    //wantedState = WantedState.STOW;
   }
 
   private void printCommands() {

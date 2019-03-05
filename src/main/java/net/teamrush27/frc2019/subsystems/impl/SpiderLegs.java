@@ -113,11 +113,11 @@ public class SpiderLegs extends Subsystem {
 		frontLegMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
 			RobotConstants.TALON_CONFIG_TIMEOUT);
-		frontLegMotor.setInverted(true);
+		frontLegMotor.setInverted(false);
 		frontLegMotor.setNeutralMode(NeutralMode.Coast);
 		frontLegMotor.configContinuousCurrentLimit(40, RobotConstants.TALON_CONFIG_TIMEOUT);
 		frontLegMotor.enableCurrentLimit(true);
-		frontLegMotor.setSensorPhase(true);
+		frontLegMotor.setSensorPhase(false);
 
 		rearLegMotorMaster = new TalonSRX(RobotMap.REAR_SPIDER_LEG_MOTOR_MASTER_CAN_ID);
 		rearLegMotorMaster.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
