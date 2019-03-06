@@ -131,4 +131,12 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		return gamePad.getTriggerButtonPressed(Hand.kRight);
 	}
 
+	private Boolean lastToggleLimelightSteering = false;
+
+	@Override
+	public Boolean wantsToggleLimelightSteering() {
+		Boolean changed = lastToggleLimelightSteering ^ driverRightJoystick.getRightButton();
+		lastToggleLimelightSteering = driverRightJoystick.getRightButton();
+		return changed && driverRightJoystick.getRightButton();
+	}
 }

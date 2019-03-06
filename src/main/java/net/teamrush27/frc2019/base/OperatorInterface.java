@@ -35,5 +35,7 @@ public interface OperatorInterface {
 
 	Boolean wantsIncreaseOffset();
 	Boolean wantsDecreaseOffset();
+
+	Boolean wantsToggleLimelightSteering();
 	
 }

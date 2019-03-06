@@ -7,7 +7,7 @@ public enum DriveMode {
   VELOCITY_SETPOINT(ControlMode.Velocity), // velocity PID control
   CHEZY_PATH_FOLLOWING(ControlMode.Velocity), // used for autonomous driving
   TURN_TO_HEADING(ControlMode.MotionMagic), // turn in place
-  HOLD_POSITION(ControlMode.MotionMagic);
+  LIMELIGHT_STEERING(ControlMode.PercentOutput); // open loop control but limelight for
 
   private final ControlMode requestedControlMode;
 

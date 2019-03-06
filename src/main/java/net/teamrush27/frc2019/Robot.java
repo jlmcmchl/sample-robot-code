@@ -8,6 +8,7 @@
 package net.teamrush27.frc2019;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -56,18 +57,11 @@ public class Robot extends TimedRobot {
   private AutoModeExecutor autoModeExecutor;
   private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
-
-  private Counter tickCounter = new Counter(new DigitalInput(7));
-  private double counter;
-  private boolean forward;
-
   Number driveCam = 1;
-  Double[] camtran_last = new Double[]{0d, 0d, 0d, 0d, 0d, 0d};
-
-  int sample_count;
-  Double[][] camtran_buffer = new Double[10][6];
 
   boolean autoRan = false;
+
+  private AnalogInput testSensor = new AnalogInput(0);
 
 
   @Override
@@ -105,6 +99,8 @@ public class Robot extends TimedRobot {
 
       toggleLimelights();
     }
+
+    SmartDashboard.putNumber("TESTSENSOR", testSensor.getVoltage());
 
   }
 
@@ -269,6 +265,10 @@ public class Robot extends TimedRobot {
         gripper.transitionCargo();
       } else if (operatorInterface.getWantManipulateHatch()) {
         gripper.transitionHatch();
+      }
+
+      if (operatorInterface.wantsToggleLimelightSteering()) {
+        drivetrain.toggleLimelightSteering();
       }
 
       double extensionInput = operatorInterface.getArmInput().getExtensionInput();

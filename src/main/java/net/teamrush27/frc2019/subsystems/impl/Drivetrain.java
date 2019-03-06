@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
@@ -143,8 +144,8 @@ public class Drivetrain extends Subsystem {
           case CHEZY_PATH_FOLLOWING:
             updateChezyPathFollower(timestamp);
             break;
-          case HOLD_POSITION:
-            updateHoldPosition(timestamp);
+          case LIMELIGHT_STEERING:
+            updateLimelightSteering(timestamp);
             break;
           default:
             LOG.warn("Unexpected drive mode: " + driveMode);
@@ -579,7 +580,7 @@ public class Drivetrain extends Subsystem {
    * @author cyocom
    */
   public synchronized void setOpenLoop(DriveCommand command) {
-    if (driveMode != DriveMode.OPEN_LOOP) {
+    if (!DriveMode.OPEN_LOOP.equals(driveMode) && !DriveMode.LIMELIGHT_STEERING.equals(driveMode)) {
       driveMode = DriveMode.OPEN_LOOP;
       setBrakeMode(command.getBrakeMode());
       setCurrentLimiting(true);
@@ -782,24 +783,22 @@ public class Drivetrain extends Subsystem {
     }
   }
 
-  public void setHoldPosition(double leftInchesAhead, double rightInchesAhead) {
-    if (!DriveMode.HOLD_POSITION.equals(driveMode)) {
-      configureTalonsForPositionControl();
-      driveMode = DriveMode.HOLD_POSITION;
+  public void toggleLimelightSteering() {
+    if (DriveMode.LIMELIGHT_STEERING.equals(driveMode)) {
+      driveMode = DriveMode.OPEN_LOOP;
+    } else if (DriveMode.OPEN_LOOP.equals(driveMode)) {
+      driveMode = DriveMode.LIMELIGHT_STEERING;
     }
-
-    periodicIO.left_demand =
-        periodicIO.left_position_ticks + DriveUtils.inchesToEncoderCount(leftInchesAhead);
-    periodicIO.right_demand =
-        periodicIO.right_position_ticks + DriveUtils.inchesToEncoderCount(rightInchesAhead);
   }
 
-  public void updateHoldPosition(double timestamp) {
-    if (driveMode == DriveMode.HOLD_POSITION) {
+  private void updateLimelightSteering(double timestamp) {
+    double throttle = periodicIO.left_demand;
 
-    } else {
-      DriverStation.reportError("Drive is not in path following state", false);
-    }
+    String limelight = throttle > 0 ? "limelight-front" : "limelight-rear";
+    double adjustment = NetworkTableInstance.getDefault().getTable(limelight).getEntry("ty").getDouble(0);
+
+    periodicIO.left_turn = -adjustment;
+    periodicIO.right_demand = adjustment;
   }
 
   public void defaultState() {
@@ -936,14 +935,14 @@ public class Drivetrain extends Subsystem {
       rightMaster.set(
           ControlMode.Velocity,
           periodicIO.right_demand);
-    } else if (driveMode == DriveMode.HOLD_POSITION) {
+    } else if (driveMode == DriveMode.LIMELIGHT_STEERING) {
       leftMaster.set(
-          ControlMode.Position,
-          periodicIO.left_demand);
+          ControlMode.PercentOutput,
+          periodicIO.left_demand + periodicIO.left_turn);
 
       rightMaster.set(
-          ControlMode.Position,
-          periodicIO.right_demand);
+          ControlMode.PercentOutput,
+          periodicIO.left_demand + periodicIO.right_turn);
     } else {
       LOG.warn("Hit a bad control state {} {}",
           driveMode.getRequestedControlMode(), driveMode);
