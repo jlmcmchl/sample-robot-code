@@ -1,6 +1,7 @@
 package net.teamrush27.frc2019.base;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.wrappers.APEMJoystick;
@@ -113,12 +114,9 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		return gamePad.getOptionsButton() && gamePad.getShareButton();
 	}
 
-	private Boolean lastSwitchPipeline = false;
 	@Override
 	public Boolean wantsSwitchPipeline() {
-		Boolean changed = lastSwitchPipeline ^ driverRightJoystick.getLeftButton();
-		lastSwitchPipeline = driverRightJoystick.getLeftButton();
-		return changed && lastSwitchPipeline;
+		return driverRightJoystick.getLeftButtonPressed();
 	}
 
 	@Override
@@ -131,12 +129,14 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		return gamePad.getTriggerButtonPressed(Hand.kRight);
 	}
 
-	private Boolean lastToggleLimelightSteering = false;
-
 	@Override
 	public Boolean wantsToggleLimelightSteering() {
-		Boolean changed = lastToggleLimelightSteering ^ driverRightJoystick.getRightButton();
-		lastToggleLimelightSteering = driverRightJoystick.getRightButton();
-		return changed && driverRightJoystick.getRightButton();
+		return driverRightJoystick.getLeftButtonPressed();
+	}
+
+	@Override
+	public void setRumble(double frac) {
+		gamePad.setRumble(RumbleType.kLeftRumble, frac);
+		gamePad.setRumble(RumbleType.kRightRumble, frac);
 	}
 }

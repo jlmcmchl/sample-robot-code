@@ -34,7 +34,7 @@ public class Gripper extends Subsystem {
   }
 
   private enum SystemState {
-    OFF, INTAKE_CARGO, HOLD_CARGO, EXHAUST_CARGO, INTAKE_HATCH, HOLD_HATCH
+    OFF, INTAKE_CARGO, HOLD_CARGO, EXHAUST_CARGO, INTAKE_HATCH, HOLD_HATCH, EXHAUST_HATCH
   }
 
   private WantedState wantedState = WantedState.OFF;
@@ -203,7 +203,7 @@ public class Gripper extends Subsystem {
 
   private SystemState handleHoldCargo(double timestamp) {
     firstFoundBall = 0;
-    gripperMotor.set(ControlMode.PercentOutput, .1);
+    gripperMotor.set(ControlMode.PercentOutput, .2);
 
     if (WantedState.EXHAUST_CARGO.equals(wantedState)) {
       return SystemState.EXHAUST_CARGO;
@@ -254,8 +254,6 @@ public class Gripper extends Subsystem {
     enabledLooper.register(loop);
   }
 
-  int i = 0;
-
   @Override
   public void outputToSmartDashboard() {
     if (SystemState.HOLD_CARGO.equals(systemState)) {
@@ -280,6 +278,7 @@ public class Gripper extends Subsystem {
     }
 
     SmartDashboard.putNumber("detective", detective.getVoltage());
+    SmartDashboard.putString("gripper.state", systemState.toString());
   }
 
   @Override
@@ -353,6 +352,10 @@ public class Gripper extends Subsystem {
 
   public boolean hasHatch() {
     return SystemState.HOLD_HATCH.equals(systemState);
+  }
+
+  public boolean hasCargo() {
+    return SystemState.HOLD_CARGO.equals(systemState);
   }
 
   @Override

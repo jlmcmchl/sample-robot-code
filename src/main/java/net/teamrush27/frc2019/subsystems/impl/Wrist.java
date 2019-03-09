@@ -24,7 +24,7 @@ public class Wrist extends Subsystem {
   private static final double TICKS_PER_DEGREE = 4096d / 360d;
   private static final double DEGREES_PER_TICK = 360d / 4096d;
 
-  private static final int MID_PWM = 2065;
+  private static final int MID_PWM = 1971;
   private static final int PWM_RANGE = 1024;
 
   public static Wrist getInstance() {
@@ -127,9 +127,9 @@ public class Wrist extends Subsystem {
     wristMotor.config_kI(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     wristMotor.config_kD(0, .1, RobotConstants.TALON_CONFIG_TIMEOUT);
     wristMotor.config_kF(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    wristMotor.configMotionAcceleration(degreesToTicks(180) / 10,
+    wristMotor.configMotionAcceleration(degreesToTicks(225) / 10,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    wristMotor.configMotionCruiseVelocity(degreesToTicks(90) / 10,
+    wristMotor.configMotionCruiseVelocity(degreesToTicks(135) / 10,
         RobotConstants.TALON_CONFIG_TIMEOUT);
 
   }

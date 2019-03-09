@@ -7,6 +7,7 @@ import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Arm.ArmState;
+import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.util.math.MathUtils;
@@ -19,7 +20,7 @@ public class SuperstructureManager extends Subsystem {
   private static SuperstructureManager INSTANCE = null;
   private static final double ROTATION_EPSILON = 10d;
   private static final double EXTENSION_EPSILON = 4d;
-  private static final double WRIST_EPSILON = 10d;
+  private static final double WRIST_EPSILON = 30d;
   private static final double ARM_BASE_LENGTH = 15.5d;
   private static final double ARM_MIN_EXTENSION = 5;
   private static final double ARM_MAX_EXTENSION = 47d;
@@ -49,7 +50,6 @@ public class SuperstructureManager extends Subsystem {
     STOW(new ArmInput(5d, 0d), 0d),
     CLIMB(new ArmInput(5d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
-
 
 
     private final ArmInput defaultInput;
@@ -86,10 +86,12 @@ public class SuperstructureManager extends Subsystem {
     }
   }
 
+  private Gripper gripper = Gripper.getInstance();
+
   private WantedState newWantedState = WantedState.STOW;
   private WantedState wantedState = WantedState.START;
-  private Boolean newInvertedRotation = false;
-  private Boolean invertedRotation = false;
+  private Boolean newInvertedRotation = true;
+  private Boolean invertedRotation = true;
   private Boolean newHasHatch = false;
   private Boolean hasHatch = false;
   private Boolean forceRecompute = true;
@@ -104,10 +106,15 @@ public class SuperstructureManager extends Subsystem {
     this.newWantedState = wantedState;
     this.newInvertedRotation = invertedRotation;
     this.newHasHatch = hasHatch;
+    this.offset = 0d;
   }
 
   public void mustRecompute() {
     forceRecompute = true;
+  }
+
+  public Boolean overBack() {
+    return !invertedRotation;
   }
 
   @Override
@@ -188,6 +195,11 @@ public class SuperstructureManager extends Subsystem {
 
       @Override
       public void onLoop(double timestamp) {
+        if ((WantedState.CARGO_GROUND_PICKUP.equals(wantedState) || WantedState.HUMAN_LOAD
+            .equals(wantedState)) && gripper.hasCargo()) {
+          newWantedState = WantedState.STOW;
+        }
+
         handlePosition(timestamp);
       }
 
@@ -207,9 +219,11 @@ public class SuperstructureManager extends Subsystem {
   //
 
   public void handlePosition(double timestamp) {
-    if (wantedState != newWantedState || invertedRotation != newInvertedRotation || hasHatch != newHasHatch
+    if (wantedState != newWantedState || invertedRotation != newInvertedRotation
+        || hasHatch != newHasHatch
         || forceRecompute) {
-      LOG.info(String.format("%s : %s : %s - %s : %s : %s", wantedState, invertedRotation, hasHatch, newWantedState,
+      LOG.info(String.format("%s : %s : %s - %s : %s : %s", wantedState, invertedRotation, hasHatch,
+          newWantedState,
           newInvertedRotation, newHasHatch));
       wantedState = newWantedState;
       invertedRotation = newInvertedRotation;
@@ -223,17 +237,15 @@ public class SuperstructureManager extends Subsystem {
 
     //System.out.println(String.format("Current: %s", wrist.getPWMAngle()));
     if (commands.isEmpty()) {
-      if (offset != 0) {
-        Double[] goal = new Double[]{
-            getWantedExtension(),
-            getWantedRotation()
-        };
+      Double[] goal = new Double[]{
+          getWantedExtension(),
+          getWantedRotation()
+      };
 
-        Command command = adjust(goal, offset);
-        if (command != null) {
-          arm.setForcePosition(true);
-          executeCommand(command);
-        }
+      Command command = adjust(goal, offset);
+      if (command != null) {
+        arm.setForcePosition(true);
+        executeCommand(command);
       }
       return;
     }
@@ -278,7 +290,13 @@ public class SuperstructureManager extends Subsystem {
               0d, Limit.ROTATION));
     } else {
       commands.add(
-          new Command(getWantedRotation(), armState.getExtensionInInches(),
+          new Command(armState.getRotationInDegrees(),
+              Math.min(armState.getExtensionInInches(), getWantedExtension()),
+              0d, Limit.EXTENSION));
+
+      commands.add(
+          new Command(getWantedRotation(),
+              Math.min(armState.getExtensionInInches(), getWantedExtension()),
               0d, Limit.ROTATION));
     }
 
@@ -294,7 +312,7 @@ public class SuperstructureManager extends Subsystem {
     double goalRotation = current.getArmInput().getRotationInput();
     double goalExtension = current.getArmInput().getExtensionInput();
     double currentExtension = arm.getArmState().getExtensionInInches();
-    double currentWrist = wrist.getEncoderAngle();
+    double currentWrist = wrist.getPWMAngle();
     double goalWrist = current.getWristAngle();
 
     switch (current.getLimitType()) {
@@ -397,9 +415,8 @@ public class SuperstructureManager extends Subsystem {
     coords = clampCartesian(coords);
     Double[] polar = cartesianToPolar(coords);
 
-    System.out.println(String.format("STATE: %s\t%s", state[0], state[1]));
-    System.out.println(String.format("GOAL: %s\t%s", polar[0], polar[1]));
-
+    //System.out.println(String.format("STATE: %s\t%s", state[0], state[1]));
+    //System.out.println(String.format("GOAL: %s\t%s", polar[0], polar[1]));
 
     if (reachable(state, polar)) {
       double wristAngle = state[1] + getWantedWristAngle() - polar[1];

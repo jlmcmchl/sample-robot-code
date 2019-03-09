@@ -25,5 +25,13 @@ public class APEMJoystick extends Joystick {
 	public boolean getRightButton(){
 		return super.getRawButton(1);
 	}
+
+	public boolean getRightButtonPressed() {
+		return super.getRawButtonPressed(1);
+	}
+
+	public boolean getLeftButtonPressed() {
+		return super.getRawButtonPressed(2);
+	}
 	
 }

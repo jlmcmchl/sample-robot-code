@@ -37,5 +37,6 @@ public interface OperatorInterface {
 	Boolean wantsDecreaseOffset();
 
 	Boolean wantsToggleLimelightSteering();
-	
+
+	void setRumble(double frac);
 }

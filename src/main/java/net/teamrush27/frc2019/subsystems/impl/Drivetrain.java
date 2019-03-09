@@ -22,10 +22,10 @@ import net.teamrush27.frc2019.constants.DriveConstants;
 import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
+import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
-import net.teamrush27.frc2019.subsystems.impl.enumerated.ShiftState;
 import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
@@ -62,6 +62,8 @@ public class Drivetrain extends Subsystem {
     return INSTANCE;
   }
 
+  private static SuperstructureManager superman = SuperstructureManager.getInstance();
+
   private static final double DRIVE_ENCODER_PPR = 4096.0;
 
   private final TalonSRX leftMaster;
@@ -83,6 +85,8 @@ public class Drivetrain extends Subsystem {
 
   private final AHRS navX;
 
+  private final Limelights limelights;
+
   private DriveMode driveMode = DriveMode.OPEN_LOOP;
   private Boolean inHighGear = false;
   private RobotState robotState = RobotState.getInstance();
@@ -103,6 +107,8 @@ public class Drivetrain extends Subsystem {
   private boolean isOnTarget = false;
 
   private ReflectingCSVWriter<PeriodicIO> CSVWriter = null;
+
+  private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
   private final Loop loop = new Loop() {
     private DriveMode lastMode = DriveMode.OPEN_LOOP;
@@ -298,6 +304,8 @@ public class Drivetrain extends Subsystem {
     shift(true);
 
     motionPlanner = new DriveMotionPlanner();
+
+    limelights = Limelights.getInstance();
   }
 
   private void setCurrentLimiting(boolean shouldCurrentLimit) {
@@ -389,8 +397,6 @@ public class Drivetrain extends Subsystem {
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftMaster.config_IntegralZone(DRIVE_CONTROL_SLOT, DriveConstants.PID_I_ZONE,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-
-
 
     rightMaster.config_kP(DRIVE_CONTROL_SLOT, DriveConstants.PID_P,
         RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -653,7 +659,7 @@ public class Drivetrain extends Subsystem {
 
   public synchronized void fixRotationEncoder() {
     int rotationTicks = leftSlave1.getSelectedSensorPosition();
-    if  (rotationTicks < -180) {
+    if (rotationTicks < -180) {
       rotationTicks += 360;
     } else if (rotationTicks > 180) {
       rotationTicks -= 360;
@@ -783,22 +789,55 @@ public class Drivetrain extends Subsystem {
     }
   }
 
-  public void toggleLimelightSteering() {
-    if (DriveMode.LIMELIGHT_STEERING.equals(driveMode)) {
-      driveMode = DriveMode.OPEN_LOOP;
-    } else if (DriveMode.OPEN_LOOP.equals(driveMode)) {
-      driveMode = DriveMode.LIMELIGHT_STEERING;
+  public void setLimelightSteering(Limelights.SystemState limelightState) {
+    switch (limelightState) {
+      case REAR_TRACKING:
+      case FRONT_TRACKING:
+      case BOTH_TRACKING:
+        driveMode = DriveMode.LIMELIGHT_STEERING;
+        break;
+      case DRIVE:
+      default:
+        driveMode = DriveMode.OPEN_LOOP;
     }
   }
 
   private void updateLimelightSteering(double timestamp) {
-    double throttle = periodicIO.left_demand;
+    periodicIO.left_turn = 1;
+    periodicIO.right_turn = 1;
 
-    String limelight = throttle > 0 ? "limelight-front" : "limelight-rear";
-    double adjustment = NetworkTableInstance.getDefault().getTable(limelight).getEntry("ty").getDouble(0);
+    if ((superman.overBack() && periodicIO.left_demand > 0) || (!superman.overBack()
+        && periodicIO.left_demand < 0)) {
+      //no steering adjustment when we go in reverse
+      return;
+    }
 
-    periodicIO.left_turn = -adjustment;
-    periodicIO.right_demand = adjustment;
+    if (superman.overBack() && periodicIO.left_demand <= 0)  {
+      periodicIO.left_demand = Math.min(periodicIO.left_demand, -.2);
+    } else if (!superman.overBack() && periodicIO.left_demand >= 0) {
+      periodicIO.left_demand = Math.max(periodicIO.left_demand, .2);
+    }
+
+
+    // INVERTS REAR ANGLE OFFSET TO ACCOUNT FOR THROTTLE DIRECTION
+
+    double angle_offset = limelights.getOffset(!superman.overBack());
+    double target_area = limelights.getTargetArea(!superman.overBack());
+
+    // more aggressive further away at lower angles
+    if (target_area < 3d && Math.abs(angle_offset) < 4) {
+      if (angle_offset * periodicIO.left_demand > 0) {
+        periodicIO.right_turn = 1 - angle_offset / 5;
+      } else {
+        periodicIO.left_turn = 1 + angle_offset / 5;
+      }
+    } else {
+      if (angle_offset * periodicIO.left_demand > 0) {
+        periodicIO.right_turn = 1 - angle_offset / 10;
+      } else {
+        periodicIO.left_turn = 1 + angle_offset / 10;
+      }
+    }
   }
 
   public void defaultState() {
@@ -938,11 +977,11 @@ public class Drivetrain extends Subsystem {
     } else if (driveMode == DriveMode.LIMELIGHT_STEERING) {
       leftMaster.set(
           ControlMode.PercentOutput,
-          periodicIO.left_demand + periodicIO.left_turn);
+          periodicIO.left_demand * periodicIO.left_turn);
 
       rightMaster.set(
           ControlMode.PercentOutput,
-          periodicIO.left_demand + periodicIO.right_turn);
+          periodicIO.left_demand * periodicIO.right_turn);
     } else {
       LOG.warn("Hit a bad control state {} {}",
           driveMode.getRequestedControlMode(), driveMode);
@@ -981,7 +1020,7 @@ public class Drivetrain extends Subsystem {
     public double right_accel;
     public double left_feedforward;
     public double right_feedforward;
-    public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState(
+    public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<>(
         Pose2dWithCurvature.identity());
     public Pose2d field_to_vehicle = Pose2d.identity();
 
@@ -1012,7 +1051,7 @@ public class Drivetrain extends Subsystem {
       this.right_accel = other.right_accel;
       this.left_feedforward = other.left_feedforward;
       this.right_feedforward = other.right_feedforward;
-      this.path_setpoint = new TimedState(
+      this.path_setpoint = new TimedState<>(
           other.path_setpoint.state(),
           other.path_setpoint.t(),
           other.path_setpoint.velocity(),

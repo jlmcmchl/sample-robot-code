@@ -166,14 +166,14 @@ public class Arm extends Subsystem {
     rotationMotorMaster.getPIDController().setI(0, 0);
     rotationMotorMaster.getPIDController().setD(0.0004, 0);
     rotationMotorMaster.getPIDController().setFF(0.000156, 0);
-    rotationMotorMaster.getPIDController().setOutputRange(-.75, .75, 0);
+    rotationMotorMaster.getPIDController().setOutputRange(-1, 1, 0);
     rotationMotorMaster.getPIDController().setDFilter(0.25, 0);
     rotationMotorMaster.getPIDController()
         .setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
     rotationMotorMaster.getPIDController()
         .setSmartMotionAllowedClosedLoopError(3 * ROTATIONS_PER_DEGREE, 0);
-    rotationMotorMaster.getPIDController().setSmartMotionMaxAccel(4000, 0);
-    rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(3000, 0);
+    rotationMotorMaster.getPIDController().setSmartMotionMaxAccel(5700, 0);
+    rotationMotorMaster.getPIDController().setSmartMotionMaxVelocity(4000, 0);
     rotationMotorMaster.getPIDController().setSmartMotionMinOutputVelocity(0, 0);
 
     rotationMotorMaster.getPIDController().setP(0.2, 1);
@@ -318,6 +318,10 @@ public class Arm extends Subsystem {
   @Override
   public void stop() {
     wantedState = WantedState.OFF;
+  }
+
+  public void reset() {
+    extensionHomed = false;
   }
 
   @Override
