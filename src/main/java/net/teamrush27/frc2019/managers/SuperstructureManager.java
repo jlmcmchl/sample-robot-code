@@ -10,6 +10,7 @@ import net.teamrush27.frc2019.subsystems.impl.Arm.ArmState;
 import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.util.math.MathUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -118,8 +119,10 @@ public class SuperstructureManager extends Subsystem {
   }
 
   @Override
-  public void outputToSmartDashboard() {
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
     //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(), arm.getArmState().getExtensionInInches(), wrist.getEncoderAngle());
+    //collection.setSuperstructureOffset(offset);
+
     SmartDashboard.putNumber("superstruture.offset", offset);
   }
 

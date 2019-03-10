@@ -13,6 +13,7 @@ import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.util.TelemetryUtil;
 import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +24,21 @@ public class SpiderLegs extends Subsystem {
 	private static Logger LOG = LogManager.getLogger(SpiderLegs.class);
 	private static String TAG = "SPIDERLEGS";
 	private static SpiderLegs INSTANCE = null;
+
+	private static final int REAR_HOME = 0;
+	private static final int FRONT_HOME = 0;
+
+	private static final int REAR_PRE = 7500;
+	private static final int FRONT_PRE = 3500;
+
+	private static final int FRONT_HOLD = 10500;
+
+	private static final int REAR_HOLD_L3 = 12750;
+	private static final int REAR_HOLD_L2 = 9000;
+
+	private static final int REAR_RETURN = 1000;
+
+	private static final int EPSILON = 250;
 
 	public static SpiderLegs getInstance() {
 		if (INSTANCE == null) {
@@ -164,15 +180,15 @@ public class SpiderLegs extends Subsystem {
 	}
 
 	private SystemState handleOff(double timestamp) {
-		rearLegMotorMaster.set(ControlMode.Disabled, 0);
-		frontLegMotor.set(ControlMode.Disabled, 0);
+		rearLegMotorMaster.set(ControlMode.Disabled, REAR_HOME);
+		frontLegMotor.set(ControlMode.Disabled, FRONT_HOME);
 
 		return defaultStateTransfer(timestamp);
 	}
 
 	private SystemState handlePendingClimb(double timestamp) {
-		frontLegMotor.set(ControlMode.MotionMagic, 3500);
-		rearLegMotorMaster.set(ControlMode.MotionMagic, 7500);
+		frontLegMotor.set(ControlMode.MotionMagic, FRONT_PRE);
+		rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_PRE);
 //		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.position", String.valueOf(rearLegMotorMaster.getSelectedSensorPosition()));
 //		TelemetryUtil.getInstance().addEntry(Timer.getFPGATimestamp(), "spiderlegs.rear.velocity", String.valueOf(rearLegMotorMaster.getSelectedSensorVelocity()));
 
@@ -180,10 +196,10 @@ public class SpiderLegs extends Subsystem {
 	}
 
 	private SystemState handleClimb(double timestamp) {
-		frontLegMotor.set(ControlMode.MotionMagic, 10500);
-		rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
+		frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
+		rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L3);
 
-		if(Math.abs(frontLegMotor.getSelectedSensorPosition() - 10500) < 250){
+		if(Math.abs(frontLegMotor.getSelectedSensorPosition() - FRONT_HOLD) < EPSILON){
 			return SystemState.CLIMBING_HOLD;
 		}
 
@@ -196,14 +212,14 @@ public class SpiderLegs extends Subsystem {
 		}
 
 		if(frontOnGround){
-			frontLegMotor.set(ControlMode.Disabled, 0);
+			frontLegMotor.set(ControlMode.Disabled, FRONT_HOME);
 		} else {
-			frontLegMotor.set(ControlMode.MotionMagic, 10500);
+			frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
 		}
 		if(rearOnGround){
-			rearLegMotorMaster.set(ControlMode.MotionMagic, 1000);
+			rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_RETURN);
 		} else {
-			rearLegMotorMaster.set(ControlMode.MotionMagic, 12750);
+			rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L3);
 		}
 
 		return defaultStateTransfer(timestamp);
@@ -256,8 +272,13 @@ public class SpiderLegs extends Subsystem {
 
 
 	@Override
-	public void outputToSmartDashboard() {
+	public void outputToSmartDashboard(SmartDashboardCollection collection) {
 		LOG.trace("front {} {} {} - rear {} {} {}", frontLegHome.get(), frontLegMotor.getSelectedSensorPosition(), frontOnGround,rearLegHome.get(), rearLegMotorMaster.getSelectedSensorPosition(), rearOnGround);
+
+		//collection.setSpiderlegsFrontPosition(frontLegMotor.getSelectedSensorPosition());
+		//collection.setSpiderlegsRearPosition(rearLegMotorMaster.getSelectedSensorPosition());
+		//collection.setSpiderlegsFrontHome(frontLegHome.get());
+		//collection.setSpiderlegsRearHome(rearLegHome.get());
 
 		SmartDashboard
 			.putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
@@ -265,6 +286,7 @@ public class SpiderLegs extends Subsystem {
 			.putNumber("spiderlegs.rear.position", rearLegMotorMaster.getSelectedSensorPosition());
 		SmartDashboard.putBoolean("spiderlegs.front.home", frontLegHome.get());
 		SmartDashboard.putBoolean("spiderlegs.rear.home", rearLegHome.get());
+
 	}
 
 	@Override

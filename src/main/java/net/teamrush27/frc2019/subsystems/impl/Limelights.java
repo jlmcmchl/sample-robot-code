@@ -5,6 +5,7 @@ import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.wrappers.Limelight;
 import net.teamrush27.frc2019.wrappers.Limelight.CamMode;
 import net.teamrush27.frc2019.wrappers.Limelight.LEDMode;
@@ -193,7 +194,8 @@ public class Limelights extends Subsystem {
   }
 
   @Override
-  public void outputToSmartDashboard() {
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
+    //collection.setLimelightMode(systemState.toString());
     SmartDashboard.putString("LIMELIGHT_MODE", systemState.toString());
   }
 

@@ -25,6 +25,7 @@ import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
 import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
@@ -475,12 +476,19 @@ public class Drivetrain extends Subsystem {
 //	private double rightMax = 0;
 
   @Override
-  public void outputToSmartDashboard() {
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
+
     LOG.trace("left {} - right {}", leftMaster.getSelectedSensorPosition(),
         rightMaster.getSelectedSensorPosition());
+
+    //collection.setArmAbsoluteRotation(leftSlave1.getSelectedSensorPosition());
+    //collection.setDrivetrainLeftPosition(leftMaster.getSelectedSensorPosition());
+    //collection.setDrivetrainRightPosition(rightMaster.getSelectedSensorPosition());
+
     SmartDashboard.putNumber("arm.absolute_rotation", leftSlave1.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.left.position", leftMaster.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.right.position", rightMaster.getSelectedSensorPosition());
+
 
 //    SmartDashboard.putBoolean("climb", DriveMode.CLIMB.equals(driveMode));
 //		double currentleftMax = Math.max(leftMaster.getOutputCurrent(),leftMax);
@@ -494,6 +502,7 @@ public class Drivetrain extends Subsystem {
     //if (CSVWriter != null) {
     //            CSVWriter.write();
     //        }
+
   }
 
   public void shift() {
@@ -806,16 +815,14 @@ public class Drivetrain extends Subsystem {
     periodicIO.left_turn = 1;
     periodicIO.right_turn = 1;
 
-    if ((superman.overBack() && periodicIO.left_demand > 0) || (!superman.overBack()
-        && periodicIO.left_demand < 0)) {
-      //no steering adjustment when we go in reverse
-      return;
-    }
+    LOG.info(String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
 
-    if (superman.overBack() && periodicIO.left_demand <= 0)  {
+    if (superman.overBack() && periodicIO.left_demand <= 0.01)  {
       periodicIO.left_demand = Math.min(periodicIO.left_demand, -.2);
-    } else if (!superman.overBack() && periodicIO.left_demand >= 0) {
+    } else if (!superman.overBack() && periodicIO.left_demand >= -0.01) {
       periodicIO.left_demand = Math.max(periodicIO.left_demand, .2);
+    } else {
+      return;
     }
 
 
@@ -826,16 +833,16 @@ public class Drivetrain extends Subsystem {
 
     // more aggressive further away at lower angles
     if (target_area < 3d && Math.abs(angle_offset) < 4) {
-      if (angle_offset * periodicIO.left_demand > 0) {
+      if (angle_offset > 0) {
         periodicIO.right_turn = 1 - angle_offset / 5;
       } else {
         periodicIO.left_turn = 1 + angle_offset / 5;
       }
     } else {
-      if (angle_offset * periodicIO.left_demand > 0) {
-        periodicIO.right_turn = 1 - angle_offset / 10;
+      if (angle_offset > 0) {
+        periodicIO.right_turn = 1 - angle_offset / 6;
       } else {
-        periodicIO.left_turn = 1 + angle_offset / 10;
+        periodicIO.left_turn = 1 + angle_offset / 6;
       }
     }
   }

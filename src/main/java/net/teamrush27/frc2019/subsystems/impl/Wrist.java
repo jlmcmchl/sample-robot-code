@@ -12,6 +12,7 @@ import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +25,7 @@ public class Wrist extends Subsystem {
   private static final double TICKS_PER_DEGREE = 4096d / 360d;
   private static final double DEGREES_PER_TICK = 360d / 4096d;
 
-  private static final int MID_PWM = 1971;
+  private static final int MID_PWM = 1760;
   private static final int PWM_RANGE = 1024;
 
   public static Wrist getInstance() {
@@ -219,16 +220,23 @@ public class Wrist extends Subsystem {
   }
 
   @Override
-  public void outputToSmartDashboard() {
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
 //		double[] array = new double[2];
 //		wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
 //		LOG.info("{} {}", getEncoderAngle(), array[0]);
+
+    //collection.setWristEncoderTicks(wristState.wristEncoderTicks);
+    //collection.setWristEncoderDegrees(wristState.wristEncoderDegrees);
+
+    //collection.setWristPWMValue(wristState.wristPWMValue);
+    //collection.setWristPWMDegrees(wristState.wristPWMDegrees);
 
     SmartDashboard.putNumber("wrist.encoder_ticks", wristState.wristEncoderTicks);
     SmartDashboard.putNumber("wrist.encoder_degrees", wristState.wristEncoderDegrees);
 
     SmartDashboard.putNumber("wrist.pwm_value", wristState.wristPWMValue);
     SmartDashboard.putNumber("wrist.pwm_degrees", wristState.wristPWMDegrees);
+
   }
 
   @Override
@@ -299,7 +307,7 @@ public class Wrist extends Subsystem {
   }
 
   private class WristState {
-    double wristEncoderTicks;
+    int wristEncoderTicks;
     double wristEncoderDegrees;
     double wristPWMValue;
     double wristPWMDegrees;

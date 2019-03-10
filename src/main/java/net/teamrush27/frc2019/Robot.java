@@ -7,6 +7,8 @@
 
 package net.teamrush27.frc2019;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -28,6 +30,7 @@ import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.util.TelemetryUtil;
 import net.teamrush27.frc2019.util.crash.CrashTracker;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
@@ -59,6 +62,8 @@ public class Robot extends TimedRobot {
 
   boolean autoRan = false;
 
+  private Gson serializer = new Gson();
+
   @Override
   public void robotInit() {
     subsystemManager.registerEnabledLoops(enabledLooper);
@@ -72,12 +77,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    SmartDashboardCollection collection = new SmartDashboardCollection();
     //limelights.outputToSmartDashboard();
-    subsystemManager.outputToSmartDashboard();
+    subsystemManager.outputToSmartDashboard(collection);
+    SmartDashboard.putString("robot.state", serializer.toJson(collection));
     //enabledLooper.outputToSmartDashboard();
     //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
     //	arm.getArmState().getExtensionInInches(), wrist.getPWMAngle());
-
     //wrist.outputToSmartDashboard();
 
     //gripper.outputToSmartDashboard();

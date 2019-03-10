@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Talon;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,7 +87,7 @@ public class LED extends Subsystem {
 	}
 
 	@Override
-	public void outputToSmartDashboard() {
+	public void outputToSmartDashboard(SmartDashboardCollection collection) {
 	}
 	
 	private SystemState defaultStateTransfer() {

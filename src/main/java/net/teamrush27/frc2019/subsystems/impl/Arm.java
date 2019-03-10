@@ -8,14 +8,15 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import javax.naming.ldap.Control;
+import java.text.DecimalFormat;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
-import net.teamrush27.frc2019.subsystems.impl.util.DriveUtils;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.util.math.CircularBuffer;
 import net.teamrush27.frc2019.util.math.MathUtils;
 import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
@@ -206,19 +207,27 @@ public class Arm extends Subsystem {
   }
 
   @Override
-  public void outputToSmartDashboard() {
-    LOG.trace("arm.extension: {}", armState.getExtensionInInches());
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
+    maxExtOutputBuffer.addValue(Math.abs(extensionMotor.getEncoder().getVelocity()));
+    currentBuffer.addValue(extensionMotor.getOutputCurrent());
+
+    //collection.setArmRotation(armState.getRotationInDegrees());
+    //collection.setArmRotationReset(armState.isRotationAtHome());
+    //collection.setArmExtension(armState.getExtensionInInches());
+    //collection.setArmExtensionReset(armState.isExtensionAtHome());
+    //collection.setArmRotationOutput(rotationMotorMaster.getAppliedOutput());
+    //collection.setArmExtensionOutput(extensionMotor.getAppliedOutput());
+    //collection.setArmExtensionSpeed(maxExtOutputBuffer.getMax());
+    //collection.setArmExtensionCurrent(currentBuffer.getMax());
+
+
     SmartDashboard.putNumber("arm.rotation", armState.getRotationInDegrees());
     SmartDashboard.putBoolean("arm.rotation.reset", armState.isRotationAtHome());
     SmartDashboard.putNumber("arm.extension", armState.getExtensionInInches());
     SmartDashboard.putBoolean("arm.extension.reset", armState.isExtensionAtHome());
     SmartDashboard.putNumber("arm.rotation.output", rotationMotorMaster.getAppliedOutput());
     SmartDashboard.putNumber("arm.extension.output", extensionMotor.getAppliedOutput());
-
-    maxExtOutputBuffer.addValue(Math.abs(extensionMotor.getEncoder().getVelocity()));
     SmartDashboard.putNumber("arm.extension.speed", maxExtOutputBuffer.getMax());
-
-    currentBuffer.addValue(extensionMotor.getOutputCurrent());
     SmartDashboard.putNumber("arm.extension.current", currentBuffer.getMax());
 
   }
@@ -265,7 +274,7 @@ public class Arm extends Subsystem {
         extensionHomeSensor.get());
   }
 
-  public void setForcePosition(boolean forcePosition){
+  public void setForcePosition(boolean forcePosition) {
     this.forcePosition = forcePosition;
   }
 
@@ -287,8 +296,9 @@ public class Arm extends Subsystem {
 //            System.out.println("Holding Rotation in POSITION PID");
           }
           rotationMotorMaster.getPIDController()
-                .setReference(armState.getRotationDemandInRotations(),
-                    rotation_close ? ControlType.kPosition : ControlType.kSmartMotion, rotation_close ? 1 : 0);
+              .setReference(armState.getRotationDemandInRotations(),
+                  rotation_close ? ControlType.kPosition : ControlType.kSmartMotion,
+                  rotation_close ? 1 : 0);
         } else {
           rotationMotorMaster.set(0);
         }
@@ -453,7 +463,8 @@ public class Arm extends Subsystem {
   public void setAbsolutePosition(double selectedSensorPosition) {
     double absolutePosition = selectedSensorPosition / 1024d * 90d * -1d;
 //		LOG.info("abs: {}", absolutePosition);
-    if (rotationHomed && Math.abs((absolutePosition + HOME_POSITION) - armState.getRotationInDegrees()) > 5) {
+    if (rotationHomed
+        && Math.abs((absolutePosition + HOME_POSITION) - armState.getRotationInDegrees()) > 5) {
       LOG.warn(String.format("rejecting large change in absolute position: goal - %s\tcurr - %s",
           absolutePosition, armState.getRotationInDegrees()));
       // Drivetrain.getInstance().fixRotationEncoder();

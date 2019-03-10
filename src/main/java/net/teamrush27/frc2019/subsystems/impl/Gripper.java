@@ -12,6 +12,7 @@ import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -255,7 +256,7 @@ public class Gripper extends Subsystem {
   }
 
   @Override
-  public void outputToSmartDashboard() {
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
     if (SystemState.HOLD_CARGO.equals(systemState)) {
       LED.getInstance().setHasGamePiece(true);
     } else if (SystemState.HOLD_HATCH.equals(systemState)
@@ -276,6 +277,9 @@ public class Gripper extends Subsystem {
     } else {
       LED.getInstance().setExhausting(false);
     }
+
+    //collection.setDetectiveVoltage(detective.getVoltage());
+    //collection.setGripperState(systemState.toString());
 
     SmartDashboard.putNumber("detective", detective.getVoltage());
     SmartDashboard.putString("gripper.state", systemState.toString());

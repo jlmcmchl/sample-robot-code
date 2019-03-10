@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.util.CSVWritable;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 
@@ -32,8 +33,8 @@ public class SubsystemManager implements ILooper {
 	public SubsystemManager(List subsystems) {
 	}
 	
-	public void outputToSmartDashboard() {
-		subsystems.forEach(s -> s.outputToSmartDashboard());
+	public void outputToSmartDashboard(SmartDashboardCollection collection) {
+		subsystems.forEach(s -> s.outputToSmartDashboard(collection));
 	}
 	
 	public void stop() {

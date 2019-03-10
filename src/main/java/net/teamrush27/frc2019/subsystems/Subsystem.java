@@ -3,10 +3,11 @@ package net.teamrush27.frc2019.subsystems;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 
 public abstract class Subsystem {
 
-    public abstract void outputToSmartDashboard();
+    public abstract void outputToSmartDashboard(SmartDashboardCollection collection);
 
     public abstract void stop();
 

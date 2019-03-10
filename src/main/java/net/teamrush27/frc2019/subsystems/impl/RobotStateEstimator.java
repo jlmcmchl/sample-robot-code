@@ -6,6 +6,7 @@ import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.util.CSVWritable;
 import net.teamrush27.frc2019.util.ReflectingCSVWriter;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
@@ -29,7 +30,7 @@ public class RobotStateEstimator extends Subsystem {
   }
 
   @Override
-  public void outputToSmartDashboard() {
+  public void outputToSmartDashboard(SmartDashboardCollection collection) {
 
   }
 
