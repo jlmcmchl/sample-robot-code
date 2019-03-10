@@ -48,11 +48,11 @@ public class SpiderLegs extends Subsystem {
 	}
 
 	public enum WantedState {
-		OFF, PENDING_CLIMB, CLIMB
+		OFF, PENDING_CLIMB, CLIMB, CLIMB_L2
 	}
 
 	private enum SystemState {
-		OFF, PENDING_CLIMB, CLIMBING, CLIMBING_HOLD
+		OFF, PENDING_CLIMB, CLIMBING, CLIMBING_HOLD, CLIMBING_L2, CLIMBING_L2_HOLD
 	}
 
 	private WantedState wantedState = WantedState.OFF;
@@ -80,6 +80,12 @@ public class SpiderLegs extends Subsystem {
 					break;
 				case CLIMBING_HOLD:
 					newState = handleClimbHold(timestamp);
+					break;
+				case CLIMBING_L2:
+					newState = handleClimbL2(timestamp);
+					break;
+				case CLIMBING_L2_HOLD:
+					newState = handleClimbL2Hold(timestamp);
 					break;
 				case OFF:
 				default:
@@ -194,6 +200,17 @@ public class SpiderLegs extends Subsystem {
 
 		return defaultStateTransfer(timestamp);
 	}
+	
+	private SystemState handleClimbL2(double timestamp){
+		frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
+		rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L2);
+		
+		if(Math.abs(frontLegMotor.getSelectedSensorPosition() - FRONT_HOLD) < EPSILON){
+			return SystemState.CLIMBING_HOLD;
+		}
+		
+		return defaultStateTransfer(timestamp);
+	}
 
 	private SystemState handleClimb(double timestamp) {
 		frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
@@ -203,6 +220,25 @@ public class SpiderLegs extends Subsystem {
 			return SystemState.CLIMBING_HOLD;
 		}
 
+		return defaultStateTransfer(timestamp);
+	}
+	
+	private SystemState handleClimbL2Hold(double timestamp){
+		if(stateChanged) {
+			setVoltageCompensation(true);
+		}
+		
+		if(frontOnGround){
+			frontLegMotor.set(ControlMode.Disabled, FRONT_HOME);
+		} else {
+			frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
+		}
+		if(rearOnGround){
+			rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_RETURN);
+		} else {
+			rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L2);
+		}
+		
 		return defaultStateTransfer(timestamp);
 	}
 
