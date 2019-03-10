@@ -10,6 +10,7 @@ package net.teamrush27.frc2019;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,6 +40,8 @@ import org.apache.logging.log4j.Logger;
 
 public class Robot extends TimedRobot {
 
+  public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
+  
   private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private Arm arm = Arm.getInstance();

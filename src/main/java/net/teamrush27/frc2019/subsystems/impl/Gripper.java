@@ -4,15 +4,18 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
+import net.teamrush27.frc2019.util.math.CircularBuffer;
 import net.teamrush27.frc2019.wrappers.InvertableDigitalInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -106,6 +109,8 @@ public class Gripper extends Subsystem {
 
   private final DigitalInput jawHome;
   private final DigitalInput jawMax;
+  
+  private final CircularBuffer circularBuffer = new CircularBuffer(10);
 
   public Gripper() {
     gripperMotor = new TalonSRX(RobotMap.GRIPPER_MOTOR_CAN_ID);
@@ -210,7 +215,7 @@ public class Gripper extends Subsystem {
       return SystemState.EXHAUST_CARGO;
     }
 
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1) {
+    if (WantedState.INTAKE_CARGO.equals(wantedState)) {
       return SystemState.HOLD_CARGO;
     }
 
@@ -220,9 +225,13 @@ public class Gripper extends Subsystem {
   private double firstFoundBall = 0;
 
   private SystemState handleIntakeCargo(double timestamp) {
+    if(stateChanged){
+      circularBuffer.clear();
+    }
+    
     gripperMotor.set(ControlMode.PercentOutput, 1);
-
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && detective.getVoltage() > 1.75) {
+    
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && (detective.getVoltage() > 1.75 || (circularBuffer.getAverage() > 13 && circularBuffer.isFull()))) {
       if (firstFoundBall == 0) {
         firstFoundBall = Timer.getFPGATimestamp();
       }
@@ -257,6 +266,8 @@ public class Gripper extends Subsystem {
 
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
+    circularBuffer.addValue(Robot.pdp.getCurrent(5));
+    
     if (SystemState.HOLD_CARGO.equals(systemState)) {
       LED.getInstance().setHasGamePiece(true);
     } else if (SystemState.HOLD_HATCH.equals(systemState)
@@ -283,6 +294,7 @@ public class Gripper extends Subsystem {
 
     SmartDashboard.putNumber("detective", detective.getVoltage());
     SmartDashboard.putString("gripper.state", systemState.toString());
+    SmartDashboard.putNumber("gripper.amps", circularBuffer.getAverage());
   }
 
   @Override
