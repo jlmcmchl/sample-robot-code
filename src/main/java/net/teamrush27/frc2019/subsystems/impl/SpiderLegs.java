@@ -371,7 +371,7 @@ public class SpiderLegs extends Subsystem {
 
 	public void setWantedState(WantedState wantedState) {
 		synchronized (wantedState) {
-			if (!(this.wantedState == WantedState.CLIMB && wantedState == WantedState.PENDING_CLIMB)) {
+			if (!((WantedState.CLIMB.equals(this.wantedState) || WantedState.CLIMB_L2.equals(this.wantedState)) && (WantedState.PENDING_CLIMB.equals(wantedState) || WantedState.CLIMB.equals(wantedState) || WantedState.CLIMB_L2.equals(wantedState)))) {
 				this.wantedState = wantedState;
 			}
 		}
