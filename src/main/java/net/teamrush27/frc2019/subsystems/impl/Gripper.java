@@ -211,6 +211,10 @@ public class Gripper extends Subsystem {
     firstFoundBall = 0;
     gripperMotor.set(ControlMode.PercentOutput, .2);
 
+    //if (detective.getVoltage() < 1) {
+      //return SystemState.INTAKE_CARGO;
+    //}
+
     if (WantedState.EXHAUST_CARGO.equals(wantedState)) {
       return SystemState.EXHAUST_CARGO;
     }
@@ -231,7 +235,7 @@ public class Gripper extends Subsystem {
     
     gripperMotor.set(ControlMode.PercentOutput, 1);
     
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && (detective.getVoltage() > 1.75 || (circularBuffer.getAverage() > 13 && circularBuffer.isFull()))) {
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && (detective.getVoltage() > 1.75 || (circularBuffer.getAverage() > 15 && circularBuffer.isFull()))) {
       if (firstFoundBall == 0) {
         firstFoundBall = Timer.getFPGATimestamp();
       }
