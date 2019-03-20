@@ -265,6 +265,8 @@ public class Arm extends Subsystem {
     }
   }
 
+  boolean lastHomed = false;
+
   @Override
   public void readPeriodicInputs() {
     armState = new ArmState( //
@@ -272,6 +274,17 @@ public class Arm extends Subsystem {
         extensionMotor.getEncoder().getPosition(), //
         rotationHomeSensor.get(), //
         extensionHomeSensor.get());
+
+    if (armState.isExtensionAtHome() && !lastHomed) {
+      if (CANError.kOK.equals(extensionMotor.setEncPosition(0))) {
+        LOG.info("extension homed");
+        extensionHomed = true;
+        LED.getInstance().setExtensionHomed(true);
+        lastHomed = true;
+      }
+    } else if(!armState.isExtensionAtHome()){
+      lastHomed = false;
+    }
   }
 
   public void setForcePosition(boolean forcePosition) {
