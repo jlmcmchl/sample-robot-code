@@ -867,6 +867,10 @@ public class Drivetrain extends Subsystem {
     }
   }
 
+  public void fixArm() {
+    Arm.getInstance().setAbsolutePosition(leftSlave1.getSelectedSensorPosition());
+  }
+
   @Override
   public void test() {
   }

@@ -98,6 +98,11 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	public Boolean getWantsInvert() {
 		return !gamePad.getBumper(Hand.kRight);
 	}
+
+	@Override
+	public Boolean wantsArmReset() {
+		return gamePad.getMiddleButton();
+	}
 	
 	@Override
 	public Double getWristInput() {

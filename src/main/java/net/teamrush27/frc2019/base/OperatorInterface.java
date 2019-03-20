@@ -22,6 +22,8 @@ public interface OperatorInterface {
 	Boolean wantsLevel2();
 	Boolean wantsLevel3();
 	Boolean getWantsInvert();
+
+	Boolean wantsArmReset();
 	
 	// climb
 	Boolean wantsPreClimb();

@@ -228,7 +228,9 @@ public class Robot extends TimedRobot {
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
       spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
     } else {
-      if (operatorInterface.wantsStow()) {
+      if (operatorInterface.wantsArmReset()) {
+        drivetrain.fixArm();
+      } else if (operatorInterface.wantsStow()) {
         superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(),
             gripper.hasHatch());
       } else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
