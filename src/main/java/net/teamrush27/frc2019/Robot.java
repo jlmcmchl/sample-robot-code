@@ -8,7 +8,6 @@
 package net.teamrush27.frc2019;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -41,7 +40,7 @@ import org.apache.logging.log4j.Logger;
 public class Robot extends TimedRobot {
 
   public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
-  
+
   private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private Arm arm = Arm.getInstance();
@@ -220,13 +219,17 @@ public class Robot extends TimedRobot {
   private void driverControl() {
     // bail everything if we're climbing
     if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-      spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
+      //spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      drivetrain.setBrakeMode(true);
+      //drivetrain.setBrakeMode(true);
       drivetrain.shift(false);
     } else if (operatorInterface.wantsClimb()) {
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+      if (operatorInterface.getWantsInvert()) {
+        //spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+      } else {
+        //spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB_L2);
+      }
     } else {
       if (operatorInterface.wantsArmReset()) {
         drivetrain.fixArm();
