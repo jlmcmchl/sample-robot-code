@@ -104,7 +104,6 @@ public class Gripper extends Subsystem {
   private final TalonSRX gripperMotor;
   private final TalonSRX jawMotor;
 
-  private final AnalogInput detective;
   private final DigitalInput kermit;
 
   private final DigitalInput jawHome;
@@ -129,7 +128,6 @@ public class Gripper extends Subsystem {
     jawMotor.configVoltageCompSaturation(6);
     jawMotor.enableVoltageCompensation(false);
 
-    detective = new AnalogInput(RobotMap.GRIPPER_CARGO_ANALOG_SENSOR_ID);
     kermit = new DigitalInput(RobotMap.GRIPPER_HATCH_DIGITAL_SENSOR_ID);
     jawHome = new InvertableDigitalInput(RobotMap.GRIPPER_JAW_HOME_SENSOR_ID, true);
     jawMax = new InvertableDigitalInput(RobotMap.GRIPPER_JAW_MAX_SENSOR_ID, true);
@@ -197,8 +195,7 @@ public class Gripper extends Subsystem {
     firstFoundBall = 0;
     gripperMotor.set(ControlMode.PercentOutput, -1);
 
-    if (WantedState.EXHAUST_CARGO.equals(wantedState) && detective.getVoltage() < 1.75
-        && timestamp - startExhaust > .5) {
+    if (WantedState.EXHAUST_CARGO.equals(wantedState) && timestamp - startExhaust > .5) {
       startExhaust = 0;
       wantedState = WantedState.OFF;
       return SystemState.OFF;
@@ -235,7 +232,7 @@ public class Gripper extends Subsystem {
     
     gripperMotor.set(ControlMode.PercentOutput, 1);
     
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && (detective.getVoltage() > 1.75 || (circularBuffer.getAverage() > 15 && circularBuffer.isFull()))) {
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 18 && circularBuffer.isFull()) {
       if (firstFoundBall == 0) {
         firstFoundBall = Timer.getFPGATimestamp();
       }
@@ -296,7 +293,6 @@ public class Gripper extends Subsystem {
     //collection.setDetectiveVoltage(detective.getVoltage());
     //collection.setGripperState(systemState.toString());
 
-    SmartDashboard.putNumber("detective", detective.getVoltage());
     SmartDashboard.putString("gripper.state", systemState.toString());
     SmartDashboard.putNumber("gripper.amps", circularBuffer.getAverage());
   }
