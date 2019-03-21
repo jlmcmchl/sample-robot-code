@@ -142,13 +142,7 @@ public class Gripper extends Subsystem {
   private SystemState handleOff(double timestamp) {
     gripperMotor.set(ControlMode.Disabled, 0);
 
-    if (!jawHome.get()) {
-      jawMotor.set(ControlMode.PercentOutput, -1);
-    } else {
-      jawMotor.set(ControlMode.Disabled, 0);
-    }
-
-    jawMotor.enableVoltageCompensation(false);
+    homeJaws();
 
     return defaultStateTransfer(timestamp);
   }
@@ -179,6 +173,8 @@ public class Gripper extends Subsystem {
 
     jawMotor.enableVoltageCompensation(false);
 
+    gripperMotor.set(ControlMode.Disabled, 0);
+
     if (!kermit.get()) {
       return SystemState.HOLD_HATCH;
     }
@@ -195,6 +191,8 @@ public class Gripper extends Subsystem {
     firstFoundBall = 0;
     gripperMotor.set(ControlMode.PercentOutput, -1);
 
+    homeJaws();
+
     if (WantedState.EXHAUST_CARGO.equals(wantedState) && timestamp - startExhaust > .5) {
       startExhaust = 0;
       wantedState = WantedState.OFF;
@@ -207,6 +205,8 @@ public class Gripper extends Subsystem {
   private SystemState handleHoldCargo(double timestamp) {
     firstFoundBall = 0;
     gripperMotor.set(ControlMode.PercentOutput, .2);
+
+    homeJaws();
 
     //if (detective.getVoltage() < 1) {
       //return SystemState.INTAKE_CARGO;
@@ -229,6 +229,8 @@ public class Gripper extends Subsystem {
     if(stateChanged){
       circularBuffer.clear();
     }
+
+    homeJaws();
     
     gripperMotor.set(ControlMode.PercentOutput, 1);
     
@@ -257,7 +259,6 @@ public class Gripper extends Subsystem {
       case EXHAUST_HATCH:
         return SystemState.OFF;
     }
-
   }
 
   @Override
@@ -310,6 +311,16 @@ public class Gripper extends Subsystem {
   @Override
   public void test() {
 
+  }
+
+  private void homeJaws() {
+    if (!jawHome.get()) {
+      jawMotor.set(ControlMode.PercentOutput, -1);
+    } else {
+      jawMotor.set(ControlMode.Disabled, 0);
+    }
+
+    jawMotor.enableVoltageCompensation(false);
   }
 
   @Override

@@ -42,7 +42,13 @@ public class SuperstructureManager extends Subsystem {
   private Wrist wrist = Wrist.getInstance();
 
   public enum WantedState {
+    //     CARGO_GROUND_PICKUP(new ArmInput(5d, 94.5d), new ArmInput(5d, 107d), 50d, -6d),
     CARGO_GROUND_PICKUP(new ArmInput(5d, 94.5d), 50d),
+    // FRONT POSITION
+    // HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(10d, 80d), 52d, 75d),
+    // REAR POSITION
+    // HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(10d, 105d), 52d, -80d),
+    // OG POSITION
     HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(0d, 90d), 52d, 0d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(8.1d, 63.8d), new ArmInput(0d, 90d), 21d, 0d),
