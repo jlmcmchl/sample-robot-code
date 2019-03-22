@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
@@ -109,6 +110,9 @@ public class Drivetrain extends Subsystem {
 
   private ReflectingCSVWriter<PeriodicIO> CSVWriter = null;
 
+  private AnalogInput distanceSensorFront;
+  private AnalogInput distanceSensorRear;
+
   private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
   private final Loop loop = new Loop() {
@@ -182,6 +186,9 @@ public class Drivetrain extends Subsystem {
    */
   public Drivetrain() {
     periodicIO = new PeriodicIO();
+
+    distanceSensorFront = new AnalogInput(0);
+    distanceSensorRear = new AnalogInput(1);
 
     leftMaster = new TalonSRX(RobotMap.DRIVE_LEFT_MASTER_CAN_ID);
     leftMaster.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
