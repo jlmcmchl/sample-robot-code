@@ -2,6 +2,7 @@ package net.teamrush27.frc2019.auto.modes;
 
 import net.teamrush27.frc2019.auto.AutoModeBase;
 import net.teamrush27.frc2019.auto.AutoModeEndedException;
+import net.teamrush27.frc2019.auto.actions.impl.ConstantVelocityAction;
 import net.teamrush27.frc2019.auto.actions.impl.DrivePercentOutputAction;
 import net.teamrush27.frc2019.auto.actions.impl.DriveTrajectory;
 import net.teamrush27.frc2019.auto.actions.impl.TurnInPlaceAction;
@@ -15,9 +16,9 @@ public class TestMode extends AutoModeBase {
   @Override
   protected void routine() throws AutoModeEndedException {
     System.out.println("Test mode");
-    //Trajectory trajectory = TrajectoryGenerator.getInstance().getTrajectorySet().habToFrontShip.get(false);
-    //DriveTrajectory driveTrajectory = new DriveTrajectory(trajectory, true);
-    //runAction(driveTrajectory);
+    Trajectory trajectory = TrajectoryGenerator.getInstance().getTrajectorySet().justStraight.get(false);
+    DriveTrajectory driveTrajectory = new DriveTrajectory(trajectory, true);
+    runAction(driveTrajectory);
 
     Drivetrain driveTrain = Drivetrain.getInstance();
     driveTrain.shift(true);
@@ -31,6 +32,7 @@ public class TestMode extends AutoModeBase {
     runAction(new DrivePercentOutputAction(DriveCommand.defaultCommand()));
     driveTrain.stopLogging();*/
 
-    runAction(new TurnInPlaceAction(2 * Math.PI * 8, 36));
+
+    //runAction(new TurnInPlaceAction(2 * Math.PI * 8, 60));
   }
 }

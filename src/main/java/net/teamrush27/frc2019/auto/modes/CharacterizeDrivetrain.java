@@ -29,8 +29,8 @@ public class CharacterizeDrivetrain extends AutoModeBase {
 
     DriveCharacterization.CharacterizationConstants constants = DriveCharacterization.characterizeDrive(velocityData, accelerationData);
 
-    LOG.info("ks: " + constants.ks);
-    LOG.info("kv: " + constants.kv);
-    LOG.info("ka: " + constants.ka);
+    LOG.info("ks: {}", constants.ks);
+    LOG.info("kv: {}", constants.kv);
+    LOG.info("ka: {}", constants.ka);
   }
 }

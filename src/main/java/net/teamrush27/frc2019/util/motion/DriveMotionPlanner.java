@@ -42,7 +42,7 @@ public class DriveMotionPlanner implements CSVWritable {
     NONLINEAR_FEEDBACK
   }
 
-  FollowerType mFollowerType = FollowerType.NONLINEAR_FEEDBACK;
+  FollowerType mFollowerType = FollowerType.PURE_PURSUIT;
 
   public void setFollowerType(FollowerType type) {
     mFollowerType = type;

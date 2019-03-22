@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
+import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
+import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.loops.Looper;
@@ -101,9 +103,10 @@ public class Robot extends TimedRobot {
     //robotStateEstimator.startLogging();
     enabledLooper.start();
 
-    /*autoModeExecutor = new AutoModeExecutor();
+    drivetrain.startLogging();
+    autoModeExecutor = new AutoModeExecutor();
     autoModeExecutor.setAutoMode(new TestMode());
-    autoModeExecutor.start();*/
+    autoModeExecutor.start();
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
     spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
@@ -118,7 +121,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    driverControl();
+    //driverControl();
   }
 
   @Override
@@ -172,6 +175,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     led.setWantedState(LED.WantedState.DISABLED);
     arm.reset();
+    drivetrain.stopLogging();
     SmartDashboard.putString("Match Cycle", "DISABLED");
     try {
       TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");

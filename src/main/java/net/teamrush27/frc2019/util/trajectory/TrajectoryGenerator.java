@@ -84,7 +84,7 @@ public class TrajectoryGenerator {
   // +y is to the left.
   // ALL POSES DEFINED FOR THE CASE THAT ROBOT STARTS ON RIGHT! (mirrored about +x axis for LEFT)
   public static final Pose2d originPose = new Pose2d(0.0, 0.0, Rotation2d.identity());
-  public static final Pose2d justStraightPose = new Pose2d(300.0, 0.0, Rotation2d.identity());
+  public static final Pose2d justStraightPose = new Pose2d(120.0, 0.0, Rotation2d.identity());
   public static final Pose2d justStraightBackPose = new Pose2d(-60.0, 0.0, Rotation2d.identity());
   public static final Pose2d turnRightBackPose = new Pose2d(-60.0, 60.0, Rotation2d.fromDegrees(-90));
 

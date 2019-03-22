@@ -53,7 +53,12 @@ public class DriveCharacterization {
 
   public static CharacterizationConstants characterizeDrive(List<VelocityDataPoint> velocityData, List<AccelerationDataPoint> accelerationData) {
     CharacterizationConstants rv = getVelocityCharacterization(getVelocityData(velocityData));
+
+    LOG.info("ks: {}", rv.ks);
+    LOG.info("kv: {}", rv.kv);
+
     getAccelerationCharacterization(getAccelerationData(accelerationData, rv), rv);
+    LOG.info("STUFF");
     return rv;
   }
 
