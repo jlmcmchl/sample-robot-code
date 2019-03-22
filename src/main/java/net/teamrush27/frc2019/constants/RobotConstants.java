@@ -5,7 +5,7 @@ public class RobotConstants {
 	// Wheel Base
     public static double DRIVE_WHEEL_DIAMETER = 4; // in inches
     public static double TRACK_WIDTH = 25; // in inches
-    public static double SCRUB_FACTOR = 1;
+    public static double SCRUB_FACTOR = 1.1525606838366464;
 
     // Extremities
     // below in inches
