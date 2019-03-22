@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
   private Limelights limelights = Limelights.getInstance();
   private final SuperstructureManager superman = SuperstructureManager.getInstance();
   private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
-      spiderLegs, wrist, arm, led, limelights, superman);
+      spiderLegs, wrist, arm, led, limelights, superman, robotStateEstimator);
 
   private final Looper enabledLooper = new Looper();
   private final Looper disabledLooper = new Looper();
