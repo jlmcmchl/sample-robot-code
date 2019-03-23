@@ -29,9 +29,9 @@ public class Gripper extends Subsystem {
   private static final Logger LOG = LogManager.getLogger(Gripper.class);
   private static Gripper INSTANCE = null;
 
-  private static final Integer JAW_HATCH_INTAKE_POSITION = 80;
-  private static final Integer JAW_RETRACT_POSITION = -244;
-  private static final Integer JAW_HATCH_EXHAUST_POSITION = 160;
+  private static final Integer JAW_HATCH_INTAKE_POSITION = 170;
+  private static final Integer JAW_RETRACT_POSITION = -120;
+  private static final Integer JAW_HATCH_EXHAUST_POSITION = 230;
 
   public static Gripper getInstance() {
     if (INSTANCE == null) {
@@ -120,9 +120,9 @@ public class Gripper extends Subsystem {
     gripperMotor = new CANSparkMax(RobotMap.GRIPPER_MOTOR_SPARK_CAN_ID, MotorType.kBrushless);
     gripperMotor.restoreFactoryDefaults();
     gripperMotor.setIdleMode(IdleMode.kBrake);
-    gripperMotor.setSmartCurrentLimit(0);
+    gripperMotor.setSecondaryCurrentLimit(80);
     gripperMotor.setOpenLoopRampRate(.1);
-    gripperMotor.enableVoltageCompensation(6);
+    gripperMotor.enableVoltageCompensation(12);
     gripperMotor.getPIDController().setP(.1);
     gripperMotor.getPIDController().setI(0);
     gripperMotor.getPIDController().setD(0);
@@ -133,7 +133,7 @@ public class Gripper extends Subsystem {
     jawMotor.setInverted(true);
     jawMotor.setSensorPhase(false);
     jawMotor.configContinuousCurrentLimit(20);
-    jawMotor.configVoltageCompSaturation(8);
+    jawMotor.configVoltageCompSaturation(12);
     jawMotor.enableVoltageCompensation(true);
     jawMotor.configSelectedFeedbackSensor(FeedbackDevice.Analog);
     jawMotor.config_kP(0,100);
@@ -199,7 +199,7 @@ public class Gripper extends Subsystem {
   private SystemState handleHoldCargo(double timestamp) {
     firstFoundBall = 0;
 
-    gripperMotor.set(.4);
+    gripperMotor.set(.1);
 //    gripperMotor.getPIDController().setReference(.2, ControlType.kDutyCycle);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
@@ -221,11 +221,11 @@ public class Gripper extends Subsystem {
       circularBuffer.clear();
     }
 
-    gripperMotor.set(1);
+    gripperMotor.set(.25);
 //    gripperMotor.getPIDController().setReference(1, ControlType.kDutyCycle);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 20 && circularBuffer.isFull() && timestamp - currentStateStartTime > .25) {
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 25 && circularBuffer.isFull() && timestamp - currentStateStartTime > .25) {
       if (firstFoundBall == 0) {
         firstFoundBall = Timer.getFPGATimestamp();
       }
@@ -261,7 +261,7 @@ public class Gripper extends Subsystem {
 
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
-    circularBuffer.addValue(gripperMotor.getOutputCurrent());
+    circularBuffer.addValue(Math.abs(gripperMotor.getOutputCurrent()));
     
     if (SystemState.HOLD_CARGO.equals(systemState)) {
       LED.getInstance().setHasGamePiece(true);
@@ -301,24 +301,17 @@ public class Gripper extends Subsystem {
 
   @Override
   public void zeroSensors() {
-
+    int position = jawMotor.getSelectedSensorPosition();
+    if(position < -400){
+      jawMotor.setSelectedSensorPosition(position+1024);
+    }
   }
 
   @Override
   public void test() {
 
   }
-
-  private void homeJaws() {
-    if (!jawHome.get()) {
-      jawMotor.set(ControlMode.PercentOutput, -1);
-    } else {
-      jawMotor.set(ControlMode.Disabled, 0);
-    }
-
-    jawMotor.enableVoltageCompensation(false);
-  }
-
+  
   @Override
   public void writePeriodicOutputs() {
     //System.out.println(detective.getVoltage());

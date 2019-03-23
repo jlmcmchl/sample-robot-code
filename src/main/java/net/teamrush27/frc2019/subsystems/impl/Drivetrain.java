@@ -495,7 +495,8 @@ public class Drivetrain extends Subsystem {
     SmartDashboard.putNumber("arm.absolute_rotation", leftSlave1.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.left.position", leftMaster.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.right.position", rightMaster.getSelectedSensorPosition());
-
+    SmartDashboard.putNumber("drivetrain.front.distance", distanceSensorFront.getValue());
+    SmartDashboard.putNumber("drivetrain.rear.distance", distanceSensorRear.getValue());
 
 //    SmartDashboard.putBoolean("climb", DriveMode.CLIMB.equals(driveMode));
 //		double currentleftMax = Math.max(leftMaster.getOutputCurrent(),leftMax);

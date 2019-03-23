@@ -176,6 +176,7 @@ public class Robot extends TimedRobot {
     led.setWantedState(LED.WantedState.DISABLED);
     arm.reset();
     drivetrain.stopLogging();
+    gripper.zeroSensors();
     SmartDashboard.putString("Match Cycle", "DISABLED");
     try {
       TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");
