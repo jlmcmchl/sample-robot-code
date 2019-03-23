@@ -224,16 +224,16 @@ public class Robot extends TimedRobot {
   private void driverControl() {
     // bail everything if we're climbing
     if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-      //spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
+      spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      //drivetrain.setBrakeMode(true);
+      drivetrain.setBrakeMode(true);
       drivetrain.shift(false);
     } else if (operatorInterface.wantsClimb()) {
       superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
       if (operatorInterface.getWantsInvert()) {
-        //spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
+        spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
       } else {
-        //spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB_L2);
+        spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB_L2);
       }
     } else {
       if (operatorInterface.wantsArmReset()) {
