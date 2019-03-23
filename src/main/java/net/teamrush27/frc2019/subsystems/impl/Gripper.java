@@ -29,7 +29,7 @@ public class Gripper extends Subsystem {
   private static final Logger LOG = LogManager.getLogger(Gripper.class);
   private static Gripper INSTANCE = null;
 
-  private static final Integer JAW_HATCH_INTAKE_POSITION = 170;
+  private static final Integer JAW_HATCH_INTAKE_POSITION = 180;
   private static final Integer JAW_RETRACT_POSITION = -120;
   private static final Integer JAW_HATCH_EXHAUST_POSITION = 230;
 
@@ -48,7 +48,7 @@ public class Gripper extends Subsystem {
     OFF, INTAKE_CARGO, HOLD_CARGO, EXHAUST_CARGO, HOLD_HATCH, EXHAUST_HATCH
   }
 
-  private WantedState wantedState = WantedState.OFF;
+  private WantedState wantedState = WantedState.INTAKE_HATCH;
   private SystemState systemState = SystemState.OFF;
 
   private boolean hasGamepiece = false;

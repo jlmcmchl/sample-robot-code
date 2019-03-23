@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DriveMotionPlanner implements CSVWritable {
+
   private static final Logger LOG = LogManager.getLogger(DriveMotionPlanner.class);
 
   private static final double kMaxDx = 2.0;
@@ -42,7 +43,7 @@ public class DriveMotionPlanner implements CSVWritable {
     NONLINEAR_FEEDBACK
   }
 
-  FollowerType mFollowerType = FollowerType.PURE_PURSUIT;
+  FollowerType mFollowerType = FollowerType.NONLINEAR_FEEDBACK;
 
   public void setFollowerType(FollowerType type) {
     mFollowerType = type;
@@ -322,8 +323,8 @@ public class DriveMotionPlanner implements CSVWritable {
   protected Output updateNonlinearFeedback(DifferentialDrive.DriveDynamics dynamics,
       Pose2d current_state) {
     // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
-    final double kBeta = 2.0;  // >0.
-    final double kZeta = 0.2;  // Damping coefficient, [0, 1].
+    final double kBeta = 3.0;  // >0.
+    final double kZeta = 1.0;  // Damping coefficient, [0, 1].
 
     // Compute gain parameter.
     final double k =

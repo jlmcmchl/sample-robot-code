@@ -103,14 +103,14 @@ public class Robot extends TimedRobot {
     //robotStateEstimator.startLogging();
     enabledLooper.start();
 
-    drivetrain.startLogging();
+    /*drivetrain.startLogging();
     autoModeExecutor = new AutoModeExecutor();
     autoModeExecutor.setAutoMode(new TestMode());
-    autoModeExecutor.start();
+    autoModeExecutor.start();*/
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
     spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-    gripper.setWantedState(Gripper.WantedState.OFF);
+    gripper.setWantedState(Gripper.WantedState.INTAKE_HATCH);
     wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
 
     superman.setWantedState(WantedState.STOW, true, false);
@@ -121,7 +121,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    //driverControl();
+    driverControl();
   }
 
   @Override
