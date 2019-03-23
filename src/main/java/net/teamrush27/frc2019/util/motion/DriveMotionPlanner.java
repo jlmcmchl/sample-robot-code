@@ -121,6 +121,11 @@ public class DriveMotionPlanner implements CSVWritable {
       double max_vel,  // inches/s
       double max_accel,  // inches/s^2
       double max_voltage) {
+
+    for (Pose2d waypoint : waypoints) {
+      LOG.info(waypoint.toString());
+    }
+
     List<Pose2d> waypoints_maybe_flipped = waypoints;
     final Pose2d flip = Pose2d.fromRotation(new Rotation2d(-1, 0, false));
     // TODO re-architect the spline generator to support reverse.

@@ -16,7 +16,7 @@ public class TestMode extends AutoModeBase {
   @Override
   protected void routine() throws AutoModeEndedException {
     System.out.println("Test mode");
-    Trajectory trajectory = TrajectoryGenerator.getInstance().getTrajectorySet().hpToCargoSideClose.get(true);
+    Trajectory trajectory = TrajectoryGenerator.getInstance().getTrajectorySet().hpToRocketFront.getRight();
     DriveTrajectory driveTrajectory = new DriveTrajectory(trajectory, true);
     runAction(driveTrajectory);
 
