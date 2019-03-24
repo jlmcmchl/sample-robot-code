@@ -29,9 +29,9 @@ public class Gripper extends Subsystem {
   private static final Logger LOG = LogManager.getLogger(Gripper.class);
   private static Gripper INSTANCE = null;
 
-  private static final Integer JAW_HATCH_INTAKE_POSITION = 180;
-  private static final Integer JAW_RETRACT_POSITION = -120;
-  private static final Integer JAW_HATCH_EXHAUST_POSITION = 230;
+  private static final Integer JAW_HATCH_INTAKE_POSITION = 228;
+  private static final Integer JAW_RETRACT_POSITION = -72;
+  private static final Integer JAW_HATCH_EXHAUST_POSITION = 278;
 
   public static Gripper getInstance() {
     if (INSTANCE == null) {
@@ -120,7 +120,7 @@ public class Gripper extends Subsystem {
     gripperMotor = new CANSparkMax(RobotMap.GRIPPER_MOTOR_SPARK_CAN_ID, MotorType.kBrushless);
     gripperMotor.restoreFactoryDefaults();
     gripperMotor.setIdleMode(IdleMode.kBrake);
-    gripperMotor.setSecondaryCurrentLimit(80);
+    gripperMotor.setSmartCurrentLimit(80);
     gripperMotor.setOpenLoopRampRate(.1);
     gripperMotor.enableVoltageCompensation(12);
     gripperMotor.getPIDController().setP(.1);
@@ -198,8 +198,11 @@ public class Gripper extends Subsystem {
 
   private SystemState handleHoldCargo(double timestamp) {
     firstFoundBall = 0;
+    if(stateChanged){
+      gripperMotor.setSmartCurrentLimit(30);
+    }
 
-    gripperMotor.set(.1);
+    gripperMotor.set(.2);
 //    gripperMotor.getPIDController().setReference(.2, ControlType.kDutyCycle);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
@@ -219,13 +222,14 @@ public class Gripper extends Subsystem {
   private SystemState handleIntakeCargo(double timestamp) {
     if(stateChanged){
       circularBuffer.clear();
+      gripperMotor.setSmartCurrentLimit(80);
     }
 
-    gripperMotor.set(.25);
+    gripperMotor.set(.33);
 //    gripperMotor.getPIDController().setReference(1, ControlType.kDutyCycle);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 35 && circularBuffer.isFull() && timestamp - currentStateStartTime > .25) {
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 30 && circularBuffer.isFull() && timestamp - currentStateStartTime > .25 && gripperMotor.getEncoder().getVelocity() < 10) {
       if (firstFoundBall == 0) {
         firstFoundBall = Timer.getFPGATimestamp();
       }
