@@ -225,7 +225,7 @@ public class Gripper extends Subsystem {
 //    gripperMotor.getPIDController().setReference(1, ControlType.kDutyCycle);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 25 && circularBuffer.isFull() && timestamp - currentStateStartTime > .25) {
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 35 && circularBuffer.isFull() && timestamp - currentStateStartTime > .25) {
       if (firstFoundBall == 0) {
         firstFoundBall = Timer.getFPGATimestamp();
       }

@@ -506,4 +506,12 @@ public class SuperstructureManager extends Subsystem {
     }
 
   }
+  
+  public WantedState getWantedState() {
+    return wantedState;
+  }
+  
+  public Boolean getHasHatch() {
+    return hasHatch;
+  }
 }

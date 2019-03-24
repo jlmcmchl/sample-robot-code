@@ -5,8 +5,6 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.wrappers.APEMJoystick;
-import net.teamrush27.frc2019.wrappers.FlightstickPro;
-import net.teamrush27.frc2019.wrappers.LogitechPad;
 import net.teamrush27.frc2019.wrappers.PS4Controller;
 
 public class JoysticksAndGamepadInterface implements OperatorInterface {

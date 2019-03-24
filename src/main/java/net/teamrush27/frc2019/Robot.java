@@ -268,23 +268,20 @@ public class Robot extends TimedRobot {
       if (operatorInterface.getShift()) {
         drivetrain.shift();
       }
-
-      if (operatorInterface.getWantManipulateCargo()) {
-        gripper.transitionCargo();
-      } else if (operatorInterface.getWantManipulateHatch()) {
+      
+      if((superman.getHasHatch() || gripper.hasHatch()) && operatorInterface.getWantManipulateHatch()){
         gripper.transitionHatch();
+      } else if(operatorInterface.getWantManipulateHatch()) {
+        gripper.transitionCargo();
       }
-
+      
       if (operatorInterface.wantsToggleLimelightSteering()) {
         limelights.cycleEnabled();
         drivetrain.setLimelightSteering(limelights.getSystemState());
       }
 
       double extensionInput = operatorInterface.getArmInput().getExtensionInput();
-
-      SmartDashboard
-          .putNumber("extensionInput", operatorInterface.getArmInput().getExtensionInput());
-
+      
       if (Math.abs(extensionInput) > 0.05) {
         superman.addOffset(extensionInput * 0.2);
       }
