@@ -16,12 +16,15 @@ public class TestMode extends AutoModeBase {
   @Override
   protected void routine() throws AutoModeEndedException {
     System.out.println("Test mode");
-    Trajectory trajectory = TrajectoryGenerator.getInstance().getTrajectorySet().hpToRocketFront.getRight();
-    DriveTrajectory driveTrajectory = new DriveTrajectory(trajectory, true);
-    runAction(driveTrajectory);
+    Trajectory cargoSideCloseToHP = TrajectoryGenerator.getInstance().getTrajectorySet().cargoSideCloseToHP.getRight();
 
-    Drivetrain driveTrain = Drivetrain.getInstance();
-    driveTrain.shift(true);
+    DriveTrajectory cargoSideCloseToHPAction = new DriveTrajectory(cargoSideCloseToHP, true);
+
+
+    runAction(cargoSideCloseToHPAction);
+
+
+
 
 /*
     runAction(new DrivePercentOutputAction(new DriveCommand(-0.2, -0.2)));
@@ -33,6 +36,6 @@ public class TestMode extends AutoModeBase {
     driveTrain.stopLogging();*/
 
 
-    //runAction(new TurnInPlaceAction(2 * Math.PI * 8, 60));
+   // runAction(new TurnInPlaceAction(2 * Math.PI * 8, 36));
   }
 }

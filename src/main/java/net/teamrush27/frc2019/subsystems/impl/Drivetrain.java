@@ -565,6 +565,8 @@ public class Drivetrain extends Subsystem {
       motionPlanner.reset();
       motionPlanner.setTrajectory(trajectory);
       driveMode = DriveMode.CHEZY_PATH_FOLLOWING;
+
+      setBrakeMode(true);
     }
   }
 
@@ -823,16 +825,16 @@ public class Drivetrain extends Subsystem {
     periodicIO.left_turn = 1;
     periodicIO.right_turn = 1;
 
-    LOG.info(String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
+    LOG.info(
+        String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
 
-    if (superman.overBack() && periodicIO.left_demand <= 0.01)  {
+    if (superman.overBack() && periodicIO.left_demand <= 0.01) {
       periodicIO.left_demand = Math.min(periodicIO.left_demand, -.2);
     } else if (!superman.overBack() && periodicIO.left_demand >= -0.01) {
       periodicIO.left_demand = Math.max(periodicIO.left_demand, .2);
     } else {
       return;
     }
-
 
     // INVERTS REAR ANGLE OFFSET TO ACCOUNT FOR THROTTLE DIRECTION
 

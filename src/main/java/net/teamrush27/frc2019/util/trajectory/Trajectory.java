@@ -1,5 +1,7 @@
 package net.teamrush27.frc2019.util.trajectory;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import net.teamrush27.frc2019.util.CSVWritable;
@@ -98,6 +100,21 @@ public class Trajectory<S extends State<S>> implements CSVWritable {
       builder.append(System.lineSeparator());
     }
     return builder.toString();
+  }
+
+  public void save(String fname) {
+    try {
+      FileWriter writer = new FileWriter(fname + ".csv");
+
+      writer.write(this.header(""));
+      writer.write(System.lineSeparator());
+      writer.write(this.toCSV());
+
+      writer.flush();
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

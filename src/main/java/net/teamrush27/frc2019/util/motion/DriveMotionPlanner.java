@@ -329,7 +329,7 @@ public class DriveMotionPlanner implements CSVWritable {
       Pose2d current_state) {
     // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
     final double kBeta = 3.0;  // >0.
-    final double kZeta = 1.0;  // Damping coefficient, [0, 1].
+    final double kZeta = 0.5;  // Damping coefficient, [0, 1].
 
     // Compute gain parameter.
     final double k =
@@ -343,7 +343,7 @@ public class DriveMotionPlanner implements CSVWritable {
     final DifferentialDrive.ChassisState adjusted_velocity = new DifferentialDrive.ChassisState(
         dynamics.chassis_velocity.linear * mError.getRotation().cos() +
             k * Units.inches_to_meters(mError.getTranslation().x()),
-        dynamics.chassis_velocity.angular + k * angle_error_rads +
+        dynamics.chassis_velocity.angular + 4 * k * angle_error_rads +
             dynamics.chassis_velocity.linear * kBeta * sin_x_over_x * Units.inches_to_meters(mError
                 .getTranslation().y()));
 

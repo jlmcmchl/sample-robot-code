@@ -24,7 +24,7 @@ public class CharacterizeDrivetrain extends AutoModeBase {
     // runAction(new WaitAction(10));
 
     runAction(new CollectVelocityData(velocityData, false, false));
-    runAction(new WaitAction(10));
+    runAction(new WaitAction(20));
     runAction(new CollectAccelerationData(accelerationData, false, false));
 
     DriveCharacterization.CharacterizationConstants constants = DriveCharacterization.characterizeDrive(velocityData, accelerationData);

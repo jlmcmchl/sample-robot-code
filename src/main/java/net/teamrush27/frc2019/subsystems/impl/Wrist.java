@@ -4,6 +4,7 @@ import com.ctre.phoenix.CANifier;
 import com.ctre.phoenix.CANifier.PWMChannel;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -107,6 +108,7 @@ public class Wrist extends Subsystem {
     wristMotor.configVoltageCompSaturation(4, RobotConstants.TALON_CONFIG_TIMEOUT);
     wristMotor.enableVoltageCompensation(false);
     wristMotor.setInverted(true);
+    wristMotor.setNeutralMode(NeutralMode.Brake);
 
     wristMotor.configRemoteFeedbackFilter(RobotMap.WRIST_CANIFIER_CAN_ID,
         RemoteSensorSource.CANifier_Quadrature, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
