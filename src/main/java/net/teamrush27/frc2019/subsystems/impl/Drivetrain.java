@@ -495,8 +495,8 @@ public class Drivetrain extends Subsystem {
     SmartDashboard.putNumber("arm.absolute_rotation", leftSlave1.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.left.position", leftMaster.getSelectedSensorPosition());
     SmartDashboard.putNumber("drivetrain.right.position", rightMaster.getSelectedSensorPosition());
-    SmartDashboard.putNumber("drivetrain.front.distance", distanceSensorFront.getValue());
-    SmartDashboard.putNumber("drivetrain.rear.distance", distanceSensorRear.getValue());
+    SmartDashboard.putNumber("drivetrain.front.distance", periodicIO.frontDistance);
+    SmartDashboard.putNumber("drivetrain.rear.distance", periodicIO.rearDistance);
 
 //    SmartDashboard.putBoolean("climb", DriveMode.CLIMB.equals(driveMode));
 //		double currentleftMax = Math.max(leftMaster.getOutputCurrent(),leftMax);
@@ -941,7 +941,10 @@ public class Drivetrain extends Subsystem {
     } else {
       periodicIO.right_distance += deltaRightTicks * RobotConstants.DRIVE_WHEEL_DIAMETER;
     }
-
+    
+    periodicIO.frontDistance = distanceSensorFront.getValue();
+    periodicIO.rearDistance = distanceSensorRear.getValue();
+  
     if (CSVWriter != null) {
       CSVWriter.add(periodicIO);
       periodicIO = new PeriodicIO(periodicIO);
@@ -1011,7 +1014,15 @@ public class Drivetrain extends Subsystem {
   public String id() {
     return TAG;
   }
-
+  
+  public int getFrontDistance() {
+    return periodicIO.frontDistance;
+  }
+  
+  public int getRearDistance() {
+    return periodicIO.rearDistance;
+  }
+  
   public static class PeriodicIO {
 
     public double timestamp;
@@ -1026,6 +1037,8 @@ public class Drivetrain extends Subsystem {
     public int right_velocity_ticks_per_100ms;
     public double left_accel_ticks_per_100ms_per_1000ms;
     public double right_accel_ticks_per_100ms_per_1000ms;
+    public int frontDistance;
+    public int rearDistance;
 
     public Rotation2d gyro_heading = Rotation2d.identity();
     public Pose2d error = Pose2d.identity();
@@ -1061,6 +1074,8 @@ public class Drivetrain extends Subsystem {
       this.right_accel_ticks_per_100ms_per_1000ms = other.left_accel_ticks_per_100ms_per_1000ms;
       this.gyro_heading = new Rotation2d(other.gyro_heading);
       this.error = new Pose2d(other.error);
+      this.frontDistance = other.frontDistance;
+      this.rearDistance = other.rearDistance;
 
       this.left_turn = other.left_turn;
       this.right_turn = other.right_turn;
