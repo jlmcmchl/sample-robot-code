@@ -485,16 +485,16 @@ public class Drivetrain extends Subsystem {
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
 
-    LOG.trace("left {} - right {}", leftMaster.getSelectedSensorPosition(),
-        rightMaster.getSelectedSensorPosition());
+//    LOG.trace("left {} - right {}", leftMaster.getSelectedSensorPosition(),
+//        rightMaster.getSelectedSensorPosition());
 
     //collection.setArmAbsoluteRotation(leftSlave1.getSelectedSensorPosition());
     //collection.setDrivetrainLeftPosition(leftMaster.getSelectedSensorPosition());
     //collection.setDrivetrainRightPosition(rightMaster.getSelectedSensorPosition());
 
     SmartDashboard.putNumber("arm.absolute_rotation", leftSlave1.getSelectedSensorPosition());
-    SmartDashboard.putNumber("drivetrain.left.position", leftMaster.getSelectedSensorPosition());
-    SmartDashboard.putNumber("drivetrain.right.position", rightMaster.getSelectedSensorPosition());
+    SmartDashboard.putNumber("drivetrain.left.position", periodicIO.left_position_ticks);
+    SmartDashboard.putNumber("drivetrain.right.position", periodicIO.right_position_ticks);
     SmartDashboard.putNumber("drivetrain.front.distance", periodicIO.frontDistance);
     SmartDashboard.putNumber("drivetrain.rear.distance", periodicIO.rearDistance);
 
