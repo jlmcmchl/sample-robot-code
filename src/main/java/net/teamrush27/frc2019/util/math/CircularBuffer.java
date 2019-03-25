@@ -45,6 +45,19 @@ public class CircularBuffer {
 
         return max;
     }
+    
+    public double getMin() {
+        if (samples.isEmpty())
+            return 0.0;
+        double min = Double.POSITIVE_INFINITY;
+        for (double sample : samples) {
+            if (sample < min) {
+                min = sample;
+            }
+        }
+        
+        return min;
+    }
 
     public void recomputeAverage() {
         // Reset any accumulation drift.
