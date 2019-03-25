@@ -107,6 +107,17 @@ public class Limelights extends Subsystem {
       stateChanged = true;
     }
   }
+  
+  public void setTrackingEnabled(boolean trackingEnabled){
+    synchronized (systemState) {
+      if (trackingEnabled) {
+        systemState = SystemState.FRONT_TRACKING;
+      } else {
+        systemState = SystemState.DRIVE;
+      }
+    }
+  }
+  
 
   public void cycleEnabled() {
     synchronized (this) {
