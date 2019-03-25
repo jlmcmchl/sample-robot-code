@@ -41,4 +41,6 @@ public interface OperatorInterface {
 	Boolean wantsToggleLimelightSteering();
 
 	void setRumble(double frac);
+
+	Boolean wantsAutoStop();
 }

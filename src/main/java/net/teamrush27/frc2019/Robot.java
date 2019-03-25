@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
 import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
+import net.teamrush27.frc2019.auto.modes.RightRocket;
 import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
@@ -67,6 +68,7 @@ public class Robot extends TimedRobot {
   boolean autoRan = false;
 
   private Gson serializer = new Gson();
+  private boolean autoRunning;
 
   @Override
   public void robotInit() {
@@ -121,7 +123,17 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    //driverControl();
+    if (operatorInterface.wantsAutoStop()) {
+      autoModeExecutor.stop();
+
+      drivetrain.shift(true);
+      limelights.setTrackingEnabled(false);
+      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+    }
+
+    if (!autoModeExecutor.isActive()) {
+      driverControl();
+    }
   }
 
   @Override
@@ -173,6 +185,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    autoRunning = false;
+
     led.setWantedState(LED.WantedState.DISABLED);
     arm.reset();
     drivetrain.stopLogging();

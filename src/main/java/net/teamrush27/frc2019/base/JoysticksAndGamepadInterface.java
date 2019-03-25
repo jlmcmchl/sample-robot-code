@@ -142,4 +142,9 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 		gamePad.setRumble(RumbleType.kLeftRumble, frac);
 		gamePad.setRumble(RumbleType.kRightRumble, frac);
 	}
+
+	@Override
+	public Boolean wantsAutoStop() {
+		return driverLeftJoystick.getLeftButtonPressed() || driverLeftJoystick.getRightButtonPressed();
+	}
 }

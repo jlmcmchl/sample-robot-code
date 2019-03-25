@@ -828,10 +828,11 @@ public class Drivetrain extends Subsystem {
     LOG.info(
         String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
 
+    // .3 for PRACTICE, .2 for COMP
     if (superman.overBack() && periodicIO.left_demand <= 0.01) {
-      periodicIO.left_demand = Math.min(periodicIO.left_demand, -.2);
+      periodicIO.left_demand = Math.min(periodicIO.left_demand, -.3);
     } else if (!superman.overBack() && periodicIO.left_demand >= -0.01) {
-      periodicIO.left_demand = Math.max(periodicIO.left_demand, .2);
+      periodicIO.left_demand = Math.max(periodicIO.left_demand, .3);
     } else {
       return;
     }

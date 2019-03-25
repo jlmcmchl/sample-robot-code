@@ -9,6 +9,8 @@ public class AutoModeExecutor {
   private AutoModeBase m_auto_mode;
   private Thread m_thread = null;
 
+  private boolean isActive = false;
+
   public void setAutoMode(AutoModeBase new_auto_mode) {
     m_auto_mode = new_auto_mode;
     m_thread = new Thread(new CrashTrackingRunnable() {
@@ -22,12 +24,14 @@ public class AutoModeExecutor {
   }
 
   public void start() {
+    isActive = true;
     if (m_thread != null) {
       m_thread.start();
     }
   }
 
   public void stop() {
+    isActive = false;
     if (m_auto_mode != null) {
       m_auto_mode.stop();
     }
@@ -37,5 +41,9 @@ public class AutoModeExecutor {
 
   public AutoModeBase getAutoMode() {
     return m_auto_mode;
+  }
+
+  public boolean isActive() {
+    return isActive;
   }
 }

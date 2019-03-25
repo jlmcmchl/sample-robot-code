@@ -16,7 +16,7 @@ public class TestMode extends AutoModeBase {
   @Override
   protected void routine() throws AutoModeEndedException {
     System.out.println("Test mode");
-    Trajectory cargoSideCloseToHP = TrajectoryGenerator.getInstance().getTrajectorySet().cargoSideCloseToHP.getRight();
+    Trajectory cargoSideCloseToHP = TrajectoryGenerator.getInstance().getTrajectorySet().justStraight.getRight();
 
     DriveTrajectory cargoSideCloseToHPAction = new DriveTrajectory(cargoSideCloseToHP, true);
 
