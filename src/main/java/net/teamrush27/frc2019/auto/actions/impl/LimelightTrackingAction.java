@@ -3,6 +3,7 @@ package net.teamrush27.frc2019.auto.actions.impl;
 import net.teamrush27.frc2019.auto.actions.Action;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.Limelights;
+import net.teamrush27.frc2019.subsystems.impl.Limelights.SystemState;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.util.math.CircularBuffer;
 
@@ -46,6 +47,6 @@ public class LimelightTrackingAction implements Action {
   @Override
   public void start() {
     limelights.setTrackingEnabled(true);
-    drivetrain.setLimelightSteering(limelights.getSystemState());
+    drivetrain.setLimelightSteering(SystemState.FRONT_TRACKING);
   }
 }

@@ -16,46 +16,43 @@ import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
-public class RightRocket extends AutoModeBase {
+public class RightCargo extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
-    Trajectory habToFarRocket = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().habToRocketRear.getRight();
-    Trajectory farRocketToMidline = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().rocketRearToMidline.getRight();
-    Trajectory midlineToHP = TrajectoryGenerator.getInstance().getTrajectorySet().midlineToHP
+    Trajectory habToCargoSideClose = TrajectoryGenerator.getInstance()
+        .getTrajectorySet().habToCargoSideClose.getRight();
+    Trajectory cargoSideCloseToHP = TrajectoryGenerator.getInstance()
+        .getTrajectorySet().cargoSideCloseToHP.getRight();
+    Trajectory hpToCargoSideMid = TrajectoryGenerator.getInstance()
+        .getTrajectorySet().hpToCargoSideMid.getRight();
+
+    Trajectory scootBack2 = TrajectoryGenerator.getInstance().getTrajectorySet().scootBack2
         .getRight();
-    Trajectory hpToRocketClose = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().hpToRocketFront.getRight();
-
-    Trajectory scootBack = TrajectoryGenerator.getInstance().getTrajectorySet().scootBack
-        .getRight();
-
-
-    Trajectory altRocketRearToHP = TrajectoryGenerator.getInstance().getTrajectorySet().altRocketRearToHP.getRight();
 
     List commands = Arrays.asList(
         new ParallelAction(
             new SeriesAction(
-                new WaitUntilCrossXBoundaryCommand(260),
-                new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, false, true)),
-            new DriveTrajectory(habToFarRocket, true)),
-        new LimelightTrackingAction(false, 1000),
+                new WaitUntilCrossXBoundaryCommand(100),
+                new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, false, true)),
+            new DriveTrajectory(habToCargoSideClose, true)),
+        new LimelightTrackingAction(false, 600),
         new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH),
-        new DriveTrajectory(farRocketToMidline, false),
-        new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
-        new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, false, true),
-        new DriveTrajectory(midlineToHP, false),
-        new LimelightTrackingAction(false, 430),
+        new ParallelAction(
+            new SeriesAction(
+                new WaitUntilCrossXBoundaryCommand(200, true),
+                new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
+                new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, true, true)),
+            new DriveTrajectory(cargoSideCloseToHP, false)),
+        new LimelightTrackingAction(true, 430),
         new ParallelAction(
             new SeriesAction(
                 new WaitUntilCrossXBoundaryCommand(24),
-                new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, true, true)),
-            new DriveTrajectory(hpToRocketClose, false)),
-        new LimelightTrackingAction(true, 1000),
+                new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, false, true)),
+            new DriveTrajectory(hpToCargoSideMid, false)),
+        new LimelightTrackingAction(false, 475),
         new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH),
-        new DriveTrajectory(scootBack, false),
+        new DriveTrajectory(scootBack2, false),
         new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
         new AutoSuperstructurePosition(WantedState.STOW, false, false));
 

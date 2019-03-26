@@ -20,7 +20,7 @@ public class SeriesAction implements Action {
     }
 
     public SeriesAction(Action... actions) {
-        mRemainingActions = Arrays.asList(actions);
+        mRemainingActions = new ArrayList(Arrays.asList(actions));
         mCurAction = null;
     }
 

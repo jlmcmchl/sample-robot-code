@@ -80,27 +80,25 @@ public class TrajectoryGenerator {
   }
 
   private static final Pose2d trackingOffset = new Pose2d(-24, 0, Rotation2d.identity());
+  private static final Pose2d trackingReversedOffset = new Pose2d(24, 0, Rotation2d.identity());
+
 
   // CRITICAL POSES
   // Origin is the center of the robot when the robot is placed against the middle of the alliance station wall.
   // +x is towards the center of the field.
   // +y is to the right.
   // ALL POSES DEFINED FOR THE CASE THAT ROBOT STARTS ON LEFT! (mirrored about +x axis for RIGHT)
-
   public static final Pose2d originPose = new Pose2d(0.0, 0.0, Rotation2d.identity());
   public static final Pose2d justStraightPose = new Pose2d(144.0, 0.0, Rotation2d.identity());
   public static final Pose2d justStraightBackPose = new Pose2d(-60.0, 0.0, Rotation2d.identity());
-  public static final Pose2d turnRightBackPose = new Pose2d(-60.0, 60.0,
-      Rotation2d.fromDegrees(-90));
+  public static final Pose2d turnRightBackPose = new Pose2d(-60.0, 60.0, Rotation2d.fromDegrees(-90));
   public static final Pose2d turnRightOrigin = new Pose2d(60.0, 0.0, Rotation2d.identity());
-  public static final Pose2d turnRightCompletion = new Pose2d(120.0, -60.0,
-      Rotation2d.fromDegrees(-90));
+  public static final Pose2d turnRightCompletion = new Pose2d(120.0, -60.0, Rotation2d.fromDegrees(-90));
   public static final Pose2d turnLeftOrigin = new Pose2d(120.0, 120.0, Rotation2d.fromDegrees(90));
   public static final Pose2d turnLeftCompletion = new Pose2d(180.0, 180.0, Rotation2d.identity());
   public static final Pose2d turnRightLeftEnd = new Pose2d(240, 180, Rotation2d.identity());
   public static final Pose2d originToCloseSideCargoMid = new Pose2d(150, 0, Rotation2d.identity());
-  public static final Pose2d originToCloseSideCargoPose = new Pose2d(240, 50,
-      Rotation2d.fromDegrees(90));
+  public static final Pose2d originToCloseSideCargoPose = new Pose2d(240, 50, Rotation2d.fromDegrees(90));
   public static final Pose2d originToOffHab = new Pose2d(40, 5, Rotation2d.fromDegrees(10));
   public static final Pose2d originToFrontShipPose = new Pose2d(115, 30, Rotation2d.identity());
 
@@ -109,32 +107,35 @@ public class TrajectoryGenerator {
   public static final Pose2d offHABPose = new Pose2d(110, 114, Rotation2d.identity());
   public static final Pose2d rocketFarPrePose = new Pose2d(210, 70, Rotation2d.fromDegrees(-30));
   public static final Pose2d cargoSideClosePrePose = new Pose2d(210, 70, Rotation2d.identity());
-  public static final Pose2d cargoSideCloseReversePrePose = new Pose2d(200, 110,
-      Rotation2d.identity());
+  public static final Pose2d cargoSideCloseReversePrePose = new Pose2d(200, 110, Rotation2d.identity());
 
 
   public static final Pose2d humanPlayerStationPose = new Pose2d(17, 28, Rotation2d.identity());
-  public static final Pose2d humanPlayerStationPoseOffset = new Pose2d(50, 38, Rotation2d.identity());
-  public static final Pose2d humanPlayerStationPoseOffsetReverse = new Pose2d(50, 38, Rotation2d.fromDegrees(-180));
+  public static final Pose2d humanPlayerStationReversePose = new Pose2d(17, 28, Rotation2d.fromDegrees(-180));
+
+  public static final Pose2d humanPlayerStationPoseOffset = new Pose2d(75, 35, Rotation2d.identity());
+  public static final Pose2d humanPlayerStationPoseOffsetReverse = new Pose2d(70, 45, Rotation2d.fromDegrees(-180));
 
 
-  public static final Pose2d humanPlayerCargoSideMidPose = new Pose2d(180, 60,
-      Rotation2d.identity());
-  public static final Pose2d humanPlayerRocketSideMidPose = new Pose2d(206, 50,
-      Rotation2d.fromDegrees(-30));
-  public static final Pose2d humanPlayerRocketFarMidPose = new Pose2d(232, 55,
-      Rotation2d.identity());
+  public static final Pose2d humanPlayerCargoSideMidPose = new Pose2d(180, 60, Rotation2d.identity());
+  public static final Pose2d humanPlayerCargoSideMidReversePose = new Pose2d(180, 50, Rotation2d.fromDegrees(-180));
+  public static final Pose2d humanPlayerRocketSideMidPose = new Pose2d(206, 50, Rotation2d.fromDegrees(-30));
+  public static final Pose2d humanPlayerRocketFarMidPose = new Pose2d(232, 55, Rotation2d.identity());
 
-  public static final Pose2d cargoSideCloseHPMidPose = new Pose2d(147, 40, Rotation2d.fromDegrees(-171));
+  public static final Pose2d cargoSideCloseHPMidPose = new Pose2d(218, 70, Rotation2d.fromDegrees(-159));
 
 
   public static final Pose2d cargoSideClosePose = new Pose2d(240, 97, Rotation2d.fromDegrees(90));
   public static final Pose2d cargoSideCloseReversePose = new Pose2d(240, 97, Rotation2d.fromDegrees(-90));
 
-  public static final Pose2d cargoSideCloseOffsetReversePose = new Pose2d(240, 50,
-      Rotation2d.fromDegrees(-120));
+  public static final Pose2d cargoSideCloseOffsetReversePose = new Pose2d(240, 50, Rotation2d.fromDegrees(-120));
   public static final Pose2d cargoSideMidPose = new Pose2d(260, 97, Rotation2d.fromDegrees(90));
   public static final Pose2d cargoSideFarPose = new Pose2d(280, 97, Rotation2d.fromDegrees(90));
+
+  public static final Pose2d cargoSideMidReversePose = new Pose2d(260, 97, Rotation2d.fromDegrees(-90));
+  public static final Pose2d cargoSideMidReverseOffsetPose = new Pose2d(260, 97, Rotation2d.fromDegrees(-70));
+
+
 
   public static final Pose2d rocketFrontPose = new Pose2d(178, 20, Rotation2d.fromDegrees(-30));
   public static final Pose2d rocketSidePose = new Pose2d(230, 90, Rotation2d.fromDegrees(-90));
@@ -142,6 +143,8 @@ public class TrajectoryGenerator {
 
   public static final Pose2d rocketFarStartPose = new Pose2d(238, 29, Rotation2d.fromDegrees(28.75));
   public static final Pose2d midlinePose = new Pose2d(280, 64, Rotation2d.identity());
+
+  public static final Pose2d rocketFarHPMidPose = new Pose2d(200,57, Rotation2d.fromDegrees(-180));
 
 
   public class TrajectorySet {
@@ -185,13 +188,18 @@ public class TrajectoryGenerator {
     public final MirroredTrajectory hpToCargoSideMid;
     public final MirroredTrajectory hpToCargoSideFar;
 
-    public final MirroredTrajectory originToCargoSideClose;
-    public final MirroredTrajectory originToRocketRear;
+    public final MirroredTrajectory habToCargoSideClose;
+    public final MirroredTrajectory habToRocketRear;
 
     public final MirroredTrajectory rocketRearToMidline;
     public final MirroredTrajectory midlineToHP;
 
     public final MirroredTrajectory cargoSideCloseToHP;
+
+    public final MirroredTrajectory scootBack;
+    public final MirroredTrajectory scootBack2;
+
+    public final MirroredTrajectory altRocketRearToHP;
 
     private TrajectorySet() {
       // For Non-Mirrored Trajectories, just call the helper fn
@@ -220,10 +228,10 @@ public class TrajectoryGenerator {
       LOG.info("hpToCargoSideFar");
       hpToCargoSideFar = new MirroredTrajectory(getHPToCargoSideFar());
 
-      LOG.info("originToRocketRear");
-      originToRocketRear = new MirroredTrajectory(getOriginToRocketRear());
-      LOG.info("originToCargoSideClose");
-      originToCargoSideClose = new MirroredTrajectory(getOriginToCargoSideClose());
+      LOG.info("habToRocketRear");
+      habToRocketRear = new MirroredTrajectory(getHABToRocketRear());
+      LOG.info("habToCargoSideClose");
+      habToCargoSideClose = new MirroredTrajectory(getHABToCargoSideClose());
 
       LOG.info("rocketRearToMidline");
       rocketRearToMidline = new MirroredTrajectory(getRocketRearToMidline());
@@ -232,6 +240,15 @@ public class TrajectoryGenerator {
 
       LOG.info("cargoSideCloseToHP");
       cargoSideCloseToHP = new MirroredTrajectory(getCargoSideCloseToHP());
+
+      LOG.info("scootBack");
+      scootBack = new MirroredTrajectory(getScootBack());
+
+      LOG.info("scootBack2");
+      scootBack2 = new MirroredTrajectory(getScootBack2());
+
+      LOG.info("altRocketRearToHP");
+      altRocketRearToHP = new MirroredTrajectory(getAltRocketRearToHP());
     }
 
     public void saveTrajectories() {
@@ -341,12 +358,11 @@ public class TrajectoryGenerator {
 
     private Trajectory<TimedState<Pose2dWithCurvature>> getHPToCargoSideMid() {
       List<Pose2d> waypoints = new ArrayList<>();
-      waypoints.add(humanPlayerStationPose);
-      waypoints.add(humanPlayerCargoSideMidPose);
-      waypoints.add(cargoSideMidPose.transformBy(trackingOffset));
-      waypoints.add(cargoSideMidPose);
+      waypoints.add(humanPlayerStationReversePose);
+      waypoints.add(humanPlayerCargoSideMidReversePose);
+      waypoints.add(cargoSideMidReverseOffsetPose);
 
-      return generateTrajectory(false, waypoints,
+      return generateTrajectory(true, waypoints,
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
@@ -362,7 +378,7 @@ public class TrajectoryGenerator {
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
 
-    private Trajectory<TimedState<Pose2dWithCurvature>> getOriginToRocketRear() {
+    private Trajectory<TimedState<Pose2dWithCurvature>> getHABToRocketRear() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(originHabPose);
       waypoints.add(offHABPose);
@@ -371,10 +387,10 @@ public class TrajectoryGenerator {
 
       return generateTrajectory(false, waypoints,
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
-          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+          ), kMaxVelocity, 60.0, kMaxVoltage);
     }
 
-    private Trajectory<TimedState<Pose2dWithCurvature>> getOriginToCargoSideClose() {
+    private Trajectory<TimedState<Pose2dWithCurvature>> getHABToCargoSideClose() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(originHabPose);
       waypoints.add(offHABPose);
@@ -410,6 +426,37 @@ public class TrajectoryGenerator {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(cargoSideCloseReversePose);
       waypoints.add(cargoSideCloseHPMidPose);
+      waypoints.add(humanPlayerStationPoseOffsetReverse);
+
+      return generateTrajectory(false, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+    }
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getScootBack() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(rocketFrontPose);
+      waypoints.add(rocketFrontPose.transformBy(trackingOffset));
+
+      return generateTrajectory(true, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+    }
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getScootBack2() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(cargoSideMidReversePose);
+      waypoints.add(cargoSideMidReversePose.transformBy(trackingReversedOffset));
+
+      return generateTrajectory(false, waypoints,
+          Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
+          ), kMaxVelocity, kMaxAccel, kMaxVoltage);
+    }
+
+    private Trajectory<TimedState<Pose2dWithCurvature>> getAltRocketRearToHP() {
+      List<Pose2d> waypoints = new ArrayList<>();
+      waypoints.add(rocketFarStartPose);
+      waypoints.add(rocketFarHPMidPose);
       waypoints.add(humanPlayerStationPoseOffsetReverse);
 
       return generateTrajectory(false, waypoints,

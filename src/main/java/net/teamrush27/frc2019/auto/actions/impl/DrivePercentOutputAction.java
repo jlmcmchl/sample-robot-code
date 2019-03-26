@@ -13,17 +13,7 @@ public class DrivePercentOutputAction extends RunOnceAction {
   }
 
   @Override
-  public void update() {
-
-  }
-
-  @Override
-  public void done() {
-
-  }
-
-  @Override
-  public void start() {
+  public void runOnce() {
     drivetrain.setOpenLoop(driveCommand);
   }
 }
