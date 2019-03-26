@@ -2,6 +2,7 @@ package net.teamrush27.frc2019.subsystems.impl;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -108,11 +109,12 @@ public class Gripper extends Subsystem {
 
 
   private final CANSparkMax gripperMotor;
+//   private final TalonSRX gripperMotor;
   private final TalonSRX jawMotor;
 
   private final DigitalInput jawHome;
   private final DigitalInput jawMax;
-
+  
   private final CircularBuffer circularBuffer = new CircularBuffer(10);
 
   public Gripper() {
@@ -125,6 +127,14 @@ public class Gripper extends Subsystem {
     gripperMotor.getPIDController().setP(.1);
     gripperMotor.getPIDController().setI(0);
     gripperMotor.getPIDController().setD(0);
+    
+//    gripperMotor = new TalonSRX(RobotMap.GRIPPER_MOTOR_CAN_ID);
+//    gripperMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
+//    gripperMotor.setNeutralMode(NeutralMode.Brake);
+//    gripperMotor.configContinuousCurrentLimit(30);
+//    gripperMotor.configVoltageCompSaturation(12);
+//    gripperMotor.enableVoltageCompensation(true);
+    
 
     jawMotor = new TalonSRX(RobotMap.GRIPPER_JAWS_CAN_ID);
     jawMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
@@ -145,6 +155,7 @@ public class Gripper extends Subsystem {
 
   private SystemState handleOff(double timestamp) {
     gripperMotor.set(0);
+    //gripperMotor.set(ControlMode.PercentOutput, 0);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
     return defaultStateTransfer(timestamp);
@@ -154,6 +165,7 @@ public class Gripper extends Subsystem {
 
     jawMotor.set(ControlMode.Position, JAW_HATCH_INTAKE_POSITION);
     gripperMotor.set(0);
+    //gripperMotor.set(ControlMode.PercentOutput, 0);
 
     if (WantedState.INTAKE_HATCH.equals(wantedState)) {
       return SystemState.HOLD_HATCH;
@@ -165,7 +177,8 @@ public class Gripper extends Subsystem {
   private SystemState handleExhaustHatch(double timestamp) {
     jawMotor.set(ControlMode.Position, JAW_HATCH_EXHAUST_POSITION);
     gripperMotor.set(0);
-
+    //gripperMotor.set(ControlMode.PercentOutput, 0);
+  
     return defaultStateTransfer(timestamp);
   }
 
@@ -177,6 +190,7 @@ public class Gripper extends Subsystem {
     }
     firstFoundBall = 0;
     gripperMotor.set(-1);
+    //gripperMotor.set(ControlMode.PercentOutput, -1);
 
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
@@ -191,12 +205,13 @@ public class Gripper extends Subsystem {
 
   private SystemState handleHoldCargo(double timestamp) {
     firstFoundBall = 0;
-    if (stateChanged) {
+    if(stateChanged){
       gripperMotor.setSmartCurrentLimit(30);
+      //gripperMotor.configVoltageCompSaturation(3);
     }
 
     gripperMotor.set(.2);
-//    gripperMotor.getPIDController().setReference(.2, ControlType.kDutyCycle);
+    //gripperMotor.set(ControlMode.PercentOutput, 1);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
     if (WantedState.EXHAUST_CARGO.equals(wantedState)) {
@@ -213,24 +228,24 @@ public class Gripper extends Subsystem {
   private double firstFoundBall = 0;
 
   private SystemState handleIntakeCargo(double timestamp) {
-    if (stateChanged) {
+    if(stateChanged){
       circularBuffer.clear();
       gripperMotor.setSmartCurrentLimit(80);
+      //gripperMotor.configVoltageCompSaturation(12);
     }
 
     gripperMotor.set(.33);
-//    gripperMotor.getPIDController().setReference(1, ControlType.kDutyCycle);
+    //gripperMotor.set(ControlMode.PercentOutput, 1);
     jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
 
-    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 30
-        && circularBuffer.isFull() && timestamp - currentStateStartTime > .25
-        && gripperMotor.getEncoder().getVelocity() < 10) {
-      if (firstFoundBall == 0) {
-        firstFoundBall = Timer.getFPGATimestamp();
-      }
-      System.out.println(Timer.getFPGATimestamp() - firstFoundBall);
-      if (Timer.getFPGATimestamp() - firstFoundBall > .5) {
-        return SystemState.HOLD_CARGO;
+    if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 30 && circularBuffer.isFull() && timestamp - currentStateStartTime > .1) {
+      if (gripperMotor.getEncoder().getVelocity() < 10){
+        if (firstFoundBall == 0) {
+          firstFoundBall = Timer.getFPGATimestamp();
+        }
+        if (Timer.getFPGATimestamp() - firstFoundBall > .25) {
+          return SystemState.HOLD_CARGO;
+        }
       }
     }
 
@@ -261,11 +276,10 @@ public class Gripper extends Subsystem {
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
     circularBuffer.addValue(Math.abs(gripperMotor.getOutputCurrent()));
-
+    
     if (SystemState.HOLD_CARGO.equals(systemState)) {
       LED.getInstance().setHasGamePiece(true);
-    } else if (SystemState.HOLD_HATCH.equals(systemState)
-        && Timer.getFPGATimestamp() - currentStateStartTime > .5) {
+    } else if (SystemState.HOLD_HATCH.equals(systemState)) {
       LED.getInstance().setHasGamePiece(true);
     } else {
       hasGamepiece = false;
@@ -277,8 +291,7 @@ public class Gripper extends Subsystem {
     } else {
       LED.getInstance().setIntaking(false);
     }
-    if (SystemState.EXHAUST_CARGO.equals(systemState) || SystemState.EXHAUST_HATCH
-        .equals(systemState)) {
+    if (SystemState.EXHAUST_CARGO.equals(systemState) || SystemState.EXHAUST_HATCH.equals(systemState)) {
       LED.getInstance().setExhausting(true);
     } else {
       LED.getInstance().setExhausting(false);
@@ -310,7 +323,7 @@ public class Gripper extends Subsystem {
   public void test() {
 
   }
-
+  
   @Override
   public void writePeriodicOutputs() {
     //System.out.println(detective.getVoltage());
