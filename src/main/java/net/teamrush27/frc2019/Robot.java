@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
 import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
+import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
 import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
@@ -107,7 +108,7 @@ public class Robot extends TimedRobot {
 
     drivetrain.startLogging();
     autoModeExecutor = new AutoModeExecutor();
-    autoModeExecutor.setAutoMode(new TestMode());
+    autoModeExecutor.setAutoMode(new RightCargo());
     autoModeExecutor.start();
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
@@ -128,7 +129,9 @@ public class Robot extends TimedRobot {
 
       drivetrain.shift(true);
       limelights.setTrackingEnabled(false);
+      drivetrain.setLimelightSteering(limelights.getSystemState());
       drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+      drivetrain.setBrakeMode(false);
     }
 
     if (!autoModeExecutor.isActive()) {
@@ -145,6 +148,9 @@ public class Robot extends TimedRobot {
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
     spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
     wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
+    limelights.setTrackingEnabled(false);
+    drivetrain.setLimelightSteering(limelights.getSystemState());
+    drivetrain.setBrakeMode(false);
 
     if (!autoRan) {
       gripper.setWantedState(Gripper.WantedState.OFF);
