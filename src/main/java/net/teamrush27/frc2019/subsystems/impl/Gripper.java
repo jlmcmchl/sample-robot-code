@@ -25,7 +25,7 @@ public class Gripper extends Subsystem {
   private static final Logger LOG = LogManager.getLogger(Gripper.class);
   private static Gripper INSTANCE = null;
 
-  private static final Integer JAW_HATCH_INTAKE_POSITION = 500;
+  private static final Integer JAW_HATCH_INTAKE_POSITION = 495;
   private static final Integer JAW_RETRACT_POSITION = 236;
   private static final Integer JAW_HATCH_EXHAUST_POSITION = 540;
 
@@ -87,7 +87,6 @@ public class Gripper extends Subsystem {
         systemState = newState;
         currentStateStartTime = timestamp;
         stateChanged = true;
-        zeroSensors();
       } else {
         stateChanged = false;
       }
@@ -128,7 +127,7 @@ public class Gripper extends Subsystem {
     gripperMotor = new TalonSRX(RobotMap.GRIPPER_MOTOR_CAN_ID);
     gripperMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
     gripperMotor.setNeutralMode(NeutralMode.Brake);
-    gripperMotor.configContinuousCurrentLimit(30);
+    gripperMotor.configContinuousCurrentLimit(20);
     gripperMotor.configVoltageCompSaturation(12);
     gripperMotor.enableVoltageCompensation(true);
     
@@ -207,7 +206,7 @@ public class Gripper extends Subsystem {
     firstFoundBall = 0;
     if(stateChanged){
 //      gripperMotor.setSmartCurrentLimit(30);
-      gripperMotor.configVoltageCompSaturation(3);
+      gripperMotor.configVoltageCompSaturation(4);
     }
 
 //    gripperMotor.set(.2);
@@ -315,7 +314,6 @@ public class Gripper extends Subsystem {
   @Override
   public void zeroSensors() {
     int position = (jawMotor.getSelectedSensorPosition() % 1024 + 1024) % 1024;
-    int position_wrapped = position >= 512? position - 1024 : position;
     jawMotor.setSelectedSensorPosition(position);
   }
 
