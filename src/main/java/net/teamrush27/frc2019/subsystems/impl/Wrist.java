@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.constants.RobotConstants;
 import net.teamrush27.frc2019.loops.ILooper;
@@ -26,7 +27,6 @@ public class Wrist extends Subsystem {
   private static final double TICKS_PER_DEGREE = 4096d / 360d;
   private static final double DEGREES_PER_TICK = 360d / 4096d;
 
-  private static final int MID_PWM = 1615;
   private static final int PWM_RANGE = 1024;
 
   public static Wrist getInstance() {
@@ -198,7 +198,7 @@ public class Wrist extends Subsystem {
     wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
     wristState.wristPWMValue = array[0];
     wristState.wristPWMDegrees =
-        (-wristState.wristPWMValue + MID_PWM) * DEGREES_PER_TICK;
+        (-wristState.wristPWMValue + Robot.ROBOT_CONFIGURATION.getWristHomePosition()) * DEGREES_PER_TICK;
 
     wristState.wristEncoderTicks = wristMotor.getSelectedSensorPosition(0);
     wristState.wristEncoderDegrees = wristState.wristEncoderTicks * DEGREES_PER_TICK;

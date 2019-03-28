@@ -21,6 +21,8 @@ import net.teamrush27.frc2019.auto.modes.RightRocket;
 import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
+import net.teamrush27.frc2019.constants.RobotConfiguration;
+import net.teamrush27.frc2019.constants.RobotConfigurationFactory;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.managers.SuperstructureManager.WantedState;
@@ -45,6 +47,8 @@ public class Robot extends TimedRobot {
 
   public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
 
+  public static final RobotConfiguration ROBOT_CONFIGURATION = RobotConfigurationFactory.getRobotConfiguration();
+  
   private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private Arm arm = Arm.getInstance();

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.text.DecimalFormat;
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
@@ -33,8 +34,6 @@ public class Arm extends Subsystem {
   private static final double ROTATIONS_PER_DEGREE = 99.410158 / 360d; // 103.6
   // gear ratio / (sprocket diameter * 2 [accts for 3rd stage] * pi)
   private static final double ROTATIONS_PER_INCH = 1.0642462836;
-
-  private static final double HOME_POSITION = 213.57421875;
 
   private static final double ROTATION_EPSILON = 3;
   private static final double EXTENSION_EPSILON = 1;
@@ -477,12 +476,12 @@ public class Arm extends Subsystem {
     double absolutePosition = selectedSensorPosition / 1024d * 90d * -1d;
 //		LOG.info("abs: {}", absolutePosition);
     if (rotationHomed
-        && Math.abs((absolutePosition + HOME_POSITION) - armState.getRotationInDegrees()) > 5) {
+        && Math.abs((absolutePosition + Robot.ROBOT_CONFIGURATION.getArmHomePosition()) - armState.getRotationInDegrees()) > 5) {
       LOG.warn(String.format("rejecting large change in absolute position: goal - %s\tcurr - %s",
           absolutePosition, armState.getRotationInDegrees()));
       // Drivetrain.getInstance().fixRotationEncoder();
     } else {
-      rotationMotorMaster.setEncPosition((absolutePosition + HOME_POSITION) * ROTATIONS_PER_DEGREE);
+      rotationMotorMaster.setEncPosition((absolutePosition + Robot.ROBOT_CONFIGURATION.getArmHomePosition()) * ROTATIONS_PER_DEGREE);
     }
 
     if (!rotationHomed) {

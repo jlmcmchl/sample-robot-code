@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.Objects;
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.base.RobotState;
 import net.teamrush27.frc2019.constants.ChezyConstants;
@@ -830,10 +831,10 @@ public class Drivetrain extends Subsystem {
 
     // .3 for PRACTICE, .2 for COMP
     if (superman.overBack() && periodicIO.left_demand <= 0.01) {
-      periodicIO.left_demand = Math.min(periodicIO.left_demand, -.35);
-      periodicIO.left_demand = Math.min(periodicIO.left_demand, -.35);
+      periodicIO.left_demand = Math.min(periodicIO.left_demand, -Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
+      periodicIO.left_demand = Math.min(periodicIO.left_demand, -Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
     } else if (!superman.overBack() && periodicIO.left_demand >= -0.01) {
-      periodicIO.left_demand = Math.max(periodicIO.left_demand, .35);
+      periodicIO.left_demand = Math.max(periodicIO.left_demand, Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
     } else {
       return;
     }

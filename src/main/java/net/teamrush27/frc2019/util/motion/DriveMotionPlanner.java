@@ -3,6 +3,7 @@ package net.teamrush27.frc2019.util.motion;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.constants.ChezyConstants;
 import net.teamrush27.frc2019.util.CSVWritable;
 import net.teamrush27.frc2019.util.math.MathUtils;
@@ -64,12 +65,12 @@ public class DriveMotionPlanner implements CSVWritable {
 
   public DriveMotionPlanner() {
     final DCMotorTransmission transmission = new DCMotorTransmission(
-        1.0 / ChezyConstants.kDriveKv,
+        1.0 / Robot.ROBOT_CONFIGURATION.getDriveKv(),
         Units.inches_to_meters(ChezyConstants.kDriveWheelRadiusInches) * Units
             .inches_to_meters(ChezyConstants
                 .kDriveWheelRadiusInches) * ChezyConstants.kRobotLinearInertia / (2.0
-            * ChezyConstants.kDriveKa),
-        ChezyConstants.kDriveVIntercept);
+            * Robot.ROBOT_CONFIGURATION.getDriveKa()),
+        Robot.ROBOT_CONFIGURATION.getDriveVIntercept());
     mModel = new DifferentialDrive(
         ChezyConstants.kRobotLinearInertia,
         ChezyConstants.kRobotAngularInertia,

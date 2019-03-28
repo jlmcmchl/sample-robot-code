@@ -24,11 +24,7 @@ public class Gripper extends Subsystem {
   private static final String TAG = "GRIPPER";
   private static final Logger LOG = LogManager.getLogger(Gripper.class);
   private static Gripper INSTANCE = null;
-
-  private static final Integer JAW_HATCH_INTAKE_POSITION = 495;
-  private static final Integer JAW_RETRACT_POSITION = 236;
-  private static final Integer JAW_HATCH_EXHAUST_POSITION = 540;
-
+  
   public static Gripper getInstance() {
     if (INSTANCE == null) {
       INSTANCE = new Gripper();
@@ -152,14 +148,14 @@ public class Gripper extends Subsystem {
   private SystemState handleOff(double timestamp) {
 //    gripperMotor.set(0);
     gripperMotor.set(ControlMode.PercentOutput, 0);
-    jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawRetractPosition());
 
     return defaultStateTransfer(timestamp);
   }
 
   private SystemState handleHoldHatch(double timestamp) {
 
-    jawMotor.set(ControlMode.Position, JAW_HATCH_INTAKE_POSITION);
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawIntakePosition());
 //    gripperMotor.set(0);
     gripperMotor.set(ControlMode.PercentOutput, 0);
 
@@ -171,7 +167,7 @@ public class Gripper extends Subsystem {
   }
 
   private SystemState handleExhaustHatch(double timestamp) {
-    jawMotor.set(ControlMode.Position, JAW_HATCH_EXHAUST_POSITION);
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawExhaustPosition());
 //    gripperMotor.set(0);
     gripperMotor.set(ControlMode.PercentOutput, 0);
   
@@ -191,7 +187,7 @@ public class Gripper extends Subsystem {
 //    gripperMotor.set(-1);
     gripperMotor.set(ControlMode.PercentOutput, -1);
 
-    jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawRetractPosition());
 
     if (WantedState.EXHAUST_CARGO.equals(wantedState) && timestamp - startExhaust > .2) {
       startExhaust = 0;
@@ -211,7 +207,7 @@ public class Gripper extends Subsystem {
 
 //    gripperMotor.set(.2);
     gripperMotor.set(ControlMode.PercentOutput, 1);
-    jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawRetractPosition());
 
     if (WantedState.EXHAUST_CARGO.equals(wantedState)) {
       return SystemState.EXHAUST_CARGO;
@@ -235,7 +231,7 @@ public class Gripper extends Subsystem {
 
 //    gripperMotor.set(.33);
     gripperMotor.set(ControlMode.PercentOutput, 1);
-    jawMotor.set(ControlMode.Position, JAW_RETRACT_POSITION);
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawRetractPosition());
 
     if (WantedState.INTAKE_CARGO.equals(wantedState) && circularBuffer.getAverage() > 30 && circularBuffer.isFull() && timestamp - currentStateStartTime > .1) {
 //      if (gripperMotor.getEncoder().getVelocity() < 10){
