@@ -7,7 +7,7 @@ public class RobotConfigurationFactory {
 	
 	public static RobotConfiguration getRobotConfiguration(){
 		File practiceFile = new File("/home/lvuser/THIS_IS_THE_PRACTICE_BOT");
-		File compFile = new File("/home/lvuser/THIS_IS_THE_PRACTICE_BOT");
+		File compFile = new File("/home/lvuser/THIS_IS_THE_COMP_BOT");
 		if(compFile.exists()){
 			return new CompBot();
 		}
