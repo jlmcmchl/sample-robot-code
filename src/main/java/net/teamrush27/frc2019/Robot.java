@@ -110,10 +110,10 @@ public class Robot extends TimedRobot {
     //robotStateEstimator.startLogging();
     enabledLooper.start();
 
-    drivetrain.startLogging();
-    autoModeExecutor = new AutoModeExecutor();
-    autoModeExecutor.setAutoMode(new RightCargo());
-    autoModeExecutor.start();
+    //drivetrain.startLogging();
+    //autoModeExecutor = new AutoModeExecutor();
+    //autoModeExecutor.setAutoMode(new RightCargo());
+    //autoModeExecutor.start();
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
     spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
