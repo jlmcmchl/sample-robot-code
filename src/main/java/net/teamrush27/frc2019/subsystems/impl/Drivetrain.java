@@ -224,6 +224,7 @@ public class Drivetrain extends Subsystem {
     leftSlave1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.setSensorPhase(false);
+    leftSlave1.overrideLimitSwitchesEnable(false);
     leftSlave1.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5,
         RobotConstants.TALON_CONFIG_TIMEOUT);
     leftSlave1.configContinuousCurrentLimit(DriveConstants.MAX_CONTINUOUS_CURRENT,
