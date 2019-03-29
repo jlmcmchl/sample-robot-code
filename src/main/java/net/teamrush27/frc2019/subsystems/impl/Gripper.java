@@ -41,7 +41,7 @@ public class Gripper extends Subsystem {
   }
 
   private WantedState wantedState = WantedState.INTAKE_HATCH;
-  private SystemState systemState = SystemState.OFF;
+  private SystemState systemState = SystemState.HOLD_HATCH;
 
   private boolean hasGamepiece = false;
   private boolean stateChanged = false;
@@ -126,6 +126,7 @@ public class Gripper extends Subsystem {
     gripperMotor.configContinuousCurrentLimit(20);
     gripperMotor.configVoltageCompSaturation(12);
     gripperMotor.enableVoltageCompensation(true);
+    gripperMotor.setInverted(true);
     
 
     jawMotor = new TalonSRX(RobotMap.GRIPPER_JAWS_CAN_ID);
