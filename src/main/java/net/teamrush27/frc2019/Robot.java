@@ -171,14 +171,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    double remaining = Timer.getMatchTime();
     driverControl();
-
-    if ((remaining < 20 && remaining > 17) || (remaining < 10 && remaining > 7)) {
-      operatorInterface.setRumble(1);
-    } else {
-      operatorInterface.setRumble(0);
-    }
   }
 
   @Override
