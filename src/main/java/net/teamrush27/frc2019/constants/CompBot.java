@@ -9,17 +9,17 @@ public class CompBot implements RobotConfiguration {
 	
 	@Override
 	public Integer getJawIntakePosition() {
-		return 359;
+		return -619;
 	}
 	
 	@Override
 	public Integer getJawExhaustPosition() {
-		return 408;
+		return -578;
 	}
 	
 	@Override
 	public Integer getJawRetractPosition() {
-		return 60;
+		return -902;
 	}
 	
 	@Override
