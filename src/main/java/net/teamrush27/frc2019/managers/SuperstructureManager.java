@@ -24,7 +24,7 @@ public class SuperstructureManager extends Subsystem {
   private static final double WRIST_EPSILON = 30d;
   private static final double ARM_BASE_LENGTH = 15.5d;
   private static final double ARM_MIN_EXTENSION = 5;
-  private static final double ARM_MAX_EXTENSION = 47d;
+  private static final double ARM_MAX_EXTENSION = 49d;
   private static final double MIN_LATERAL_EXTENSION = 2d;
   private static final double MAX_LATERAL_EXTENSION = 32d;
 
@@ -53,7 +53,7 @@ public class SuperstructureManager extends Subsystem {
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(7.3d, 68.1d), new ArmInput(0d, 90d), 17d, 0d),
     ROCKET_LEVEL_2(new ArmInput(18d, 6.7d), new ArmInput(14.9d, 13.4d), 60d, 68d),
-    ROCKET_LEVEL_3(new ArmInput(46d, 2.85d), new ArmInput(46d, 7.17d), 63d, 77d),
+    ROCKET_LEVEL_3(new ArmInput(49d, 2.85d), new ArmInput(46d, 7.17d), 63d, 77d),
     STOW(new ArmInput(0d, 0d), 0d),
     CLIMB(new ArmInput(0d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
