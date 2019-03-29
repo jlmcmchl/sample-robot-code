@@ -73,7 +73,6 @@ public class Robot extends TimedRobot {
   boolean autoRan = false;
 
   private Gson serializer = new Gson();
-  private boolean autoRunning;
 
   @Override
   public void robotInit() {
@@ -128,19 +127,19 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    if (operatorInterface.wantsAutoStop()) {
-      autoModeExecutor.stop();
+//    if (operatorInterface.wantsAutoStop()) {
+//      autoModeExecutor.stop();
 
-      drivetrain.shift(true);
-      limelights.setTrackingEnabled(false);
-      drivetrain.setLimelightSteering(limelights.getSystemState());
-      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-      drivetrain.setBrakeMode(false);
-    }
+//      drivetrain.shift(true);
+//      limelights.setTrackingEnabled(false);
+//      drivetrain.setLimelightSteering(limelights.getSystemState());
+//      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+//      drivetrain.setBrakeMode(false);
+//    }
 
-    if (!autoModeExecutor.isActive()) {
+//    if (!autoModeExecutor.isActive()) {
       driverControl();
-    }
+//    }
   }
 
   @Override
@@ -157,7 +156,7 @@ public class Robot extends TimedRobot {
     drivetrain.setBrakeMode(false);
 
     if (!autoRan) {
-      gripper.setWantedState(Gripper.WantedState.OFF);
+//      gripper.setWantedState(Gripper.WantedState.OFF);
       superman.setWantedState(WantedState.STOW, true, false);
     }
 
@@ -195,12 +194,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    autoRunning = false;
 
-    led.setWantedState(LED.WantedState.DISABLED);
-    arm.reset();
+    
+    if(!autoRan) {
+      arm.reset();
+      led.setWantedState(LED.WantedState.DISABLED);
+    }
     drivetrain.stopLogging();
-    gripper.zeroSensors();
+//    gripper.zeroSensors();
     SmartDashboard.putString("Match Cycle", "DISABLED");
     try {
       TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");
@@ -235,9 +236,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    spiderLegs.zeroSensors();
-    arm.zeroSensors();
-    wrist.zeroSensors();
+    if(!autoRan){
+      spiderLegs.zeroSensors();
+      arm.zeroSensors();
+      wrist.zeroSensors();
+    }
 
     if (operatorInterface.wantsToggleLimelightSteering()) {
       limelights.cycleDisabled();
