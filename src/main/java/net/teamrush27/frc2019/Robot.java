@@ -112,9 +112,9 @@ public class Robot extends TimedRobot {
     enabledLooper.start();
 
     //drivetrain.startLogging();
-    //autoModeExecutor = new AutoModeExecutor();
-    //autoModeExecutor.setAutoMode(new RightCargo());
-    //autoModeExecutor.start();
+    autoModeExecutor = new AutoModeExecutor();
+    autoModeExecutor.setAutoMode(new RightCargo());
+    autoModeExecutor.start();
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
     spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
@@ -129,19 +129,19 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-//    if (operatorInterface.wantsAutoStop()) {
-//      autoModeExecutor.stop();
+    if (operatorInterface.wantsAutoStop()) {
+      autoModeExecutor.stop();
 
-//      drivetrain.shift(true);
-//      limelights.setTrackingEnabled(false);
-//      drivetrain.setLimelightSteering(limelights.getSystemState());
-//      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-//      drivetrain.setBrakeMode(false);
-//    }
+      drivetrain.shift(true);
+      limelights.setTrackingEnabled(false);
+      drivetrain.setLimelightSteering(limelights.getSystemState());
+      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+      drivetrain.setBrakeMode(false);
+    }
 
-//    if (!autoModeExecutor.isActive()) {
+    if (!autoModeExecutor.isActive()) {
       driverControl();
-//    }
+    }
   }
 
   @Override
@@ -167,7 +167,6 @@ public class Robot extends TimedRobot {
     drivetrain.shift(true);
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
 
-//		arm.setClosedLoopInput(new ArmInput(0d, 0d));
 //		subsystemManager.startLogging();
   }
 
