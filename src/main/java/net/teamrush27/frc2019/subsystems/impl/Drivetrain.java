@@ -827,8 +827,8 @@ public class Drivetrain extends Subsystem {
     periodicIO.left_turn = 1;
     periodicIO.right_turn = 1;
 
-    LOG.info(
-        String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
+//    LOG.info(
+//        String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
 
     // .3 for PRACTICE, .2 for COMP
     if (superman.overBack() && periodicIO.left_demand <= 0.01) {
