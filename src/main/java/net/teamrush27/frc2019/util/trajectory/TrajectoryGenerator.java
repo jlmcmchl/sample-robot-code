@@ -18,7 +18,7 @@ public class TrajectoryGenerator {
   private static final Logger LOG = LogManager.getLogger(TrajectoryGenerator.class);
 
   private static final double kMaxVelocity = 36.0;
-  private static final double kMaxAccel = 24.0;
+  private static final double kMaxAccel = 36.0;
   private static final double kMaxCentripetalAccelElevatorDown = 110.0;
   private static final double kMaxCentripetalAccel = 50.0;
   private static final double kMaxVoltage = 9.0;
