@@ -891,7 +891,7 @@ public class Drivetrain extends Subsystem {
 
   public synchronized void startLogging() {
     if (CSVWriter == null) {
-      CSVWriter = new ReflectingCSVWriter<>("/media/sda/logs/DRIVE-LOGS.csv", PeriodicIO.class);
+      CSVWriter = new ReflectingCSVWriter<>("/media/sda1/logs/DRIVE-LOGS.csv", PeriodicIO.class);
     }
   }
 

@@ -197,7 +197,7 @@ public class Robot extends TimedRobot {
 //    gripper.zeroSensors();
     SmartDashboard.putString("Match Cycle", "DISABLED");
     try {
-      TelemetryUtil.getInstance().writeToFile("/media/sda/logs/telemetry.csv");
+      TelemetryUtil.getInstance().writeToFile("/media/sda1/logs/telemetry.csv");
     } catch (IOException e) {
       LOG.error("could not write telemetry", e);
     }
