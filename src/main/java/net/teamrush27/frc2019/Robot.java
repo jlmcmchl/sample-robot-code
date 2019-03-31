@@ -9,6 +9,7 @@ package net.teamrush27.frc2019;
 
 import com.google.gson.Gson;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -102,6 +103,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    DriverStation.reportError(String.format("I HATE THIS ROBOT %s",operatorInterface.getWantManipulateHatch()), false);
     led.setWantedState(LED.WantedState.ENABLED);
     disabledLooper.stop();
     //drivetrain.startLogging();
