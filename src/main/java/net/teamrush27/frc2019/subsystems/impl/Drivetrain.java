@@ -494,7 +494,7 @@ public class Drivetrain extends Subsystem {
     //collection.setDrivetrainLeftPosition(leftMaster.getSelectedSensorPosition());
     //collection.setDrivetrainRightPosition(rightMaster.getSelectedSensorPosition());
 
-    SmartDashboard.putNumber("arm.absolute_rotation", leftSlave1.getSelectedSensorPosition());
+    SmartDashboard.putNumber("arm.absolute_rotation", periodicIO.armPosition);
     SmartDashboard.putNumber("drivetrain.left.position", periodicIO.left_position_ticks);
     SmartDashboard.putNumber("drivetrain.right.position", periodicIO.right_position_ticks);
     SmartDashboard.putNumber("drivetrain.front.distance", periodicIO.frontDistance);
@@ -903,10 +903,6 @@ public class Drivetrain extends Subsystem {
     }
   }
 
-  public void resetArmPosition(int armPositionTicks) {
-    leftSlave1.setSelectedSensorPosition(armPositionTicks, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-  }
-
   @Override
   public synchronized void readPeriodicInputs() {
     double prevLeftTicks = periodicIO.left_position_ticks;
@@ -915,6 +911,7 @@ public class Drivetrain extends Subsystem {
     double prevRightVelocity = periodicIO.right_velocity_ticks_per_100ms;
     double prevTimestamp = periodicIO.timestamp;
 
+    periodicIO.armPosition = leftSlave1.getSelectedSensorPosition();
     periodicIO.timestamp = Timer.getFPGATimestamp();
     periodicIO.left_position_ticks = leftMaster.getSelectedSensorPosition(0);
     periodicIO.right_position_ticks = rightMaster.getSelectedSensorPosition(0);
@@ -1035,6 +1032,7 @@ public class Drivetrain extends Subsystem {
     public double can_read_delta;
 
     // INPUTS
+    public int armPosition;
     public int left_position_ticks;
     public int right_position_ticks;
     public double left_distance;
@@ -1061,6 +1059,7 @@ public class Drivetrain extends Subsystem {
     public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<>(
         Pose2dWithCurvature.identity());
     public Pose2d field_to_vehicle = Pose2d.identity();
+    
 
     public PeriodicIO() {
 
@@ -1070,6 +1069,7 @@ public class Drivetrain extends Subsystem {
       this.timestamp = other.timestamp;
       this.can_read_delta = 0;
 
+      this.armPosition = other.armPosition;
       this.left_position_ticks = other.left_position_ticks;
       this.right_position_ticks = other.right_position_ticks;
       this.left_distance = other.left_distance;
