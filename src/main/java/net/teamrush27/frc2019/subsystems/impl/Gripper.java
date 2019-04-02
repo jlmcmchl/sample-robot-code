@@ -265,14 +265,17 @@ public class Gripper extends Subsystem {
   }
 
   @Override
+  public void readPeriodicInputs() {
+    circularBuffer.addValue(Math.abs(gripperMotor.getOutputCurrent()));
+  }
+
+  @Override
   public void registerEnabledLoops(ILooper enabledLooper) {
     enabledLooper.register(loop);
   }
 
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
-    circularBuffer.addValue(Math.abs(gripperMotor.getOutputCurrent()));
-    
     if (SystemState.HOLD_CARGO.equals(systemState)) {
       LED.getInstance().setHasGamePiece(true);
     } else if (SystemState.HOLD_HATCH.equals(systemState)) {
@@ -297,10 +300,10 @@ public class Gripper extends Subsystem {
     //collection.setGripperState(systemState.toString());
 
     SmartDashboard.putString("gripper.state", systemState.toString());
-    SmartDashboard.putNumber("gripper.amps", circularBuffer.getMax());
-    SmartDashboard.putNumber("gripper.pdpAmps", Robot.pdp.getCurrent(4));
+    //SmartDashboard.putNumber("gripper.amps", circularBuffer.getMax());
+    //SmartDashboard.putNumber("gripper.pdpAmps", Robot.pdp.getCurrent(4));
 //    SmartDashboard.putNumber("gripper.speed", gripperMotor.getEncoder().getVelocity());
-    SmartDashboard.putNumber("gripper.jaw.position", jawMotor.getSelectedSensorPosition());
+    //SmartDashboard.putNumber("gripper.jaw.position", jawMotor.getSelectedSensorPosition());
   }
 
   @Override

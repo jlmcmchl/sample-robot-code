@@ -833,7 +833,6 @@ public class Drivetrain extends Subsystem {
     // .3 for PRACTICE, .2 for COMP
     if (superman.overBack() && periodicIO.left_demand <= 0.01) {
       periodicIO.left_demand = Math.min(periodicIO.left_demand, -Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
-      periodicIO.left_demand = Math.min(periodicIO.left_demand, -Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
     } else if (!superman.overBack() && periodicIO.left_demand >= -0.01) {
       periodicIO.left_demand = Math.max(periodicIO.left_demand, Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
     } else {

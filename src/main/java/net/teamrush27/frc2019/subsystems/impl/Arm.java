@@ -207,8 +207,8 @@ public class Arm extends Subsystem {
 
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
-    maxExtOutputBuffer.addValue(Math.abs(extensionMotor.getEncoder().getVelocity()));
-    currentBuffer.addValue(extensionMotor.getOutputCurrent());
+    //maxExtOutputBuffer.addValue(Math.abs(extensionMotor.getEncoder().getVelocity()));
+    //currentBuffer.addValue(extensionMotor.getOutputCurrent());
 
     //collection.setArmRotation(armState.getRotationInDegrees());
     //collection.setArmRotationReset(armState.isRotationAtHome());
@@ -224,10 +224,10 @@ public class Arm extends Subsystem {
     SmartDashboard.putBoolean("arm.rotation.reset", armState.isRotationAtHome());
     SmartDashboard.putNumber("arm.extension", armState.getExtensionInInches());
     SmartDashboard.putBoolean("arm.extension.reset", armState.isExtensionAtHome());
-    SmartDashboard.putNumber("arm.rotation.output", rotationMotorMaster.getAppliedOutput());
-    SmartDashboard.putNumber("arm.extension.output", extensionMotor.getAppliedOutput());
-    SmartDashboard.putNumber("arm.extension.speed", maxExtOutputBuffer.getMax());
-    SmartDashboard.putNumber("arm.extension.current", currentBuffer.getMax());
+    //SmartDashboard.putNumber("arm.rotation.output", rotationMotorMaster.getAppliedOutput());
+    //SmartDashboard.putNumber("arm.extension.output", extensionMotor.getAppliedOutput());
+    //SmartDashboard.putNumber("arm.extension.speed", maxExtOutputBuffer.getMax());
+    //SmartDashboard.putNumber("arm.extension.current", currentBuffer.getMax());
 
   }
 

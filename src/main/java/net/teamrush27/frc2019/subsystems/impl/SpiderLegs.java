@@ -329,15 +329,15 @@ public class SpiderLegs extends Subsystem {
 
   @Override
   public void outputToSmartDashboard(SmartDashboardCollection collection) {
-    LOG.trace("front {} {} {} - rear {} {} {}", frontLegHome.get(),
-        frontLegMotor.getSelectedSensorPosition(), frontOnGround, rearLegHome.get(),
-        rearLegMotorMaster.getSelectedSensorPosition(), rearOnGround);
+    //LOG.trace("front {} {} {} - rear {} {} {}", frontLegHome.get(),
+    //    frontLegMotor.getSelectedSensorPosition(), frontOnGround, rearLegHome.get(),
+    //    rearLegMotorMaster.getSelectedSensorPosition(), rearOnGround);
 
     //collection.setSpiderlegsFrontPosition(frontLegMotor.getSelectedSensorPosition());
     //collection.setSpiderlegsRearPosition(rearLegMotorMaster.getSelectedSensorPosition());
     //collection.setSpiderlegsFrontHome(frontLegHome.get());
     //collection.setSpiderlegsRearHome(rearLegHome.get());
-
+/*
     SmartDashboard
         .putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
     SmartDashboard
@@ -347,7 +347,7 @@ public class SpiderLegs extends Subsystem {
 
     SmartDashboard.putNumber("spiderlegs.front_detective", underFrontWheel.getAverageVoltage());
     SmartDashboard.putNumber("spiderlegs.rear_detective", underRearMiddleWheel.getAverageVoltage());
-
+*/
   }
 
   @Override
