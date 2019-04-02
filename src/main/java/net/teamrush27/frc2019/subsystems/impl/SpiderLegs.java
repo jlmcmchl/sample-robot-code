@@ -358,8 +358,8 @@ public class SpiderLegs extends Subsystem {
   @Override
   public void zeroSensors() {
     if (frontLegHome.get()) {
-      frontLegMotor.setSelectedSensorPosition(0);
       if (!frontHomed) {
+        frontLegMotor.setSelectedSensorPosition(0);
         LED.getInstance().setFrontSpiderLegsHomed(true);
         LOG.info("front spiderlegs homed");
       }
@@ -367,8 +367,8 @@ public class SpiderLegs extends Subsystem {
     }
 
     if (rearLegHome.get()) {
-      rearLegMotorMaster.setSelectedSensorPosition(0);
       if (!rearHomed) {
+        rearLegMotorMaster.setSelectedSensorPosition(0);
         LED.getInstance().setRearSpiderLegsHomed(true);
         LOG.info("rear spiderlegs homed");
       }
