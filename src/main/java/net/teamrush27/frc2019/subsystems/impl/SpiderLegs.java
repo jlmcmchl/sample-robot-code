@@ -300,26 +300,28 @@ public class SpiderLegs extends Subsystem {
   @Override
   public void readPeriodicInputs() {
     if (WantedState.CLIMB_L2.equals(wantedState)) {
-      if (underFrontWheel.getAverageVoltage() > 1.25) {
+      if (underFrontWheel.getAverageVoltage() > 1.25 || frontOnGround) {
         frontOnGround = true;
       } else {
         frontOnGround = false;
       }
 
-      if (underRearMiddleWheel.getAverageVoltage() > 1.8) {
+      if (underRearMiddleWheel.getAverageVoltage() > 1.8 || rearOnGround) {
         rearOnGround = true;
+        frontOnGround = true;
       } else {
         rearOnGround = false;
       }
     } else {
-      if (underFrontWheel.getAverageVoltage() > 1.25) {
+      if (underFrontWheel.getAverageVoltage() > 1.25 || frontOnGround) {
         frontOnGround = true;
       } else {
         frontOnGround = false;
       }
 
-      if (underRearMiddleWheel.getAverageVoltage() > 1.5) {
+      if (underRearMiddleWheel.getAverageVoltage() > 1.5 || rearOnGround) {
         rearOnGround = true;
+        frontOnGround = true;
       } else {
         rearOnGround = false;
       }
