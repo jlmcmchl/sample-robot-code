@@ -105,7 +105,7 @@ public class Wrist extends Subsystem {
   public Wrist() {
     wristMotor = new TalonSRX(RobotMap.WRIST_MOTOR_CAN_ID);
     wristMotor.configFactoryDefault(RobotConstants.TALON_CONFIG_TIMEOUT);
-    wristMotor.configVoltageCompSaturation(4, RobotConstants.TALON_CONFIG_TIMEOUT);
+    wristMotor.configVoltageCompSaturation(8, RobotConstants.TALON_CONFIG_TIMEOUT);
     wristMotor.enableVoltageCompensation(false);
     wristMotor.setInverted(true);
     wristMotor.setNeutralMode(NeutralMode.Brake);
@@ -130,9 +130,9 @@ public class Wrist extends Subsystem {
     wristMotor.config_kI(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
     wristMotor.config_kD(0, .1, RobotConstants.TALON_CONFIG_TIMEOUT);
     wristMotor.config_kF(0, 0, RobotConstants.TALON_CONFIG_TIMEOUT);
-    wristMotor.configMotionAcceleration(degreesToTicks(225) / 10,
+    wristMotor.configMotionAcceleration(degreesToTicks(360) / 10,
         RobotConstants.TALON_CONFIG_TIMEOUT);
-    wristMotor.configMotionCruiseVelocity(degreesToTicks(135) / 10,
+    wristMotor.configMotionCruiseVelocity(degreesToTicks(180) / 10,
         RobotConstants.TALON_CONFIG_TIMEOUT);
 
   }

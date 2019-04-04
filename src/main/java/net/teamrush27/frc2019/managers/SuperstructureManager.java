@@ -261,7 +261,12 @@ public class SuperstructureManager extends Subsystem {
     executeCommand(commands.peek());
 
     if (operationComplete(commands.peek())) {
-      commands.poll();
+      Command finished = commands.poll();
+
+      LOG.info(String.format("Completed Command: ROT: %s\tEXT: %s\tWRS: %s",
+          finished.getArmInput().getRotationInput(),
+          finished.getArmInput().getExtensionInput(),
+          finished.getWristAngle()));
     }
   }
 
@@ -336,11 +341,6 @@ public class SuperstructureManager extends Subsystem {
   }
 
   private void executeCommand(Command command) {
-    LOG.info(String.format("Current Command: ROT: %s\tEXT: %s\tWRS: %s",
-        command.getArmInput().getRotationInput(),
-        command.getArmInput().getExtensionInput(),
-        command.getWristAngle()));
-
     arm.setClosedLoopInput(command.getArmInput());
     wrist.setClosedLoopInput(command.getWristAngle());
   }

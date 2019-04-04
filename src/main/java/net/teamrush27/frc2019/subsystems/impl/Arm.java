@@ -193,7 +193,7 @@ public class Arm extends Subsystem {
         .setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
     extensionMotor.getPIDController()
         .setSmartMotionAllowedClosedLoopError(.5 * ROTATIONS_PER_INCH, 0);
-    extensionMotor.getPIDController().setSmartMotionMaxAccel(5700, 0);
+    extensionMotor.getPIDController().setSmartMotionMaxAccel(7000, 0);
     extensionMotor.getPIDController().setSmartMotionMaxVelocity(5700, 0);
     extensionMotor.getPIDController().setSmartMotionMinOutputVelocity(0, 0);
 
