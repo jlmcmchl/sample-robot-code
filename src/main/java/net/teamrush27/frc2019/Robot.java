@@ -12,15 +12,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
-import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
-import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
-import net.teamrush27.frc2019.auto.modes.TestMode;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.constants.RobotConfiguration;
@@ -34,6 +30,7 @@ import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.subsystems.impl.LED;
 import net.teamrush27.frc2019.subsystems.impl.Limelights;
+import net.teamrush27.frc2019.subsystems.impl.Limelights.SystemState;
 import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
 import net.teamrush27.frc2019.subsystems.impl.Wrist;
@@ -49,8 +46,9 @@ public class Robot extends TimedRobot {
 
   public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
 
-  public static final RobotConfiguration ROBOT_CONFIGURATION = RobotConfigurationFactory.getRobotConfiguration();
-  
+  public static final RobotConfiguration ROBOT_CONFIGURATION = RobotConfigurationFactory
+      .getRobotConfiguration();
+
   private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
   private Drivetrain drivetrain = Drivetrain.getInstance();
   private Arm arm = Arm.getInstance();
@@ -87,6 +85,7 @@ public class Robot extends TimedRobot {
     limelights.defaultState();
 
     LiveWindow.disableAllTelemetry();
+    autoModeExecutor = new AutoModeExecutor();
   }
 
   @Override
@@ -106,7 +105,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    DriverStation.reportError(String.format("I HATE THIS ROBOT %s",operatorInterface.getWantManipulateHatch()), false);
+    DriverStation.reportError(
+        String.format("I HATE THIS ROBOT %s", operatorInterface.getWantManipulateHatch()), false);
     led.setWantedState(LED.WantedState.ENABLED);
     disabledLooper.stop();
     //drivetrain.startLogging();
@@ -115,8 +115,7 @@ public class Robot extends TimedRobot {
     enabledLooper.start();
 
     //drivetrain.startLogging();
-    autoModeExecutor = new AutoModeExecutor();
-    autoModeExecutor.setAutoMode(new RightCargo());
+    autoModeExecutor.setAutoMode(new RightRocket());
     autoModeExecutor.start();
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
@@ -137,7 +136,7 @@ public class Robot extends TimedRobot {
 
       drivetrain.shift(true);
       limelights.setTrackingEnabled(false);
-      drivetrain.setLimelightSteering(limelights.getSystemState());
+      drivetrain.setLimelightSteering(SystemState.DRIVE);
       drivetrain.setOpenLoop(DriveCommand.defaultCommand());
       drivetrain.setBrakeMode(false);
     }
@@ -171,11 +170,27 @@ public class Robot extends TimedRobot {
     drivetrain.setOpenLoop(DriveCommand.defaultCommand());
 
 //		subsystemManager.startLogging();
+
+    autoModeExecutor = new AutoModeExecutor();
   }
 
   @Override
   public void teleopPeriodic() {
-    driverControl();
+    if (autoModeExecutor.isActive() && operatorInterface.wantsAutoStop()) {
+      autoModeExecutor.stop();
+
+      drivetrain.shift(true);
+      limelights.setTrackingEnabled(false);
+      drivetrain.setLimelightSteering(SystemState.DRIVE);
+      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
+      drivetrain.setBrakeMode(false);
+    } else if (!autoModeExecutor.isActive() && operatorInterface.getWantStartAuton()) {
+
+      autoModeExecutor.setAutoMode(new RightRocket());
+      autoModeExecutor.start();
+    } else if (!autoModeExecutor.isActive()) {
+      driverControl();
+    }
   }
 
   @Override
@@ -192,8 +207,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
 
-    
-    if(!autoRan) {
+    if (!autoRan) {
       arm.reset();
       led.setWantedState(LED.WantedState.DISABLED);
     }
@@ -233,7 +247,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    if(!autoRan){
+    if (!autoRan) {
       spiderLegs.zeroSensors();
       arm.zeroSensors();
       wrist.zeroSensors();
@@ -292,20 +306,21 @@ public class Robot extends TimedRobot {
       if (operatorInterface.getShift()) {
         drivetrain.shift();
       }
-      
-      if((superman.getHasHatch() || gripper.hasHatch()) && operatorInterface.getWantManipulateHatch()){
+
+      if ((superman.getHasHatch() || gripper.hasHatch()) && operatorInterface
+          .getWantManipulateHatch()) {
         gripper.transitionHatch();
-      } else if(operatorInterface.getWantManipulateHatch()) {
+      } else if (operatorInterface.getWantManipulateHatch()) {
         gripper.transitionCargo();
       }
-      
+
       if (operatorInterface.wantsToggleLimelightSteering()) {
         limelights.cycleEnabled();
         drivetrain.setLimelightSteering(limelights.getSystemState());
       }
 
       double extensionInput = operatorInterface.getArmInput().getExtensionInput();
-      
+
       if (Math.abs(extensionInput) > 0.05) {
         superman.addOffset(extensionInput * 0.2);
       }
