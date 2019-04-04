@@ -147,4 +147,9 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	public Boolean wantsAutoStop() {
 		return driverLeftJoystick.getLeftButtonPressed() || driverLeftJoystick.getRightButtonPressed();
 	}
+
+	@Override
+	public Boolean getWantStartAuton() {
+		return driverLeftJoystick.getLeftButtonPressed() || driverLeftJoystick.getRightButtonPressed();
+	}
 }

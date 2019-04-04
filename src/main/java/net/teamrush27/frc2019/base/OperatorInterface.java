@@ -43,4 +43,6 @@ public interface OperatorInterface {
 	void setRumble(double frac);
 
 	Boolean wantsAutoStop();
+
+	Boolean getWantStartAuton();
 }
