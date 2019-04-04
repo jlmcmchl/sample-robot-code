@@ -150,6 +150,6 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 
 	@Override
 	public Boolean getWantStartAuton() {
-		return driverLeftJoystick.getLeftButtonPressed() || driverLeftJoystick.getRightButtonPressed();
+		return driverLeftJoystick.getLeftButtonPressed() && driverLeftJoystick.getRightButtonPressed();
 	}
 }

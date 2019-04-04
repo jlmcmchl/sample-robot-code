@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
+import net.teamrush27.frc2019.auto.modes.LeftCargo;
+import net.teamrush27.frc2019.auto.modes.LeftRocket;
+import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
@@ -178,6 +181,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     if (autoModeExecutor.isActive() && operatorInterface.wantsAutoStop()) {
       autoModeExecutor.stop();
+      drivetrain.stopLogging();
 
       drivetrain.shift(true);
       limelights.setTrackingEnabled(false);
@@ -185,8 +189,8 @@ public class Robot extends TimedRobot {
       drivetrain.setOpenLoop(DriveCommand.defaultCommand());
       drivetrain.setBrakeMode(false);
     } else if (!autoModeExecutor.isActive() && operatorInterface.getWantStartAuton()) {
-
-      autoModeExecutor.setAutoMode(new RightRocket());
+      drivetrain.startLogging();
+      autoModeExecutor.setAutoMode(new RightCargo());
       autoModeExecutor.start();
     } else if (!autoModeExecutor.isActive()) {
       driverControl();
