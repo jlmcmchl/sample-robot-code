@@ -16,19 +16,19 @@ import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
-public class RightCargo extends AutoModeBase {
+public class LeftCargo extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
     Trajectory habToCargoSideClose = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().habToCargoSideClose.getRight();
+        .getTrajectorySet().habToCargoSideClose.getLeft();
     Trajectory cargoSideCloseToHP = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().cargoSideCloseToHP.getRight();
+        .getTrajectorySet().cargoSideCloseToHP.getLeft();
     Trajectory hpToCargoSideMid = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().hpToCargoSideMid.getRight();
+        .getTrajectorySet().hpToCargoSideMid.getLeft();
 
     Trajectory scootBack2 = TrajectoryGenerator.getInstance().getTrajectorySet().scootBack2
-        .getRight();
+        .getLeft();
 
     List commands = Arrays.asList(
         new ParallelAction(
@@ -41,7 +41,7 @@ public class RightCargo extends AutoModeBase {
         new ParallelAction(
             new SeriesAction(
                 new WaitUntilCrossXBoundaryCommand(200, true),
-                new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
+                new GripperStateAction(Gripper.WantedState.OFF),
                 new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, true, true)),
             new DriveTrajectory(cargoSideCloseToHP, false)),
         new LimelightTrackingAction(true, 430),

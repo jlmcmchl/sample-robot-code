@@ -16,21 +16,21 @@ import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
-public class RightRocket extends AutoModeBase {
+public class LeftRocket extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
     Trajectory habToFarRocket = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().habToRocketRear.getRight();
+        .getTrajectorySet().habToRocketRear.getLeft();
     Trajectory farRocketToMidline = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().rocketRearToMidline.getRight();
+        .getTrajectorySet().rocketRearToMidline.getLeft();
     Trajectory midlineToHP = TrajectoryGenerator.getInstance().getTrajectorySet().midlineToHP
-        .getRight();
+        .getLeft();
     Trajectory hpToRocketClose = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().hpToRocketFront.getRight();
+        .getTrajectorySet().hpToRocketFront.getLeft();
 
     Trajectory scootBack = TrajectoryGenerator.getInstance().getTrajectorySet().scootBack
-        .getRight();
+        .getLeft();
 
 
     Trajectory altRocketRearToHP = TrajectoryGenerator.getInstance().getTrajectorySet().altRocketRearToHP.getRight();
@@ -44,7 +44,7 @@ public class RightRocket extends AutoModeBase {
         new LimelightTrackingAction(false, 1000),
         new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH),
         new DriveTrajectory(farRocketToMidline, false),
-        new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
+        new GripperStateAction(Gripper.WantedState.OFF),
         new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, false, true),
         new DriveTrajectory(midlineToHP, false),
         new LimelightTrackingAction(false, 430),

@@ -14,7 +14,7 @@ public class LimelightTrackingAction implements Action {
   private Boolean isFront;
   private Double minLimit;
   
-  private CircularBuffer buf = new CircularBuffer(10);
+  private CircularBuffer buf = new CircularBuffer(5);
   
   public LimelightTrackingAction(boolean isFront, double minLimit) {
     this.isFront = isFront;
@@ -37,6 +37,7 @@ public class LimelightTrackingAction implements Action {
     } else {
       buf.addValue(drivetrain.getRearDistance());
     }
+    drivetrain.setLimelightSteering(SystemState.FRONT_TRACKING);
   }
 
   @Override
