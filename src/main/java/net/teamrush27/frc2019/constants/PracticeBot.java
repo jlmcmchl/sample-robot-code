@@ -9,12 +9,12 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public Integer getJawIntakePosition() {
-		return -737;
+		return -727;
 	}
 	
 	@Override
 	public Integer getJawExhaustPosition() {
-		return -696;
+		return -686;
 	}
 	
 	@Override
@@ -25,6 +25,21 @@ public class PracticeBot implements RobotConfiguration {
 	@Override
 	public Integer getWristHomePosition() {
 		return 1550;
+	}
+	
+	@Override
+	public double getArmMaxExtension() {
+		return 45d;
+	}
+	
+	@Override
+	public double getArmLevel3CargoExtension() {
+		return 45d;
+	}
+	
+	@Override
+	public double getArmLevel3HatchExtension() {
+		return 45d;
 	}
 	
 	@Override

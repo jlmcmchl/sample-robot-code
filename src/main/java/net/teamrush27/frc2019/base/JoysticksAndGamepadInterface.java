@@ -11,6 +11,8 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 	
 	private static OperatorInterface INSTANCE = null;
 	
+	private final CheesyDriveHelper cheesyDriveHelper = new CheesyDriveHelper();
+	
 	public static OperatorInterface getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new JoysticksAndGamepadInterface();
@@ -44,6 +46,11 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 			shiftLatch = false;
 		}
 		return false;
+	}
+	
+	@Override
+	public DriveCommand getChezyDrive() {
+		return cheesyDriveHelper.cheesyDrive(driverLeftJoystick.getY(),-driverRightJoystick.getX(),driverRightJoystick.getRightButton(),false);
 	}
 	
 	@Override

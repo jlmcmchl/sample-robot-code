@@ -8,7 +8,6 @@
 package net.teamrush27.frc2019;
 
 import com.google.gson.Gson;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -16,10 +15,10 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
-import net.teamrush27.frc2019.auto.modes.LeftCargo;
-import net.teamrush27.frc2019.auto.modes.LeftRocket;
+import net.teamrush27.frc2019.auto.creators.AutoModeSelector;
 import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
+import net.teamrush27.frc2019.base.CheesyDriveHelper;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.constants.RobotConfiguration;
@@ -71,7 +70,6 @@ public class Robot extends TimedRobot {
   private final Logger LOG = LogManager.getLogger(Robot.class);
 
   private AutoModeExecutor autoModeExecutor;
-  private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
   boolean autoRan = false;
 
@@ -89,6 +87,7 @@ public class Robot extends TimedRobot {
 
     LiveWindow.disableAllTelemetry();
     autoModeExecutor = new AutoModeExecutor();
+    AutoModeSelector.initAutoModeSelector();
   }
 
   @Override
@@ -118,7 +117,7 @@ public class Robot extends TimedRobot {
     enabledLooper.start();
 
     //drivetrain.startLogging();
-    autoModeExecutor.setAutoMode(new RightRocket());
+    autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
     autoModeExecutor.start();
 
     arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
@@ -190,7 +189,7 @@ public class Robot extends TimedRobot {
       drivetrain.setBrakeMode(false);
     } else if (!autoModeExecutor.isActive() && operatorInterface.getWantStartAuton()) {
       drivetrain.startLogging();
-      autoModeExecutor.setAutoMode(new RightCargo());
+      autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
       autoModeExecutor.start();
     } else if (!autoModeExecutor.isActive()) {
       driverControl();
@@ -249,6 +248,8 @@ public class Robot extends TimedRobot {
     }
   }
 
+  boolean chezy = false;
+  
   @Override
   public void disabledPeriodic() {
     if (!autoRan) {
@@ -256,11 +257,17 @@ public class Robot extends TimedRobot {
       arm.zeroSensors();
       wrist.zeroSensors();
     }
+    
+    if(operatorInterface.getWantStartAuton()){
+      chezy = true;
+    }
 
     if (operatorInterface.wantsToggleLimelightSteering()) {
       limelights.cycleDisabled();
       drivetrain.setLimelightSteering(limelights.getSystemState());
     }
+  
+    AutoModeSelector.update();
   }
 
   private void driverControl() {
@@ -338,7 +345,11 @@ public class Robot extends TimedRobot {
         drivetrain.setOpenLoop(new DriveCommand(.3, .3, true));
       }
     } else {
-      drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+      if(chezy){
+        drivetrain.setOpenLoop(operatorInterface.getChezyDrive());
+      } else {
+        drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+      }
     }
   }
 }

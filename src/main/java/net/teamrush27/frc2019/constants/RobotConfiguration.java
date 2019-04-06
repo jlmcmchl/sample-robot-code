@@ -10,8 +10,11 @@ public interface RobotConfiguration {
 	
 	Integer getWristHomePosition();
 	
-	double getLimelightDriveForwardPercent();
+	double getArmMaxExtension();
+	double getArmLevel3CargoExtension();
+	double getArmLevel3HatchExtension();
 	
+	double getLimelightDriveForwardPercent();
 	
 	double getDriveKv();
 	double getDriveKa();

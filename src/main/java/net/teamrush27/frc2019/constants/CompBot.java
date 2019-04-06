@@ -28,6 +28,21 @@ public class CompBot implements RobotConfiguration {
 	}
 	
 	@Override
+	public double getArmMaxExtension() {
+		return 49d;
+	}
+	
+	@Override
+	public double getArmLevel3CargoExtension() {
+		return 49d;
+	}
+	
+	@Override
+	public double getArmLevel3HatchExtension() {
+		return 46d;
+	}
+	
+	@Override
 	public double getLimelightDriveForwardPercent() {
 		return .3;
 	}

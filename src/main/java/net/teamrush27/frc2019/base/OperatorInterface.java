@@ -8,6 +8,10 @@ public interface OperatorInterface {
     DriveCommand getTankCommand();
     boolean getShift();
     
+    // ignore plz
+	
+	DriveCommand getChezyDrive();
+    
     // OPERATOR CONTROLS
 	
 	// gripper

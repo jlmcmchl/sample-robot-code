@@ -2,6 +2,7 @@ package net.teamrush27.frc2019.managers;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.LinkedList;
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
@@ -24,7 +25,6 @@ public class SuperstructureManager extends Subsystem {
   private static final double WRIST_EPSILON = 30d;
   private static final double ARM_BASE_LENGTH = 15.5d;
   private static final double ARM_MIN_EXTENSION = 5;
-  private static final double ARM_MAX_EXTENSION = 49d;
   private static final double MIN_LATERAL_EXTENSION = 2d;
   private static final double MAX_LATERAL_EXTENSION = 32d;
 
@@ -53,7 +53,7 @@ public class SuperstructureManager extends Subsystem {
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(7.3d, 68.1d), new ArmInput(0d, 90d), 17d, 0d),
     ROCKET_LEVEL_2(new ArmInput(18d, 6.7d), new ArmInput(14.9d, 13.4d), 60d, 68d),
-    ROCKET_LEVEL_3(new ArmInput(49d, 2.85d), new ArmInput(46d, 7.17d), 63d, 77d),
+    ROCKET_LEVEL_3(new ArmInput(Robot.ROBOT_CONFIGURATION.getArmLevel3CargoExtension(), 2.85d), new ArmInput(Robot.ROBOT_CONFIGURATION.getArmLevel3HatchExtension(), 7.17d), 63d, 77d),
     STOW(new ArmInput(0d, 0d), 0d),
     CLIMB(new ArmInput(0d, 45d), 0d),
     START(new ArmInput(0d, 0d), 0d);
@@ -382,7 +382,7 @@ public class SuperstructureManager extends Subsystem {
               - Math.sin(angle * Math.PI / 180) * ARM_BASE_LENGTH;
       double max_extension_for_angle =
           max_lateral_extension_for_angle / Math.sin(angle * Math.PI / 180);
-      return Math.min(ARM_MAX_EXTENSION, Math.abs(max_extension_for_angle));
+      return Math.min(Robot.ROBOT_CONFIGURATION.getArmMaxExtension(), Math.abs(max_extension_for_angle));
     } else {
       return MAX_LATERAL_EXTENSION - ARM_BASE_LENGTH;
     }
@@ -456,7 +456,7 @@ public class SuperstructureManager extends Subsystem {
 
   private Boolean reachable(Double[] start, Double[] goal) {
     return ARM_MIN_EXTENSION < goal[0]
-        && goal[0] < ARM_MAX_EXTENSION
+        && goal[0] < Robot.ROBOT_CONFIGURATION.getArmMaxExtension()
         && start[1] * goal[1] > 0;
   }
 

@@ -32,6 +32,7 @@ public abstract class AutoModeBase {
 
   public void done() {
     LOG.info("Auto mode done");
+    mActive = false;
   }
 
   public void stop() {

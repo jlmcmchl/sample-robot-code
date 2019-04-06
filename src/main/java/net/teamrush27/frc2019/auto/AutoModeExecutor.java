@@ -44,6 +44,6 @@ public class AutoModeExecutor {
   }
 
   public boolean isActive() {
-    return isActive;
+    return isActive && m_auto_mode.isActive();
   }
 }
