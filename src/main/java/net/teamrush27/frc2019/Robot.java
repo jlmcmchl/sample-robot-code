@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
     //robotStateEstimator.startLogging();
     enabledLooper.start();
 
-    //drivetrain.startLogging();
+    drivetrain.startLogging();
     autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
     autoModeExecutor.start();
 
@@ -135,6 +135,8 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     if (operatorInterface.wantsAutoStop()) {
       autoModeExecutor.stop();
+
+      drivetrain.stopLogging();
 
       drivetrain.shift(true);
       limelights.setTrackingEnabled(false);
@@ -211,7 +213,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
 
     if (!autoRan) {
-      arm.reset();
+      //arm.reset();
       led.setWantedState(LED.WantedState.DISABLED);
     }
     drivetrain.stopLogging();
@@ -259,7 +261,7 @@ public class Robot extends TimedRobot {
     }
     
     if(operatorInterface.getWantStartAuton()){
-      chezy = true;
+      chezy = true && false;
     }
 
     if (operatorInterface.wantsToggleLimelightSteering()) {

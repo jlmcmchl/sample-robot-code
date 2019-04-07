@@ -276,6 +276,7 @@ public class Gripper extends Subsystem {
     }
 
     SmartDashboard.putString("gripper.state", systemState.toString());
+    SmartDashboard.putNumber("gripper.jaw_position", jawMotor.getSelectedSensorPosition());
   }
 
   @Override

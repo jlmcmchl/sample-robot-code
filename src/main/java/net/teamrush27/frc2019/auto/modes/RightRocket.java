@@ -22,43 +22,40 @@ public class RightRocket extends AutoModeBase {
   protected void routine() throws AutoModeEndedException {
     Trajectory habToFarRocket = TrajectoryGenerator.getInstance()
         .getTrajectorySet().habToRocketRear.getRight();
-    Trajectory farRocketToMidline = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().rocketRearToMidline.getRight();
-    Trajectory midlineToHP = TrajectoryGenerator.getInstance().getTrajectorySet().midlineToHP
-        .getRight();
+    Trajectory altRocketRearToHP = TrajectoryGenerator.getInstance()
+        .getTrajectorySet().altRocketRearToHP.getRight();
     Trajectory hpToRocketClose = TrajectoryGenerator.getInstance()
         .getTrajectorySet().hpToRocketFront.getRight();
 
     Trajectory scootBack = TrajectoryGenerator.getInstance().getTrajectorySet().scootBack
         .getRight();
 
-
-    Trajectory altRocketRearToHP = TrajectoryGenerator.getInstance().getTrajectorySet().altRocketRearToHP.getRight();
-
     List commands = Arrays.asList(
         new ParallelAction(
             new SeriesAction(
                 new WaitUntilCrossXBoundaryCommand(260),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, false, true)),
-            new DriveTrajectory(habToFarRocket, true)),
+            new DriveTrajectory(habToFarRocket, true, true)),
         new LimelightTrackingAction(false, 1000),
-        new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH),
-        new DriveTrajectory(farRocketToMidline, false),
-        new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
-        new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, false, true),
-        new DriveTrajectory(midlineToHP, false),
-        new LimelightTrackingAction(false, 430),
+        new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .1),
+        new ParallelAction(
+            new DriveTrajectory(altRocketRearToHP, false),
+            new SeriesAction(
+                new WaitUntilCrossXBoundaryCommand(250, true),
+                new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
+                new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, true, true))),
+        new LimelightTrackingAction(true, 450),
         new ParallelAction(
             new SeriesAction(
                 new WaitUntilCrossXBoundaryCommand(24),
-                new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, true, true)),
+                new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, false, true)),
             new DriveTrajectory(hpToRocketClose, false)),
-        new LimelightTrackingAction(true, 1000)/*,
-        new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH),
+        new LimelightTrackingAction(false, 1000),
+        new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .1),
         new DriveTrajectory(scootBack, false),
         new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
         new AutoSuperstructurePosition(WantedState.STOW, false, false)
-        */);
+    );
 
     runAction(new SeriesAction(commands));
   }

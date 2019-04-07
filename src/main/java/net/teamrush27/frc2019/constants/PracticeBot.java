@@ -9,12 +9,12 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public Integer getJawIntakePosition() {
-		return -685;
+		return -670;
 	}
 	
 	@Override
 	public Integer getJawExhaustPosition() {
-		return -645;
+		return -630;
 	}
 	
 	@Override
@@ -29,36 +29,36 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public double getArmMaxExtension() {
-		return 45d;
+		return 49d;
 	}
 	
 	@Override
 	public double getArmLevel3CargoExtension() {
-		return 45d;
+		return 49d;
 	}
 	
 	@Override
 	public double getArmLevel3HatchExtension() {
-		return 45d;
+		return 46d;
 	}
 	
 	@Override
 	public double getLimelightDriveForwardPercent() {
-		return .35;
+		return .40;
 	}
 	
 	@Override
 	public double getDriveKv() {
-		return 0.08194457874358892;
+		return 0.20315821635941475;
 	}
 	
 	@Override
 	public double getDriveKa() {
-		return 0.02430825757642667;
+		return 0.036565738498063036;
 	}
 	
 	@Override
 	public double getDriveVIntercept() {
-		return 1.9806873036972523;
+		return 1.0191132753224497;
 	}
 }

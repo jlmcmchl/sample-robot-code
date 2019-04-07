@@ -268,11 +268,17 @@ public class Arm extends Subsystem {
 
   @Override
   public void readPeriodicInputs() {
-    armState = new ArmState( //
+    ArmState newArmState = new ArmState( //
         rotationMotorMaster.getEncoder().getPosition(), //
         extensionMotor.getEncoder().getPosition(), //
         rotationHomeSensor.get(), //
         extensionHomeSensor.get());
+
+    newArmState.setExtensionDemandInInches(armState.getExtensionDemandInInches());
+    newArmState.setRotationDemandInDegrees(armState.getRotationDemandInDegrees());
+
+
+    armState = newArmState;
 
     if (armState.isExtensionAtHome() && !lastHomed) {
       if (CANError.kOK.equals(extensionMotor.setEncPosition(0))) {
@@ -339,7 +345,7 @@ public class Arm extends Subsystem {
 
   @Override
   public void stop() {
-    wantedState = WantedState.OFF;
+    //wantedState = WantedState.OFF;
   }
 
   public void reset() {
