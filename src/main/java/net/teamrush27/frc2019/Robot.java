@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.io.IOException;
@@ -142,7 +143,8 @@ public class Robot extends TimedRobot {
       limelights.setTrackingEnabled(false);
       drivetrain.setLimelightSteering(SystemState.DRIVE);
       drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-      drivetrain.setBrakeMode(false);
+
+      operatorInterface.clear();
     }
 
     if (!autoModeExecutor.isActive()) {
@@ -181,14 +183,22 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (autoModeExecutor.isActive() && operatorInterface.wantsAutoStop()) {
+      double time = Timer.getFPGATimestamp();
+      LOG.info("STOPPING AUTONOMOUS");
       autoModeExecutor.stop();
-      drivetrain.stopLogging();
 
       drivetrain.shift(true);
       limelights.setTrackingEnabled(false);
       drivetrain.setLimelightSteering(SystemState.DRIVE);
       drivetrain.setOpenLoop(DriveCommand.defaultCommand());
       drivetrain.setBrakeMode(false);
+
+      operatorInterface.clear();
+
+      drivetrain.stopLogging();
+
+      LOG.info("STOPPED AUTONOMOUS: {}", Timer.getFPGATimestamp() - time);
+
     } else if (!autoModeExecutor.isActive() && operatorInterface.getWantStartAuton()) {
       drivetrain.startLogging();
       autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
@@ -236,6 +246,7 @@ public class Robot extends TimedRobot {
       //drivetrain.startLogging();
 
 //			subsystemManager.stopLogging();
+      drivetrain.setBrakeMode(false);
       drivetrain.stopLogging();
       //robotStateEstimator.stopLogging();
 

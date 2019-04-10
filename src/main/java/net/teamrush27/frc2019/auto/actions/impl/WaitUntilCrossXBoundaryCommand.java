@@ -19,9 +19,6 @@ public class WaitUntilCrossXBoundaryCommand implements Action {
 
   @Override
   public boolean isFinished() {
-    System.out.println(String.format("%s > %s",
-        RobotState.getInstance().getLatestFieldToVehicle().getValue().getTranslation().x(),
-        mXBoundary));
     return (RobotState.getInstance().getLatestFieldToVehicle().getValue().getTranslation().x()
         > mXBoundary) ^ behind;
   }

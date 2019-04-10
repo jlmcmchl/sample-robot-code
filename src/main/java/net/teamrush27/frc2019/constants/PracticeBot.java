@@ -9,17 +9,17 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public Integer getJawIntakePosition() {
-		return -670;
+		return -666;
 	}
 	
 	@Override
 	public Integer getJawExhaustPosition() {
-		return -630;
+		return -626;
 	}
 	
 	@Override
 	public Integer getJawRetractPosition() {
-		return -1000;
+		return -975;
 	}
 	
 	@Override

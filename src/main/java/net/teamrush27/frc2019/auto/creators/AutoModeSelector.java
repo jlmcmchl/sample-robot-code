@@ -12,9 +12,11 @@ import net.teamrush27.frc2019.auto.modes.DoNothing;
 import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
 import net.teamrush27.frc2019.auto.modes.singlepath.AltRocketReturnPathRight;
+import net.teamrush27.frc2019.auto.modes.singlepath.CargoFrontToHPRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.CargoSideCloseToHPRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.HPToCargoSideMidRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.HPToRocketCloseRight;
+import net.teamrush27.frc2019.auto.modes.singlepath.HabToCargoFrontRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.HabToCargoSideCloseRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.HabToRocketRearRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.MidlineToHPRight;
@@ -80,6 +82,8 @@ public class AutoModeSelector {
       new AutoModeCreator("MidlineToHPRight", () -> new MidlineToHPRight()),
       new AutoModeCreator("HPToRocketSideCloseRight", () -> new HPToRocketCloseRight()),
       new AutoModeCreator("AltRocketReturnPathRight", () -> new AltRocketReturnPathRight()),
+      new AutoModeCreator("HabToCargoFrontRight", () -> new HabToCargoFrontRight()),
+      new AutoModeCreator("CargoFrontToHPRight", () -> new CargoFrontToHPRight()),
   };
 
 

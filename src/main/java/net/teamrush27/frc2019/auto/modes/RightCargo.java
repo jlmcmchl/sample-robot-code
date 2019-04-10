@@ -35,7 +35,7 @@ public class RightCargo extends AutoModeBase {
             new SeriesAction(
                 new WaitUntilCrossXBoundaryCommand(100),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, false, true)),
-            new DriveTrajectory(habToCargoSideClose, true)),
+            new DriveTrajectory(habToCargoSideClose, true, true)),
         new LimelightTrackingAction(false, 500),
         new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .1),
         new ParallelAction(
@@ -50,7 +50,7 @@ public class RightCargo extends AutoModeBase {
                 new WaitUntilCrossXBoundaryCommand(70),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, false, true)),
             new DriveTrajectory(hpToCargoSideMid, false)),
-        new LimelightTrackingAction(false, 400)/*,
+        new LimelightTrackingAction(false, 350)/*,
         new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .1),
         new DriveTrajectory(scootBack2, false),
         new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),

@@ -49,4 +49,6 @@ public interface OperatorInterface {
 	Boolean wantsAutoStop();
 
 	Boolean getWantStartAuton();
+
+	Boolean clear();
 }

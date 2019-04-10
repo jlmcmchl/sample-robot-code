@@ -26,6 +26,7 @@ import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.Arm.SystemState;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
@@ -570,6 +571,10 @@ public class Drivetrain extends Subsystem {
 
       setBrakeMode(true);
     }
+  }
+
+  public Boolean isLimelightSteering() {
+    return DriveMode.LIMELIGHT_STEERING.equals(driveMode);
   }
 
   public boolean isDoneWithTrajectory() {
