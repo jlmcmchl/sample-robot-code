@@ -68,6 +68,7 @@ public class TurnInPlaceAction implements Action {
 
   @Override
   public void start() {
+    drivetrain.resetEncoders();
     drivetrain.setHeading(Rotation2d.identity());
     drivetrain.setVelocitySetpoint(new DriveCommand(velocity, -velocity, true));
   }
