@@ -331,6 +331,10 @@ public class Robot extends TimedRobot {
         drivetrain.shift();
       }
 
+      if (WantedState.STOW.equals(superman.getWantedState()) && operatorInterface.getWantUnjam()) {
+        gripper.unjam();
+      }
+
       if ((superman.getHasHatch() || gripper.hasHatch()) && operatorInterface
           .getWantManipulateHatch()) {
         gripper.transitionHatch();

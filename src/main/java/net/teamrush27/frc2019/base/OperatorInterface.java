@@ -51,4 +51,6 @@ public interface OperatorInterface {
 	Boolean getWantStartAuton();
 
 	Boolean clear();
+
+	Boolean getWantUnjam();
 }

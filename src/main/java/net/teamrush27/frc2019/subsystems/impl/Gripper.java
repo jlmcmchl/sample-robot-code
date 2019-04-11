@@ -37,7 +37,7 @@ public class Gripper extends Subsystem {
   }
 
   private enum SystemState {
-    OFF, INTAKE_CARGO, HOLD_CARGO, EXHAUST_CARGO, HOLD_HATCH, EXHAUST_HATCH
+    OFF, INTAKE_CARGO, HOLD_CARGO, EXHAUST_CARGO, HOLD_HATCH, EXHAUST_HATCH, UNJAM_HATCH
   }
 
   private WantedState wantedState = WantedState.INTAKE_HATCH;
@@ -73,6 +73,9 @@ public class Gripper extends Subsystem {
         case HOLD_HATCH:
           newState = handleHoldHatch(timestamp);
           break;
+        case UNJAM_HATCH:
+          newState = handleUnjamHatch(timestamp);
+          break;
         case OFF:
         default:
           newState = handleOff(timestamp);
@@ -99,6 +102,10 @@ public class Gripper extends Subsystem {
     }
   };
 
+  public synchronized void unjam() {
+    currentStateStartTime = Timer.getFPGATimestamp();
+    systemState = SystemState.UNJAM_HATCH;
+  }
 
   private final TalonSRX gripperMotor;
   private final TalonSRX jawMotor;
@@ -222,6 +229,16 @@ public class Gripper extends Subsystem {
         if (Timer.getFPGATimestamp() - firstFoundBall > .25) {
           return SystemState.HOLD_CARGO;
         }
+    }
+
+    return defaultStateTransfer(timestamp);
+  }
+
+  private SystemState handleUnjamHatch(double timestamp) {
+    jawMotor.set(ControlMode.Position, Robot.ROBOT_CONFIGURATION.getJawExhaustPosition());
+
+    if (timestamp - currentStateStartTime < 0.2) {
+      return SystemState.UNJAM_HATCH;
     }
 
     return defaultStateTransfer(timestamp);

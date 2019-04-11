@@ -167,4 +167,9 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
     return driverLeftJoystick.getLeftButtonPressed() ^ driverLeftJoystick.getRightButtonPressed()
         ^ driverRightJoystick.getLeftButtonPressed() ^ driverRightJoystick.getRightButtonPressed();
   }
+
+  @Override
+  public Boolean getWantUnjam() {
+    return gamePad.getCircleButton();
+  }
 }
