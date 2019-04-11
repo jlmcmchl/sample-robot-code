@@ -227,6 +227,8 @@ public class SpiderLegs extends Subsystem {
   private SystemState handleClimbL2Hold(double timestamp) {
     if (stateChanged) {
       setVoltageCompensation(true);
+      frontOnGround = false;
+      rearOnGround = false;
     }
 
     if (frontOnGround) {
@@ -246,14 +248,18 @@ public class SpiderLegs extends Subsystem {
   private SystemState handleClimbHold(double timestamp) {
     if (stateChanged) {
       setVoltageCompensation(true);
+      frontOnGround = false;
+      rearOnGround = false;
     }
+
+    LOG.info("FrontOnGround: {} - {}\tRearOnGround: {} - {}", frontOnGround,  underFrontWheel.getAverageVoltage(), rearOnGround, underRearMiddleWheel.getAverageVoltage());
 
     if (frontOnGround) {
       frontLegMotor.set(ControlMode.Disabled, FRONT_HOME);
     } else {
       frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
     }
-    if (rearOnGround) {
+    if (frontOnGround && rearOnGround) {
       rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_RETURN);
     } else {
       rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L3);
@@ -319,7 +325,7 @@ public class SpiderLegs extends Subsystem {
         frontOnGround = false;
       }
 
-      if (underRearMiddleWheel.getAverageVoltage() > 1.5 || rearOnGround) {
+      if (underRearMiddleWheel.getAverageVoltage() > 2.0 || rearOnGround) {
         rearOnGround = true;
         frontOnGround = true;
       } else {
@@ -346,10 +352,10 @@ public class SpiderLegs extends Subsystem {
         .putNumber("spiderlegs.rear.position", rearLegMotorMaster.getSelectedSensorPosition());
     SmartDashboard.putBoolean("spiderlegs.front.home", frontLegHome.get());
     SmartDashboard.putBoolean("spiderlegs.rear.home", rearLegHome.get());
-
+*/
     SmartDashboard.putNumber("spiderlegs.front_detective", underFrontWheel.getAverageVoltage());
     SmartDashboard.putNumber("spiderlegs.rear_detective", underRearMiddleWheel.getAverageVoltage());
-*/
+
   }
 
   @Override
