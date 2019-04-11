@@ -57,7 +57,6 @@ public class ChezyConstants {
     // Wheel Base
     public static double DRIVE_WHEEL_DIAMETER = 7.75; // in inches
     public static double TRACK_WIDTH = 25; // in inches
-    public static double SCRUB_FACTOR = 1.25; // 2
 
     // Extremities
     // below in inches
@@ -88,7 +87,6 @@ public class ChezyConstants {
     public static double kRobotAngularInertia = 15.0;
     public static double kRobotAngularDrag = 12.0;
     public static double kDriveWheelTrackWidthInches = 25.0;
-    public static double kTrackScrubFactor = 1.1525606838366464;
     public static double kPathLookaheadTime = 0.1;
     public static double kPathMinLookaheadDistance = 3.0;
     public static double kPathKX = 5.0;

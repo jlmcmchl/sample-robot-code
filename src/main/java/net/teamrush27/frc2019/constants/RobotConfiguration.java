@@ -19,5 +19,7 @@ public interface RobotConfiguration {
 	double getDriveKv();
 	double getDriveKa();
 	double getDriveVIntercept();
+
+	double getScrubFactor();
 	
 }

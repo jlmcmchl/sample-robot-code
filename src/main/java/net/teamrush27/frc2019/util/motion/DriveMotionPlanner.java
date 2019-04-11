@@ -77,7 +77,7 @@ public class DriveMotionPlanner implements CSVWritable {
         ChezyConstants.kRobotAngularDrag,
         Units.inches_to_meters(ChezyConstants.kDriveWheelDiameterInches / 2.0),
         Units.inches_to_meters(
-            ChezyConstants.kDriveWheelTrackWidthInches / 2.0 * ChezyConstants.kTrackScrubFactor),
+            ChezyConstants.kDriveWheelTrackWidthInches / 2.0 * Robot.ROBOT_CONFIGURATION.getScrubFactor()),
         transmission, transmission
     );
   }
@@ -329,7 +329,7 @@ public class DriveMotionPlanner implements CSVWritable {
   protected Output updateNonlinearFeedback(DifferentialDrive.DriveDynamics dynamics,
       Pose2d current_state) {
     // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
-    final double kBeta = 1.5;  // >0.
+    final double kBeta = 1.7;  // >0.
     final double kZeta = 0.5;  // Damping coefficient, [0, 1].
 
     // Compute gain parameter.

@@ -61,4 +61,10 @@ public class PracticeBot implements RobotConfiguration {
 	public double getDriveVIntercept() {
 		return 1.0191132753224497;
 	}
+
+	@Override
+	public double getScrubFactor() {
+		return 1.1525606838366464;
+	}
+
 }

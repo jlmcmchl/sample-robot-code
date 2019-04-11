@@ -1,5 +1,6 @@
 package net.teamrush27.frc2019.util.math;
 
+import net.teamrush27.frc2019.Robot;
 import net.teamrush27.frc2019.constants.ChezyConstants;
 import net.teamrush27.frc2019.constants.RobotConstants;
 
@@ -17,7 +18,7 @@ public class KinematicsUtils {
      * motion)
      */
     public static Twist2d forwardKinematics(double leftWheelDelta, double rightWheelDelta) {
-        double deltaV = (rightWheelDelta - leftWheelDelta) / 2 * RobotConstants.SCRUB_FACTOR;
+        double deltaV = (rightWheelDelta - leftWheelDelta) / 2 * Robot.ROBOT_CONFIGURATION.getScrubFactor();
         double deltaRotation = deltaV * 2 / RobotConstants.TRACK_WIDTH;
         return forwardKinematics(leftWheelDelta, rightWheelDelta, deltaRotation);
     }
@@ -81,7 +82,7 @@ public class KinematicsUtils {
         if (Math.abs(velocity.deltaTheta) < MAX_ERROR) {
             return new DriveVelocity(velocity.deltaX, velocity.deltaX);
         }
-        double deltaV = ChezyConstants.kDriveWheelTrackWidthInches * velocity.deltaTheta / (2 * ChezyConstants.kTrackScrubFactor);
+        double deltaV = ChezyConstants.kDriveWheelTrackWidthInches * velocity.deltaTheta / (2 * Robot.ROBOT_CONFIGURATION.getScrubFactor());
         return new DriveVelocity(velocity.deltaX - deltaV, velocity.deltaX + deltaV);
     }
 }
