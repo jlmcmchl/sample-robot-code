@@ -10,6 +10,7 @@ import net.teamrush27.frc2019.auto.actions.impl.GripperStateAction;
 import net.teamrush27.frc2019.auto.actions.impl.LimelightTrackingAction;
 import net.teamrush27.frc2019.auto.actions.impl.ParallelAction;
 import net.teamrush27.frc2019.auto.actions.impl.SeriesAction;
+import net.teamrush27.frc2019.auto.actions.impl.WaitAction;
 import net.teamrush27.frc2019.auto.actions.impl.WaitUntilCrossXBoundaryCommand;
 import net.teamrush27.frc2019.managers.SuperstructureManager.WantedState;
 import net.teamrush27.frc2019.subsystems.impl.Gripper;
@@ -41,13 +42,13 @@ public class RightRocket extends AutoModeBase {
         new ParallelAction(
             new DriveTrajectory(altRocketRearToHP, false),
             new SeriesAction(
-                new WaitUntilCrossXBoundaryCommand(250, true),
+                new WaitAction(1.0),
                 new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
                 new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, true, true))),
         new LimelightTrackingAction(true, 450),
         new ParallelAction(
             new SeriesAction(
-                new WaitUntilCrossXBoundaryCommand(24),
+                new WaitAction(0.5),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, false, true)),
             new DriveTrajectory(hpToRocketClose, false)),
         new LimelightTrackingAction(false, 1000),
