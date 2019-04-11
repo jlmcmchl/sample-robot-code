@@ -4,7 +4,7 @@ public class CompBot implements RobotConfiguration {
 
 	@Override
 	public double getArmHomePosition() {
-		return 169.62890625;
+		return 172.265625;
 	}
 	
 	@Override
