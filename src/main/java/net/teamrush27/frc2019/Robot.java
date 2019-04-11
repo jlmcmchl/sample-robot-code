@@ -117,7 +117,7 @@ public class Robot extends TimedRobot {
     //robotStateEstimator.startLogging();
     enabledLooper.start();
 
-    drivetrain.startLogging();
+    //drivetrain.startLogging();
     autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
     autoModeExecutor.start();
 
