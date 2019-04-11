@@ -11,6 +11,7 @@ import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
 import net.teamrush27.frc2019.auto.modes.DoNothing;
 import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
+import net.teamrush27.frc2019.auto.modes.TurnInPlace;
 import net.teamrush27.frc2019.auto.modes.singlepath.AltRocketReturnPathRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.CargoFrontToHPRight;
 import net.teamrush27.frc2019.auto.modes.singlepath.CargoSideCloseToHPRight;
@@ -74,16 +75,17 @@ public class AutoModeSelector {
       new AutoModeCreator("Rocket", () -> new RightRocket()),
       new AutoModeCreator("Nothing", () -> new DoNothing()),
       new AutoModeCreator("Characterize", () -> new CharacterizeDrivetrain()),
-      new AutoModeCreator("HabToCargoSideCloseRight", () -> new HabToCargoSideCloseRight()),
-      new AutoModeCreator("CargoSideCloseToHPRight", () -> new CargoSideCloseToHPRight()),
-      new AutoModeCreator("HPToCargoSideMidRight", () -> new HPToCargoSideMidRight()),
-      new AutoModeCreator("HabToRocketRearRight", () -> new HabToRocketRearRight()),
-      new AutoModeCreator("RocketRearToMidlineRight", () -> new RocketRearToMidlineRight()),
-      new AutoModeCreator("MidlineToHPRight", () -> new MidlineToHPRight()),
-      new AutoModeCreator("HPToRocketSideCloseRight", () -> new HPToRocketCloseRight()),
-      new AutoModeCreator("AltRocketReturnPathRight", () -> new AltRocketReturnPathRight()),
-      new AutoModeCreator("HabToCargoFrontRight", () -> new HabToCargoFrontRight()),
-      new AutoModeCreator("CargoFrontToHPRight", () -> new CargoFrontToHPRight()),
+      new AutoModeCreator("Turn In Place", () -> new TurnInPlace()),
+      new AutoModeCreator("Hab -> Cargo Side Close Right", () -> new HabToCargoSideCloseRight()),
+      new AutoModeCreator("Cargo Side Close -> HP Right", () -> new CargoSideCloseToHPRight()),
+      new AutoModeCreator("HP -> Cargo Side Mid Right", () -> new HPToCargoSideMidRight()),
+      new AutoModeCreator("Hab -> Rocket Rear Right", () -> new HabToRocketRearRight()),
+      new AutoModeCreator("Rocket Rear -> Midline Right", () -> new RocketRearToMidlineRight()),
+      new AutoModeCreator("Midline -> HP Right", () -> new MidlineToHPRight()),
+      new AutoModeCreator("HP -> Rocket Side Close Right", () -> new HPToRocketCloseRight()),
+      new AutoModeCreator("Alt Rocket Return Path Right", () -> new AltRocketReturnPathRight()),
+      new AutoModeCreator("Hab -> Cargo Front Right", () -> new HabToCargoFrontRight()),
+      new AutoModeCreator("Cargo Front -> HP Right", () -> new CargoFrontToHPRight()),
   };
 
 
