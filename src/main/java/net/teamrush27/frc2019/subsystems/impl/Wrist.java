@@ -199,6 +199,10 @@ public class Wrist extends Subsystem {
 
     wristMotor.getFaults(talonFaults);
 
+    if (talonFaults.hasAnyFault()) {
+      System.out.println(talonFaults.toString());
+    }
+
     if (talonFaults.RemoteLossOfSignal) {
       LOG.info("LOST CANIFIER SIGNAL");
     }
