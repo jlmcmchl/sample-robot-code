@@ -42,7 +42,7 @@ public class RightRocket extends AutoModeBase {
         new ParallelAction(
             new DriveTrajectory(altRocketRearToHP, false),
             new SeriesAction(
-                new WaitAction(1.0),
+                new WaitAction(0.5),
                 new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
                 new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, true, true))),
         new LimelightTrackingAction(true, 450),
