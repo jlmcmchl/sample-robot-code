@@ -141,7 +141,7 @@ public class TrajectoryGenerator {
 
 
 
-  public static final Pose2d rocketFrontPose = new Pose2d(194, 32, Rotation2d.fromDegrees(-30));
+  public static final Pose2d rocketFrontPose = new Pose2d(174, 32, Rotation2d.fromDegrees(-30));
   public static final Pose2d rocketSidePose = new Pose2d(230, 90, Rotation2d.fromDegrees(-90));
   public static final Pose2d rocketFarPose = new Pose2d(280, 35, Rotation2d.fromDegrees(30));
 
