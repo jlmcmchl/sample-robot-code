@@ -165,7 +165,13 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
   @Override
   public Boolean clear() {
     return driverLeftJoystick.getLeftButtonPressed() ^ driverLeftJoystick.getRightButtonPressed()
-        ^ driverRightJoystick.getLeftButtonPressed() ^ driverRightJoystick.getRightButtonPressed();
+        ^ driverRightJoystick.getLeftButtonPressed() ^ driverRightJoystick.getRightButtonPressed()
+        ^ gamePad.getXButtonPressed() ^ gamePad.getTriangleButtonPressed()
+        ^ gamePad.getTriggerButtonPressed(Hand.kLeft) ^ gamePad.getTriggerButtonPressed(Hand.kRight)
+        ^ gamePad.getPadButtonPressed() ^ gamePad.getMiddleButtonPressed()
+        ^ gamePad.getBumperPressed(Hand.kLeft) ^ gamePad.getBumperPressed(Hand.kRight)
+        ^ gamePad.getCircleButtonPressed() ^ gamePad.getSquareButtonPressed()
+        ^ gamePad.getShareButtonPressed() ^ gamePad.getOptionsButtonPressed();
   }
 
   @Override
