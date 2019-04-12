@@ -3,6 +3,7 @@ package net.teamrush27.frc2019.subsystems.impl;
 import com.ctre.phoenix.CANifier;
 import com.ctre.phoenix.CANifier.PWMChannel;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
@@ -194,11 +195,34 @@ public class Wrist extends Subsystem {
 
   @Override
   public void readPeriodicInputs() {
+    Faults talonFaults = new Faults();
+
+    wristMotor.getFaults(talonFaults);
+
+    if (talonFaults.RemoteLossOfSignal) {
+      LOG.info("LOST CANIFIER SIGNAL");
+    }
+
+    readInputs();
+
+    /*
+    if (talonFaults.RemoteLossOfSignal) {
+      zeroed = false;
+      zeroSensors();
+    } else {
+      readInputs();
+    }
+    */
+  }
+
+  private void readInputs() {
     double[] array = new double[2];
+
     wristSensor.getPWMInput(PWMChannel.PWMChannel0, array);
     wristState.wristPWMValue = array[0];
     wristState.wristPWMDegrees =
-        (-wristState.wristPWMValue + Robot.ROBOT_CONFIGURATION.getWristHomePosition()) * DEGREES_PER_TICK;
+        (-wristState.wristPWMValue + Robot.ROBOT_CONFIGURATION.getWristHomePosition())
+            * DEGREES_PER_TICK;
 
     wristState.wristEncoderTicks = wristMotor.getSelectedSensorPosition(0);
     wristState.wristEncoderDegrees = wristState.wristEncoderTicks * DEGREES_PER_TICK;
@@ -255,7 +279,7 @@ public class Wrist extends Subsystem {
 
       wristSensor.setQuadraturePosition(blah, 0);
 
-      readPeriodicInputs();
+      readInputs();
 
       LOG.info("INITIAL POSITION {} {} {}", getPWMAngle(), getEncoderAngle(), blah);
       zeroed = true;
@@ -309,6 +333,7 @@ public class Wrist extends Subsystem {
   }
 
   private class WristState {
+
     int wristEncoderTicks;
     double wristEncoderDegrees;
     double wristPWMValue;
