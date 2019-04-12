@@ -2,29 +2,30 @@ package net.teamrush27.frc2019.constants;
 
 public class CompBot implements RobotConfiguration {
 
+  //1935
 	@Override
 	public double getArmHomePosition() {
-		return 172.265625;
+		return 170.068359375;
 	}
 	
 	@Override
 	public Integer getJawIntakePosition() {
-		return -455;
+		return -438;
 	}
 	
 	@Override
 	public Integer getJawExhaustPosition() {
-		return -415;
+		return -397;
 	}
 	
 	@Override
 	public Integer getJawRetractPosition() {
-		return -750;
+		return -718;
 	}
 	
 	@Override
 	public Integer getWristHomePosition() {
-		return 1900;
+		return 1893;
 	}
 	
 	@Override

@@ -49,7 +49,7 @@ public class SuperstructureManager extends Subsystem {
     // REAR POSITION
     // HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(10d, 105d), 52d, -80d),
     // OG POSITION
-    HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(0d, 90d), 52d, 0d),
+    HUMAN_LOAD(new ArmInput(12.6d, 28.75d), new ArmInput(0d, 90d), 52d, -3d),
     CARGO_SHIP(new ArmInput(12.5d, 27d), 63d),
     ROCKET_LEVEL_1(new ArmInput(7.3d, 68.1d), new ArmInput(0d, 90d), 17d, 0d),
     ROCKET_LEVEL_2(new ArmInput(18d, 6.7d), new ArmInput(14.9d, 13.4d), 60d, 68d),
