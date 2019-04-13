@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import net.teamrush27.frc2019.base.RobotMap;
 import net.teamrush27.frc2019.constants.RobotConstants;
@@ -30,6 +31,7 @@ public class SpiderLegs extends Subsystem {
   private static final int FRONT_PRE = 3500;
 
   private static final int FRONT_HOLD = 11750;
+  private static final int FRONT_L2_HOLD = 12000;
 
   private static final int REAR_HOLD_L3 = 12750;
   private static final int REAR_HOLD_L2 = 9500;
@@ -200,13 +202,13 @@ public class SpiderLegs extends Subsystem {
   }
 
   private SystemState handleClimbL2(double timestamp) {
-    frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
+    frontLegMotor.set(ControlMode.MotionMagic, FRONT_L2_HOLD);
 
     if (frontLegMotor.getSelectedSensorPosition() > 6000) {
       rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L2);
     }
 
-    if (Math.abs(frontLegMotor.getSelectedSensorPosition() - FRONT_HOLD) < EPSILON) {
+    if (Math.abs(frontLegMotor.getSelectedSensorPosition() - FRONT_L2_HOLD) < EPSILON) {
       return SystemState.CLIMBING_L2_HOLD;
     }
 
@@ -224,19 +226,21 @@ public class SpiderLegs extends Subsystem {
     return defaultStateTransfer(timestamp);
   }
 
+  double firstHeld = 0;
   private SystemState handleClimbL2Hold(double timestamp) {
     if (stateChanged) {
       setVoltageCompensation(true);
       frontOnGround = false;
       rearOnGround = false;
+      firstHeld = Timer.getFPGATimestamp();
     }
 
-    if (frontOnGround) {
+    if (frontOnGround && Timer.getFPGATimestamp() - firstHeld > 1) {
       frontLegMotor.set(ControlMode.Disabled, FRONT_HOME);
     } else {
-      frontLegMotor.set(ControlMode.MotionMagic, FRONT_HOLD);
+      frontLegMotor.set(ControlMode.MotionMagic, FRONT_L2_HOLD);
     }
-    if (rearOnGround) {
+    if (rearOnGround && Timer.getFPGATimestamp() - firstHeld > 1) {
       rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_RETURN);
     } else {
       rearLegMotorMaster.set(ControlMode.MotionMagic, REAR_HOLD_L2);
