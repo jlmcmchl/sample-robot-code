@@ -4,7 +4,7 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public double getArmHomePosition() {
-		return 213.57;
+		return 212.6953125;
 	}
 	
 	@Override
@@ -24,7 +24,7 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public Integer getWristHomePosition() {
-		return 1550;
+		return 2170;
 	}
 	
 	@Override
