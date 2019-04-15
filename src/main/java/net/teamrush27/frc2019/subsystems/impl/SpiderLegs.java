@@ -31,10 +31,10 @@ public class SpiderLegs extends Subsystem {
   private static final int FRONT_PRE = 3500;
 
   private static final int FRONT_HOLD = 11750;
-  private static final int FRONT_L2_HOLD = 12000;
+  private static final int FRONT_L2_HOLD = 12300;
 
   private static final int REAR_HOLD_L3 = 12750;
-  private static final int REAR_HOLD_L2 = 9500;
+  private static final int REAR_HOLD_L2 = 10000;
 
   private static final int REAR_RETURN = 1000;
 
@@ -349,12 +349,12 @@ public class SpiderLegs extends Subsystem {
     //collection.setSpiderlegsRearPosition(rearLegMotorMaster.getSelectedSensorPosition());
     //collection.setSpiderlegsFrontHome(frontLegHome.get());
     //collection.setSpiderlegsRearHome(rearLegHome.get());
-/*
+
     SmartDashboard
         .putNumber("spiderlegs.front.position", frontLegMotor.getSelectedSensorPosition());
     SmartDashboard
         .putNumber("spiderlegs.rear.position", rearLegMotorMaster.getSelectedSensorPosition());
-    SmartDashboard.putBoolean("spiderlegs.front.home", frontLegHome.get());
+   /* SmartDashboard.putBoolean("spiderlegs.front.home", frontLegHome.get());
     SmartDashboard.putBoolean("spiderlegs.rear.home", rearLegHome.get());
 */
     SmartDashboard.putNumber("spiderlegs.front_detective", underFrontWheel.getAverageVoltage());
@@ -396,7 +396,7 @@ public class SpiderLegs extends Subsystem {
 
   public boolean shouldHoldPosition() {
     return (SystemState.CLIMBING_HOLD.equals(systemState) || SystemState.CLIMBING_L2_HOLD
-        .equals(systemState)) && rearOnGround;
+        .equals(systemState)) && rearOnGround && Timer.getFPGATimestamp() - firstHeld > 1;
   }
 
   @Override
