@@ -13,6 +13,6 @@ public class HPToRocketCloseRight extends AutoModeBase {
     Trajectory hpToRocketClose = TrajectoryGenerator.getInstance()
         .getTrajectorySet().hpToRocketFront.getRight();
 
-    runAction(new DriveTrajectory(hpToRocketClose, true));
+    runAction(new DriveTrajectory(hpToRocketClose, true, true));
   }
 }

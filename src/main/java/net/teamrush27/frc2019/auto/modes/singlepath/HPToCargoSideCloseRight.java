@@ -6,13 +6,13 @@ import net.teamrush27.frc2019.auto.actions.impl.DriveTrajectory;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
-public class HabToCargoSideCloseRight extends AutoModeBase {
+public class HPToCargoSideCloseRight extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
-    Trajectory habToCargoSideClose = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().habToCargoSideClose.getRight();
+    Trajectory hpToCargoSideClose = TrajectoryGenerator.getInstance()
+        .getTrajectorySet().hpToCargoSideClose.getRight();
 
-    runAction(new DriveTrajectory(habToCargoSideClose, true, true));
+    runAction(new DriveTrajectory(hpToCargoSideClose, true, true));
   }
 }

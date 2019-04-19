@@ -13,6 +13,6 @@ public class HPToCargoSideMidRight extends AutoModeBase {
     Trajectory hpToCargoSideMid = TrajectoryGenerator.getInstance()
         .getTrajectorySet().hpToCargoSideMid.getRight();
 
-    runAction(new DriveTrajectory(hpToCargoSideMid, true));
+    runAction(new DriveTrajectory(hpToCargoSideMid, true, true));
   }
 }

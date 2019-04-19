@@ -13,6 +13,6 @@ public class MidlineToHPRight extends AutoModeBase {
     Trajectory midlineToHP = TrajectoryGenerator.getInstance().getTrajectorySet().midlineToHP
         .getRight();
 
-    runAction(new DriveTrajectory(midlineToHP, true));
+    runAction(new DriveTrajectory(midlineToHP, true, true));
   }
 }

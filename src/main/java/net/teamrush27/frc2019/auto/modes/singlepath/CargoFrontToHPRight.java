@@ -13,6 +13,6 @@ public class CargoFrontToHPRight extends AutoModeBase {
     Trajectory cargoFrontToHP = TrajectoryGenerator.getInstance()
         .getTrajectorySet().cargoFrontToHP.getRight();
 
-    runAction(new DriveTrajectory(cargoFrontToHP, true));
+    runAction(new DriveTrajectory(cargoFrontToHP, true, true));
   }
 }

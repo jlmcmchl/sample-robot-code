@@ -13,6 +13,6 @@ public class HabToCargoFrontRight extends AutoModeBase {
     Trajectory habToCargoFront = TrajectoryGenerator.getInstance()
         .getTrajectorySet().habToCargoFront.getRight();
 
-    runAction(new DriveTrajectory(habToCargoFront, true));
+    runAction(new DriveTrajectory(habToCargoFront, true, true));
   }
 }

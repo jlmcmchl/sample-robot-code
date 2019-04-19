@@ -13,6 +13,6 @@ public class RocketRearToMidlineRight extends AutoModeBase {
     Trajectory farRocketToMidline = TrajectoryGenerator.getInstance()
         .getTrajectorySet().rocketRearToMidline.getRight();
 
-    runAction(new DriveTrajectory(farRocketToMidline, true));
+    runAction(new DriveTrajectory(farRocketToMidline, true, true));
   }
 }

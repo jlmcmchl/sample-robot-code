@@ -13,6 +13,6 @@ public class CargoSideCloseToHPRight extends AutoModeBase {
     Trajectory cargoSideCloseToHP = TrajectoryGenerator.getInstance()
         .getTrajectorySet().cargoSideCloseToHP.getRight();
 
-    runAction(new DriveTrajectory(cargoSideCloseToHP, true));
+    runAction(new DriveTrajectory(cargoSideCloseToHP, true, true));
   }
 }
