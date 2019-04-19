@@ -37,7 +37,7 @@ public class RightRocket extends AutoModeBase {
                 new WaitUntilCrossXBoundaryCommand(260),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, false, true)),
             new DriveTrajectory(habToFarRocket, true, true)),
-        new LimelightTrackingAction(false, 1000),
+        new LimelightTrackingAction(false, 1700),
         new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .1),
         new ParallelAction(
             new DriveTrajectory(altRocketRearToHP, false),
