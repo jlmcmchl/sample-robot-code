@@ -129,7 +129,7 @@ public class TrajectoryGenerator {
   public static final Pose2d cargoSideCloseHPMidPose = new Pose2d(218, 70, Rotation2d.fromDegrees(-159));
 
 
-  public static final Pose2d cargoSideClosePose = new Pose2d(240, 97, Rotation2d.fromDegrees(90));
+  public static final Pose2d cargoSideClosePose = new Pose2d(235, 85, Rotation2d.fromDegrees(90));
   public static final Pose2d cargoSideCloseReversePose = new Pose2d(240, 97, Rotation2d.fromDegrees(-90));
 
   public static final Pose2d cargoSideCloseOffsetReversePose = new Pose2d(251, 74, Rotation2d.fromDegrees(-90));
@@ -358,10 +358,14 @@ public class TrajectoryGenerator {
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
 
+    private final Pose2d cargoShipCloseFirstMidpoint = new Pose2d(66, 39, Rotation2d.fromDegrees(22));
+    private final Pose2d cargoShipCloseSecondMidpoint = new Pose2d(165,55, Rotation2d.identity());
+
     private Trajectory<TimedState<Pose2dWithCurvature>> getHPToCargoSideClose() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(humanPlayerStationPose);
-      waypoints.add(humanPlayerCargoSideMidPose);
+      waypoints.add(cargoShipCloseFirstMidpoint);
+      waypoints.add(cargoShipCloseSecondMidpoint);
       waypoints.add(cargoSideClosePose);
 
       return generateTrajectory(false, waypoints,
@@ -480,11 +484,12 @@ public class TrajectoryGenerator {
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
 
-    private final Pose2d cargoFrontEndPose = new Pose2d(160,145, Rotation2d.identity());
+    private final Pose2d originCenterHabPose = new Pose2d(67, 145, Rotation2d.identity());
+    private final Pose2d cargoFrontEndPose = new Pose2d(150,145, Rotation2d.identity());
 
     private Trajectory<TimedState<Pose2dWithCurvature>> getHabToCargoFront() {
       List<Pose2d> waypoints = new ArrayList<>();
-      waypoints.add(originHabPose);
+      waypoints.add(originCenterHabPose);
       //waypoints.add(offHABPose);
       waypoints.add(cargoFrontEndPose);
 
@@ -493,12 +498,16 @@ public class TrajectoryGenerator {
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
 
-    private final Pose2d cargoFrontStartPose = new Pose2d(191, 151, Rotation2d.identity());
+    private final Pose2d cargoFrontStartPose = new Pose2d(190, 145, Rotation2d.identity());
+    private final Pose2d cargoFrontHPMidPose = new Pose2d(140, 90, Rotation2d.fromDegrees(70));
+    private final Pose2d thisIsTheWorstPoint = new Pose2d(75, 50, Rotation2d.identity());
+
 
     private Trajectory<TimedState<Pose2dWithCurvature>> getCargoFrontToHP() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(cargoFrontStartPose);
-      waypoints.add(humanPlayerStationPoseOffset);
+      waypoints.add(cargoFrontHPMidPose);
+      waypoints.add(thisIsTheWorstPoint);
 
       return generateTrajectory(true, waypoints,
           Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)
