@@ -200,10 +200,11 @@ public class Robot extends TimedRobot {
       LOG.info("STOPPED AUTONOMOUS: {}", Timer.getFPGATimestamp() - time);
 
     } else if (!autoModeExecutor.isActive() && operatorInterface.getWantStartAuton()) {
-      drivetrain.startLogging();
+      //drivetrain.startLogging();
       autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
       autoModeExecutor.start();
     } else if (!autoModeExecutor.isActive()) {
+      drivetrain.setBrakeMode(false);
       driverControl();
     }
   }

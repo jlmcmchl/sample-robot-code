@@ -845,9 +845,9 @@ public class Drivetrain extends Subsystem {
           superman.overBack() ? -periodicIO.turn_demand : periodicIO.turn_demand;
     } else {
 
-      periodicIO.turn_demand =
-          (1 - limelights.getWidth(!superman.overBack()) / 320)
-              * periodicIO.left_demand;
+      periodicIO.turn_demand = periodicIO.left_demand;
+          //(1 - limelights.getWidth(!superman.overBack()) / 320)
+          //   * periodicIO.left_demand;
     }
 
     if (!(superman.overBack() && periodicIO.turn_demand <= 0)
@@ -867,16 +867,11 @@ public class Drivetrain extends Subsystem {
 
     // INVERTS REAR ANGLE OFFSET TO ACCOUNT FOR THROTTLE DIRECTION
 
-    double angle_offset = limelights.getOffset(!superman.overBack());
+    double angle_offset = limelights.getOffset(!superman.overBack()) / 10;
+    //* limelights.getWidth(!superman.overBack()) / 320;
 
-    // more aggressive further away at lower angles
-    if (angle_offset > 0) {
-      periodicIO.right_turn = 1 - angle_offset / 15;
-      periodicIO.left_turn = 1 + angle_offset / 15;
-    } else {
-      periodicIO.left_turn = 1 + angle_offset / 15;
-      periodicIO.right_turn = 1 - angle_offset / 15;
-    }
+    periodicIO.right_turn = 1 - angle_offset;
+    periodicIO.left_turn = 1 + angle_offset;
   }
 
   public void defaultState() {
