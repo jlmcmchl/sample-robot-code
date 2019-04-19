@@ -26,7 +26,6 @@ import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.managers.SuperstructureManager;
 import net.teamrush27.frc2019.subsystems.Subsystem;
-import net.teamrush27.frc2019.subsystems.impl.Arm.SystemState;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
@@ -832,36 +831,51 @@ public class Drivetrain extends Subsystem {
     periodicIO.left_turn = 1;
     periodicIO.right_turn = 1;
 
-//    LOG.info(
-//        String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
+    /*
+    System.out.println(
+        String.format("superman: %s\tdemand: %s", superman.overBack(), periodicIO.left_demand));
+     */
 
-    // .3 for PRACTICE, .2 for COMP
-    if (superman.overBack() && periodicIO.left_demand <= 0.01) {
-      periodicIO.left_demand = Math.min(periodicIO.left_demand, -Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
-    } else if (!superman.overBack() && periodicIO.left_demand >= -0.01) {
-      periodicIO.left_demand = Math.max(periodicIO.left_demand, Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
+    if (periodicIO.left_demand == 0) {
+      periodicIO.turn_demand =
+          (1 - limelights.getWidth(!superman.overBack()) / 320)
+              * Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent();
+
+      periodicIO.turn_demand =
+          superman.overBack() ? -periodicIO.turn_demand : periodicIO.turn_demand;
     } else {
+
+      periodicIO.turn_demand =
+          (1 - limelights.getWidth(!superman.overBack()) / 320)
+              * periodicIO.left_demand;
+    }
+
+    if (!(superman.overBack() && periodicIO.turn_demand <= 0)
+        && !(!superman.overBack() && periodicIO.turn_demand >= 0)) {
       return;
     }
+
+    // .3 for PRACTICE, .2 for COMP
+    /*
+    if (superman.overBack() && periodicIO.left_demand <= 0) {
+      periodicIO.turn_demand = Math.min(periodicIO.left_demand, -Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
+    } else if (!superman.overBack() && periodicIO.left_demand >= 0) {
+      periodicIO.turn_demand = Math.max(periodicIO.left_demand, Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent());
+    } else {
+      return;
+    }*/
 
     // INVERTS REAR ANGLE OFFSET TO ACCOUNT FOR THROTTLE DIRECTION
 
     double angle_offset = limelights.getOffset(!superman.overBack());
-    double target_area = limelights.getTargetArea(!superman.overBack());
 
     // more aggressive further away at lower angles
-    if (target_area < 3d && Math.abs(angle_offset) < 4) {
-      if (angle_offset > 0) {
-        periodicIO.right_turn = 1 - angle_offset / 5;
-      } else {
-        periodicIO.left_turn = 1 + angle_offset / 5;
-      }
+    if (angle_offset > 0) {
+      periodicIO.right_turn = 1 - angle_offset / 15;
+      periodicIO.left_turn = 1 + angle_offset / 15;
     } else {
-      if (angle_offset > 0) {
-        periodicIO.right_turn = 1 - angle_offset / 6;
-      } else {
-        periodicIO.left_turn = 1 + angle_offset / 6;
-      }
+      periodicIO.left_turn = 1 + angle_offset / 15;
+      periodicIO.right_turn = 1 - angle_offset / 15;
     }
   }
 
@@ -948,10 +962,10 @@ public class Drivetrain extends Subsystem {
     } else {
       periodicIO.right_distance += deltaRightTicks * RobotConstants.DRIVE_WHEEL_DIAMETER;
     }
-    
+
     periodicIO.frontDistance = distanceSensorFront.getValue();
     periodicIO.rearDistance = distanceSensorRear.getValue();
-  
+
     if (CSVWriter != null) {
       CSVWriter.add(periodicIO);
       periodicIO = new PeriodicIO(periodicIO);
@@ -1004,13 +1018,30 @@ public class Drivetrain extends Subsystem {
           ControlMode.Velocity,
           periodicIO.right_demand);
     } else if (driveMode == DriveMode.LIMELIGHT_STEERING) {
+      double left_signal = periodicIO.turn_demand * periodicIO.left_turn;
+      double right_signal = periodicIO.turn_demand * periodicIO.right_turn;
+
+      if (Math.abs(left_signal) > 1) {
+        left_signal = Math.signum(left_signal);
+        right_signal = Math.signum(right_signal) * Math.abs(right_signal / left_signal);
+      }
+
+      if (Math.abs(right_signal) > 1) {
+        right_signal = Math.signum(right_signal);
+        left_signal = Math.signum(left_signal) * Math.abs(left_signal / right_signal);
+      }
+
+      System.out.println(String
+          .format("l: %s * %s\tr: %s * %s", periodicIO.left_demand, periodicIO.left_turn,
+              periodicIO.left_demand, periodicIO.right_turn));
+
       leftMaster.set(
           ControlMode.PercentOutput,
-          periodicIO.left_demand * periodicIO.left_turn);
+          left_signal);
 
       rightMaster.set(
           ControlMode.PercentOutput,
-          periodicIO.left_demand * periodicIO.right_turn);
+          right_signal);
     } else {
       LOG.warn("Hit a bad control state {} {}",
           driveMode.getRequestedControlMode(), driveMode);
@@ -1021,15 +1052,15 @@ public class Drivetrain extends Subsystem {
   public String id() {
     return TAG;
   }
-  
+
   public int getFrontDistance() {
     return periodicIO.frontDistance;
   }
-  
+
   public int getRearDistance() {
     return periodicIO.rearDistance;
   }
-  
+
   public static class PeriodicIO {
 
     public double timestamp;
@@ -1052,6 +1083,7 @@ public class Drivetrain extends Subsystem {
     public Pose2d error = Pose2d.identity();
 
     // OUTPUTS
+    public double turn_demand;
     public double left_turn;
     public double right_turn;
     public double left_demand;
@@ -1063,7 +1095,7 @@ public class Drivetrain extends Subsystem {
     public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<>(
         Pose2dWithCurvature.identity());
     public Pose2d field_to_vehicle = Pose2d.identity();
-    
+
 
     public PeriodicIO() {
 
@@ -1087,6 +1119,7 @@ public class Drivetrain extends Subsystem {
       this.frontDistance = other.frontDistance;
       this.rearDistance = other.rearDistance;
 
+      this.turn_demand = other.turn_demand;
       this.left_turn = other.left_turn;
       this.right_turn = other.right_turn;
       this.left_demand = other.left_demand;

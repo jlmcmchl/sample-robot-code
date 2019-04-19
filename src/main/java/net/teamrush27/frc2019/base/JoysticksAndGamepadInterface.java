@@ -32,7 +32,13 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 
   @Override
   public DriveCommand getTankCommand() {
-    return new DriveCommand(driverLeftJoystick.getY(), driverRightJoystick.getY());
+    double left = driverLeftJoystick.getY();
+    double right = driverRightJoystick.getY();
+
+    left = Math.abs(left) < 0.01 ? 0 : left;
+    right = Math.abs(right) < 0.01 ? 0 : right;
+
+    return new DriveCommand(left, right);
   }
 
   private boolean shiftLatch = false;

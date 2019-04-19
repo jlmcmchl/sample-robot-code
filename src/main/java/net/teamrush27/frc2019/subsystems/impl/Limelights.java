@@ -163,6 +163,10 @@ public class Limelights extends Subsystem {
     return front ? periodicIO.front_ta : periodicIO.rear_ta;
   }
 
+  public Double getWidth(boolean front) {
+    return front ? periodicIO.front_thor : periodicIO.rear_thor;
+  }
+
   public SystemState getSystemState() {
     return systemState;
   }
@@ -173,26 +177,34 @@ public class Limelights extends Subsystem {
       case FRONT_TRACKING:
         periodicIO.front_tx = front.getTX();
         periodicIO.front_ta = front.getTA();
+        periodicIO.front_thor = front.getTHOR();
         periodicIO.rear_tx = 0d;
         periodicIO.rear_ta = 0d;
+        periodicIO.rear_thor = 0d;
         break;
       case REAR_TRACKING:
         periodicIO.front_tx = 0d;
         periodicIO.front_ta = 0d;
+        periodicIO.front_thor = 0d;
         periodicIO.rear_tx = rear.getTX();
         periodicIO.rear_ta = rear.getTA();
+        periodicIO.rear_thor = rear.getTHOR();
         break;
       case BOTH_TRACKING:
         periodicIO.front_tx = front.getTX();
         periodicIO.front_ta = front.getTA();
+        periodicIO.front_thor = front.getTHOR();
         periodicIO.rear_tx = rear.getTX();
         periodicIO.rear_ta = rear.getTA();
+        periodicIO.rear_thor = rear.getTHOR();
         break;
       default:
         periodicIO.front_tx = 0d;
         periodicIO.front_ta = 0d;
+        periodicIO.front_thor = 0d;
         periodicIO.rear_tx = 0d;
         periodicIO.rear_ta = 0d;
+        periodicIO.rear_thor = 0d;
     }
   }
 
@@ -241,5 +253,8 @@ public class Limelights extends Subsystem {
 
     public Double front_ta;
     public Double rear_ta;
+
+    public Double front_thor;
+    public Double rear_thor;
   }
 }

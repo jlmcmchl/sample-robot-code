@@ -13,6 +13,7 @@ public class Limelight {
 
   private NetworkTableEntry txEntry = null;
   private NetworkTableEntry taEntry = null;
+  private NetworkTableEntry thorEntry = null;
 
   public enum CamMode {
     DRIVE_MODE(1),
@@ -84,5 +85,13 @@ public class Limelight {
     }
 
     return taEntry.getDouble(0d);
+  }
+
+  public double getTHOR() {
+    if (thorEntry == null) {
+      thorEntry = networkTableInstance.getTable(table).getEntry("thor");
+    }
+
+    return thorEntry.getDouble(0d);
   }
 }
