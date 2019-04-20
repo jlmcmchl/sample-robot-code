@@ -111,7 +111,7 @@ public class TrajectoryGenerator {
   public static final Pose2d originHabPose = new Pose2d(67, 114, Rotation2d.identity());
 
   public static final Pose2d offHABPose = new Pose2d(110, 114, Rotation2d.identity());
-  public static final Pose2d rocketFarPrePose = new Pose2d(250, 59, Rotation2d.fromDegrees(-55));
+  public static final Pose2d rocketFarPrePose = new Pose2d(256, 49, Rotation2d.fromDegrees(-42));
   public static final Pose2d cargoSideClosePrePose = new Pose2d(182, 81, Rotation2d.fromDegrees(-31));
   public static final Pose2d cargoSideCloseReversePrePose = new Pose2d(205, 107, Rotation2d.fromDegrees(-6));
 
@@ -146,9 +146,9 @@ public class TrajectoryGenerator {
 
 
 
-  public static final Pose2d rocketFrontPose = new Pose2d(155, 27, Rotation2d.fromDegrees(-30));
+  public static final Pose2d rocketFrontPose = new Pose2d(155, 22, Rotation2d.fromDegrees(-30));
   public static final Pose2d rocketSidePose = new Pose2d(230, 90, Rotation2d.fromDegrees(-90));
-  public static final Pose2d rocketFarPose = new Pose2d(284, 38, Rotation2d.fromDegrees(29));
+  public static final Pose2d rocketFarPose = new Pose2d(284, 40, Rotation2d.fromDegrees(29));
 
   public static final Pose2d rocketFarStartPose = new Pose2d(257, 27, Rotation2d.fromDegrees(28.75));
   public static final Pose2d midlinePose = new Pose2d(280, 70, Rotation2d.identity());
@@ -477,13 +477,13 @@ public class TrajectoryGenerator {
           ), kMaxVelocity, kMaxAccel, kMaxVoltage);
     }
 
-    private final Pose2d someDumbPose = new Pose2d(275, 47, Rotation2d.fromDegrees(90));
+    private final Pose2d someDumbPose = new Pose2d(247, 70, Rotation2d.fromDegrees(-176));
 
     private Trajectory<TimedState<Pose2dWithCurvature>> getAltRocketRearToHP() {
       List<Pose2d> waypoints = new ArrayList<>();
       waypoints.add(rocketFarStartPose);
       waypoints.add(someDumbPose);
-      waypoints.add(rocketFarHPMidPose);
+      //waypoints.add(rocketFarHPMidPose);
       waypoints.add(humanPlayerStationPoseOffsetReverse);
 
       return generateTrajectory(false, waypoints,
