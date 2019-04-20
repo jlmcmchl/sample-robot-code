@@ -49,17 +49,17 @@ public class PracticeBot implements RobotConfiguration {
 	
 	@Override
 	public double getDriveKv() {
-		return 0.06768822612476563;
+		return 0.22279217164090692;
 	}
 	
 	@Override
 	public double getDriveKa() {
-		return 0.0183557814431722;
+		return 0.07547720908034031;
 	}
 	
 	@Override
 	public double getDriveVIntercept() {
-		return 1.937761109315021;
+		return 0.6987745333333212;
 	}
 
 	@Override
