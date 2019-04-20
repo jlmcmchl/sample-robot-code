@@ -111,8 +111,8 @@ public class TrajectoryGenerator {
   public static final Pose2d originHabPose = new Pose2d(67, 114, Rotation2d.identity());
 
   public static final Pose2d offHABPose = new Pose2d(110, 114, Rotation2d.identity());
-  public static final Pose2d rocketFarPrePose = new Pose2d(256, 49, Rotation2d.fromDegrees(-42));
-  public static final Pose2d cargoSideClosePrePose = new Pose2d(182, 81, Rotation2d.fromDegrees(-31));
+  public static final Pose2d rocketFarPrePose = new Pose2d(231, 68, Rotation2d.fromDegrees(-50));
+  public static final Pose2d cargoSideClosePrePose = new Pose2d(150, 86, Rotation2d.fromDegrees(-27));
   public static final Pose2d cargoSideCloseReversePrePose = new Pose2d(205, 107, Rotation2d.fromDegrees(-6));
 
 
@@ -135,10 +135,10 @@ public class TrajectoryGenerator {
   public static final Pose2d cargoSideCloseReversePose = new Pose2d(250, 97, Rotation2d.fromDegrees(-90));
 
 
-  public static final Pose2d cargoSideCloseFinishPose = new Pose2d(252, 100, Rotation2d.fromDegrees(100));
+  public static final Pose2d cargoSideCloseFinishPose = new Pose2d(242, 95, Rotation2d.fromDegrees(95));
 
   public static final Pose2d cargoSideCloseOffsetReversePose = new Pose2d(251, 74, Rotation2d.fromDegrees(-90));
-  public static final Pose2d cargoSideMidPose = new Pose2d(260, 97, Rotation2d.fromDegrees(90));
+  public static final Pose2d cargoSideMidPose = new Pose2d(255, 97, Rotation2d.fromDegrees(90));
   public static final Pose2d cargoSideFarPose = new Pose2d(280, 97, Rotation2d.fromDegrees(90));
 
   public static final Pose2d cargoSideMidReversePose = new Pose2d(260, 97, Rotation2d.fromDegrees(-90));
@@ -146,11 +146,11 @@ public class TrajectoryGenerator {
 
 
 
-  public static final Pose2d rocketFrontPose = new Pose2d(155, 22, Rotation2d.fromDegrees(-30));
+  public static final Pose2d rocketFrontPose = new Pose2d(155, 30, Rotation2d.fromDegrees(-30));
   public static final Pose2d rocketSidePose = new Pose2d(230, 90, Rotation2d.fromDegrees(-90));
-  public static final Pose2d rocketFarPose = new Pose2d(284, 40, Rotation2d.fromDegrees(29));
+  public static final Pose2d rocketFarPose = new Pose2d(288, 53, Rotation2d.fromDegrees(29));
 
-  public static final Pose2d rocketFarStartPose = new Pose2d(257, 27, Rotation2d.fromDegrees(28.75));
+  public static final Pose2d rocketFarStartPose = new Pose2d(257, 27, Rotation2d.fromDegrees(29));
   public static final Pose2d midlinePose = new Pose2d(280, 70, Rotation2d.identity());
 
   public static final Pose2d rocketFarHPMidPose = new Pose2d(191,55, Rotation2d.fromDegrees(-160));
@@ -444,7 +444,7 @@ public class TrajectoryGenerator {
           ), kMaxVelocity, 200, kMaxVoltage);
     }
 
-    private final Pose2d dumbOffset = new Pose2d(0, 12, Rotation2d.identity());
+    private final Pose2d dumbOffset = new Pose2d(0, -10, Rotation2d.identity());
 
     private Trajectory<TimedState<Pose2dWithCurvature>> getCargoSideCloseToHP() {
       List<Pose2d> waypoints = new ArrayList<>();
