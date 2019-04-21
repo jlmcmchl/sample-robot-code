@@ -165,7 +165,7 @@ public class Wrist extends Subsystem {
     }
 
     if (WantedState.CLOSED_LOOP.equals(wantedState)
-        && Math.abs(getEncoderAngle() - wristState.demand) < 3) {
+        && Math.abs(getEncoderAngle() - wristState.demand) < 2) {
       return SystemState.HOLD;
     } else {
       return defaultStateTransfer(timestamp);

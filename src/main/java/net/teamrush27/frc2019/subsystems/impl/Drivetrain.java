@@ -838,7 +838,7 @@ public class Drivetrain extends Subsystem {
 
     if (periodicIO.left_demand == 0) {
       periodicIO.turn_demand =
-          (1 - limelights.getWidth(!superman.overBack()) / 320)
+          (1 - Math.min(limelights.getWidth(!superman.overBack()) * 5, 260) / 320)
               * Robot.ROBOT_CONFIGURATION.getLimelightDriveForwardPercent();
 
       periodicIO.turn_demand =
