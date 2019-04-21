@@ -47,8 +47,8 @@ public class RightCloseCargo extends AutoModeBase {
             new SeriesAction(
                 new WaitAction(0.5),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, true, true)),
-            new DriveTrajectory(hpToCargoSideClose, false, false)),
-        new LimelightTrackingAction(true, 400));
+            new DriveTrajectory(hpToCargoSideClose, false, false)));//,
+        //new LimelightTrackingAction(true, 400));
 
     runAction(new SeriesAction(commands));
 

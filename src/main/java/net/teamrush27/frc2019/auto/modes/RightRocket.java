@@ -45,14 +45,14 @@ public class RightRocket extends AutoModeBase {
                 new WaitAction(0.5),
                 new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
                 new AutoSuperstructurePosition(WantedState.HUMAN_LOAD, true, true))),
-        new LimelightTrackingAction(true, 450),
+        new LimelightTrackingAction(true, 400),
         new ParallelAction(
             new SeriesAction(
                 new WaitAction(0.5),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_2, false, true)),
             new DriveTrajectory(hpToRocketClose, false)),
         new LimelightTrackingAction(false, 1000),
-        new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .1),
+        new GripperStateAction(Gripper.WantedState.EXHAUST_HATCH, .4),
         new DriveTrajectory(scootBack, false),
         new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
         new AutoSuperstructurePosition(WantedState.STOW, false, false)
