@@ -301,6 +301,7 @@ public class Robot extends TimedRobot {
     } else {
       if (operatorInterface.wantsArmReset()) {
         drivetrain.fixArm();
+        wrist.zeroSensors();
       } else if (operatorInterface.wantsStow()) {
         superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(),
             gripper.hasHatch());
