@@ -9,6 +9,9 @@ import java.util.function.Supplier;
 import net.teamrush27.frc2019.auto.AutoModeBase;
 import net.teamrush27.frc2019.auto.modes.CharacterizeDrivetrain;
 import net.teamrush27.frc2019.auto.modes.DoNothing;
+import net.teamrush27.frc2019.auto.modes.LeftCargo;
+import net.teamrush27.frc2019.auto.modes.LeftCloseCargo;
+import net.teamrush27.frc2019.auto.modes.LeftRocket;
 import net.teamrush27.frc2019.auto.modes.RightCargo;
 import net.teamrush27.frc2019.auto.modes.RightCloseCargo;
 import net.teamrush27.frc2019.auto.modes.RightRocket;
@@ -84,12 +87,14 @@ public class AutoModeSelector {
       new AutoModeCreator("Cargo Side Close -> HP Right", () -> new CargoSideCloseToHPRight()),
       new AutoModeCreator("HP -> Cargo Side Mid Right", () -> new HPToCargoSideMidRight()),
       new AutoModeCreator("Hab -> Rocket Rear Right", () -> new HabToRocketRearRight()),
-      new AutoModeCreator("Rocket Rear -> Midline Right", () -> new RocketRearToMidlineRight()),
-      new AutoModeCreator("Midline -> HP Right", () -> new MidlineToHPRight()),
       new AutoModeCreator("HP -> Rocket Side Close Right", () -> new HPToRocketCloseRight()),
-      new AutoModeCreator("Alt Rocket Return Path Right", () -> new AltRocketReturnPathRight()),
+      new AutoModeCreator("Rocket Rear -> HP Right", () -> new AltRocketReturnPathRight()),
       new AutoModeCreator("Hab -> Cargo Front Right", () -> new HabToCargoFrontRight()),
       new AutoModeCreator("Cargo Front -> HP Right", () -> new CargoFrontToHPRight()),
+      new AutoModeCreator("LEFT Cargo Ship", () -> new LeftCargo()),
+      new AutoModeCreator("LEFT Rocket", () -> new LeftRocket()),
+      new AutoModeCreator("LEFT Close Cargo Ship", () -> new LeftCloseCargo()),
+
   };
 
 

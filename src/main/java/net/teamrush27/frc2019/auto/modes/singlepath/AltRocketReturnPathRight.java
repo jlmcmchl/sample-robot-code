@@ -11,8 +11,8 @@ public class AltRocketReturnPathRight extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
-    Trajectory altRocketRearToHP = TrajectoryGenerator.getInstance().getTrajectorySet().altRocketRearToHP.getRight();
-
+    Trajectory altRocketRearToHP = TrajectoryGenerator.getInstance()
+        .getTrajectorySet().altRocketRearToHP.getRight();
 
     runAction(new SeriesAction(new DriveTrajectory(altRocketRearToHP, true, true)));
   }

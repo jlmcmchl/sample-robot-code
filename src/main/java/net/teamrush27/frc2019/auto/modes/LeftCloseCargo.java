@@ -16,19 +16,18 @@ import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.util.trajectory.Trajectory;
 import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 
-public class RightCloseCargo extends AutoModeBase {
+public class LeftCloseCargo extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
-
     Trajectory habToCargoFront = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().habToCargoFront.getRight();
+        .getTrajectorySet().habToCargoFront.getLeft();
 
     Trajectory cargoFrontToHP = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().cargoFrontToHP.getRight();
+        .getTrajectorySet().cargoFrontToHP.getLeft();
 
     Trajectory hpToCargoSideClose = TrajectoryGenerator.getInstance()
-        .getTrajectorySet().hpToCargoSideClose.getRight();
+        .getTrajectorySet().hpToCargoSideClose.getLeft();
 
     List commands = Arrays.asList(
         new ParallelAction(
@@ -39,18 +38,17 @@ public class RightCloseCargo extends AutoModeBase {
         new ParallelAction(
             new SeriesAction(
                 new WaitAction(0.5),
-                new GripperStateAction(Gripper.WantedState.INTAKE_HATCH),
+                new GripperStateAction(Gripper.WantedState.OFF),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, false, true)),
-            new DriveTrajectory(cargoFrontToHP, false, false)),
+            new DriveTrajectory(cargoFrontToHP, false, false))/*,
         new LimelightTrackingAction(false, 400),
         new ParallelAction(
             new SeriesAction(
                 new WaitAction(0.5),
                 new AutoSuperstructurePosition(WantedState.ROCKET_LEVEL_1, true, true)),
-            new DriveTrajectory(hpToCargoSideClose, false, false)),
-    new LimelightTrackingAction(true, 400));
+            new DriveTrajectory(hpToCargoSideClose, false, false))*/);//,
+    //new LimelightTrackingAction(true, 400));
 
     runAction(new SeriesAction(commands));
-
   }
 }

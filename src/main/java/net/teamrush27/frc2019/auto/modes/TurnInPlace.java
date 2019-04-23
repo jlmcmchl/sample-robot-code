@@ -8,6 +8,6 @@ public class TurnInPlace extends AutoModeBase {
 
   @Override
   protected void routine() throws AutoModeEndedException {
-    runAction(new TurnInPlaceAction(2 * Math.PI * 5, 24));
+    runAction(new TurnInPlaceAction(2 * Math.PI * 5, 48));
   }
 }
