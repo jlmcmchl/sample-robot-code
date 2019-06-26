@@ -33,8 +33,10 @@ public class SubsystemManager implements ILooper {
 	public SubsystemManager(List subsystems) {
 	}
 	
-	public void outputToSmartDashboard(SmartDashboardCollection collection) {
+	public SmartDashboardCollection outputToSmartDashboard() {
+		SmartDashboardCollection collection = new SmartDashboardCollection();
 		subsystems.forEach(s -> s.outputToSmartDashboard(collection));
+		return collection;
 	}
 	
 	public void stop() {

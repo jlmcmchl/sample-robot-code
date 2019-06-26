@@ -6,18 +6,18 @@ import net.teamrush27.frc2019.util.crash.CrashTrackingRunnable;
  * This class selects, runs, and stops (if necessary) a specified autonomous mode.
  */
 public class AutoModeExecutor {
-  private AutoModeBase m_auto_mode;
-  private Thread m_thread = null;
+  private AutoModeBase autoMode;
+  private Thread autoThread = null;
 
   private boolean isActive = false;
 
   public void setAutoMode(AutoModeBase new_auto_mode) {
-    m_auto_mode = new_auto_mode;
-    m_thread = new Thread(new CrashTrackingRunnable() {
+    autoMode = new_auto_mode;
+    autoThread = new Thread(new CrashTrackingRunnable() {
       @Override
       public void runCrashTracked() {
-        if (m_auto_mode != null) {
-          m_auto_mode.run();
+        if (autoMode != null) {
+          autoMode.run();
         }
       }
     });
@@ -25,25 +25,25 @@ public class AutoModeExecutor {
 
   public void start() {
     isActive = true;
-    if (m_thread != null) {
-      m_thread.start();
+    if (autoThread != null) {
+      autoThread.start();
     }
   }
 
   public void stop() {
     isActive = false;
-    if (m_auto_mode != null) {
-      m_auto_mode.stop();
+    if (autoMode != null) {
+      autoMode.stop();
     }
 
-    m_thread = null;
+    autoThread = null;
   }
 
   public AutoModeBase getAutoMode() {
-    return m_auto_mode;
+    return autoMode;
   }
 
   public boolean isActive() {
-    return isActive && m_auto_mode.isActive();
+    return isActive && autoMode.isActive();
   }
 }

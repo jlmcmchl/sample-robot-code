@@ -8,367 +8,224 @@
 package net.teamrush27.frc2019;
 
 import com.google.gson.Gson;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import java.io.IOException;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
 import net.teamrush27.frc2019.auto.creators.AutoModeSelector;
-import net.teamrush27.frc2019.auto.modes.RightCargo;
-import net.teamrush27.frc2019.auto.modes.RightRocket;
-import net.teamrush27.frc2019.base.CheesyDriveHelper;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.constants.RobotConfiguration;
 import net.teamrush27.frc2019.constants.RobotConfigurationFactory;
 import net.teamrush27.frc2019.loops.Looper;
-import net.teamrush27.frc2019.managers.SuperstructureManager;
-import net.teamrush27.frc2019.managers.SuperstructureManager.WantedState;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
-import net.teamrush27.frc2019.subsystems.impl.Arm;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
-import net.teamrush27.frc2019.subsystems.impl.Gripper;
 import net.teamrush27.frc2019.subsystems.impl.LED;
-import net.teamrush27.frc2019.subsystems.impl.Limelights;
-import net.teamrush27.frc2019.subsystems.impl.Limelights.SystemState;
-import net.teamrush27.frc2019.subsystems.impl.RobotStateEstimator;
-import net.teamrush27.frc2019.subsystems.impl.SpiderLegs;
-import net.teamrush27.frc2019.subsystems.impl.Wrist;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 import net.teamrush27.frc2019.subsystems.impl.dto.SmartDashboardCollection;
-import net.teamrush27.frc2019.util.TelemetryUtil;
-import net.teamrush27.frc2019.util.crash.CrashTracker;
-import net.teamrush27.frc2019.util.trajectory.TrajectoryGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Robot extends TimedRobot {
-
-  public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
-
-  public static final RobotConfiguration ROBOT_CONFIGURATION = RobotConfigurationFactory
-      .getRobotConfiguration();
-
-  private RobotStateEstimator robotStateEstimator = RobotStateEstimator.getInstance();
-  private Drivetrain drivetrain = Drivetrain.getInstance();
-  private Arm arm = Arm.getInstance();
-  private Gripper gripper = Gripper.getInstance();
-  private Wrist wrist = Wrist.getInstance();
-  private SpiderLegs spiderLegs = SpiderLegs.getInstance();
-  private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
-  private LED led = LED.getInstance();
-  private Limelights limelights = Limelights.getInstance();
-  private final SuperstructureManager superman = SuperstructureManager.getInstance();
-  private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, gripper,
-      spiderLegs, wrist, arm, led, limelights, superman, robotStateEstimator);
-
-  private final Looper enabledLooper = new Looper();
-  private final Looper disabledLooper = new Looper();
-
-  private final Logger LOG = LogManager.getLogger(Robot.class);
-
-  private AutoModeExecutor autoModeExecutor;
-
-  boolean autoRan = false;
-
-  private Gson serializer = new Gson();
-
-  @Override
-  public void robotInit() {
-    subsystemManager.registerEnabledLoops(enabledLooper);
-    subsystemManager.registerDisabledLoops(disabledLooper);
-    TrajectoryGenerator.getInstance().generateTrajectories();
-    superman.zeroSensors();
-    drivetrain.zeroSensors();
-
-    limelights.defaultState();
-
-    LiveWindow.disableAllTelemetry();
-    autoModeExecutor = new AutoModeExecutor();
-    AutoModeSelector.initAutoModeSelector();
-  }
-
-  @Override
-  public void robotPeriodic() {
-    SmartDashboardCollection collection = new SmartDashboardCollection();
-    //limelights.outputToSmartDashboard();
-    subsystemManager.outputToSmartDashboard(collection);
-    SmartDashboard.putString("robot.state", serializer.toJson(collection));
-    //enabledLooper.outputToSmartDashboard();
-    //LOG.info("rot: {} ext: {} wrist: {}", arm.getArmState().getRotationInDegrees(),
-    //	arm.getArmState().getExtensionInInches(), wrist.getPWMAngle());
-    //wrist.outputToSmartDashboard();
-
-    //gripper.outputToSmartDashboard();
-
-  }
-
-  @Override
-  public void autonomousInit() {
-    DriverStation.reportError(
-        String.format("I HATE THIS ROBOT %s", operatorInterface.getWantManipulateHatch()), false);
-    led.setWantedState(LED.WantedState.ENABLED);
-    disabledLooper.stop();
-    //drivetrain.startLogging();
-//		subsystemManager.startLogging();
-    //robotStateEstimator.startLogging();
-    enabledLooper.start();
-
-    //drivetrain.startLogging();
-    autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
-    autoModeExecutor.start();
-
-    arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
-    spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-    gripper.setWantedState(Gripper.WantedState.INTAKE_HATCH);
-    wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
-
-    superman.setWantedState(WantedState.STOW, true, false);
-    superman.mustRecompute();
-
-    autoRan = true;
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-    if (operatorInterface.wantsAutoStop()) {
-      autoModeExecutor.stop();
-
-      drivetrain.stopLogging();
-
-      drivetrain.shift(true);
-      limelights.setTrackingEnabled(false);
-      drivetrain.setLimelightSteering(SystemState.DRIVE);
-      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-
-      operatorInterface.clear();
-    }
-
-    if (!autoModeExecutor.isActive()) {
-      driverControl();
-    }
-  }
-
-  @Override
-  public void teleopInit() {
-    led.setWantedState(LED.WantedState.ENABLED);
-    disabledLooper.stop();
-    enabledLooper.start();
-
-    arm.setWantedState(Arm.WantedState.CLOSED_LOOP);
-    spiderLegs.setWantedState(SpiderLegs.WantedState.OFF);
-    wrist.setWantedState(Wrist.WantedState.CLOSED_LOOP);
-    limelights.setTrackingEnabled(false);
-    drivetrain.setLimelightSteering(limelights.getSystemState());
-    drivetrain.setBrakeMode(false);
-
-    if (!autoRan) {
-//      gripper.setWantedState(Gripper.WantedState.OFF);
-      superman.setWantedState(WantedState.STOW, true, false);
-    }
-
-    superman.mustRecompute();
-
-    drivetrain.shift(true);
-    drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-
-//		subsystemManager.startLogging();
-
-    autoModeExecutor = new AutoModeExecutor();
-  }
-
-  @Override
-  public void teleopPeriodic() {
-    if (autoModeExecutor.isActive() && operatorInterface.wantsAutoStop()) {
-      double time = Timer.getFPGATimestamp();
-      LOG.info("STOPPING AUTONOMOUS");
-      autoModeExecutor.stop();
-
-      drivetrain.shift(true);
-      limelights.setTrackingEnabled(false);
-      drivetrain.setLimelightSteering(SystemState.DRIVE);
-      drivetrain.setOpenLoop(DriveCommand.defaultCommand());
-      drivetrain.setBrakeMode(false);
-
-      operatorInterface.clear();
-
-      drivetrain.stopLogging();
-
-      LOG.info("STOPPED AUTONOMOUS: {}", Timer.getFPGATimestamp() - time);
-
-    } else if (!autoModeExecutor.isActive() && operatorInterface.getWantStartAuton()) {
-      //drivetrain.startLogging();
-      autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
-      autoModeExecutor.start();
-    } else if (!autoModeExecutor.isActive()) {
-      drivetrain.setBrakeMode(false);
-      driverControl();
-    }
-  }
-
-  @Override
-  public void testInit() {
-    enabledLooper.stop();
-    disabledLooper.stop();
-
-  }
-
-  @Override
-  public void testPeriodic() {
-  }
-
-  @Override
-  public void disabledInit() {
-
-    if (!autoRan) {
-      //arm.reset();
-      led.setWantedState(LED.WantedState.DISABLED);
-    }
-    drivetrain.stopLogging();
-//    gripper.zeroSensors();
-    SmartDashboard.putString("Match Cycle", "DISABLED");
-    try {
-      TelemetryUtil.getInstance().writeToFile("/media/sda1/logs/telemetry.csv");
-    } catch (IOException e) {
-      LOG.error("could not write telemetry", e);
-    }
-
-    if (autoModeExecutor != null) {
-      autoModeExecutor.stop();
-    }
-
-    try {
-      CrashTracker.logDisabledInit();
-      enabledLooper.stop();
-
-      //drivetrain.startLogging();
-
-//			subsystemManager.stopLogging();
-      drivetrain.setBrakeMode(false);
-      drivetrain.stopLogging();
-      //robotStateEstimator.stopLogging();
-
-//			Drivetrain.getInstance().zeroSensors();
-//			RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2d.identity());
-
-      disabledLooper.start();
-
-    } catch (Throwable t) {
-      CrashTracker.logThrowableCrash(t);
-      throw t;
-    }
-  }
-
-  boolean chezy = false;
-  
-  @Override
-  public void disabledPeriodic() {
-    if (!autoRan) {
-      spiderLegs.zeroSensors();
-      arm.zeroSensors();
-      wrist.zeroSensors();
-    }
-    
-    if(operatorInterface.getWantStartAuton()){
-      chezy = true && false;
-    }
-
-    if (operatorInterface.wantsToggleLimelightSteering()) {
-      limelights.cycleDisabled();
-      drivetrain.setLimelightSteering(limelights.getSystemState());
-    }
-  
-    AutoModeSelector.update();
-  }
-
-  private void driverControl() {
-    // bail everything if we're climbing
-    if (operatorInterface.wantsPreClimb() && !operatorInterface.wantsClimb()) {
-      spiderLegs.setWantedState(SpiderLegs.WantedState.PENDING_CLIMB);
-      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      drivetrain.setBrakeMode(true);
-      drivetrain.shift(false);
-    } else if (operatorInterface.wantsClimb()) {
-      superman.setWantedState(SuperstructureManager.WantedState.CLIMB, true, false);
-      if (operatorInterface.getWantsInvert()) {
-        spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB);
-      } else {
-        spiderLegs.setWantedState(SpiderLegs.WantedState.CLIMB_L2);
-      }
-    } else {
-      if (operatorInterface.wantsArmReset()) {
-        drivetrain.fixArm();
-        wrist.zeroSensors();
-      } else if (operatorInterface.wantsStow()) {
-        superman.setWantedState(WantedState.STOW, operatorInterface.getWantsInvert(),
-            gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel1HumanLoad() && gripper.hasGamepiece()) {
-        superman.setWantedState(WantedState.ROCKET_LEVEL_1, operatorInterface.getWantsInvert(),
-            gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel1HumanLoad()) {
-        superman.setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), true);
-      } else if (operatorInterface.wantsGroundPickup()) {
-        superman.setWantedState(WantedState.CARGO_GROUND_PICKUP,
-            operatorInterface.getWantsInvert(), false);
-      } else if (operatorInterface.getWantsCargoShip()) {
-        superman.setWantedState(WantedState.CARGO_SHIP, operatorInterface.getWantsInvert(),
-            gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel2() && gripper.hasGamepiece()) {
-        superman
-            .setWantedState(WantedState.ROCKET_LEVEL_2, operatorInterface.getWantsInvert(),
-                gripper.hasHatch());
-      } else if (operatorInterface.wantsLevel2()) {
-        superman
-            .setWantedState(WantedState.HUMAN_LOAD, operatorInterface.getWantsInvert(), false);
-      } else if (operatorInterface.wantsLevel3()) {
-        superman
-            .setWantedState(WantedState.ROCKET_LEVEL_3, operatorInterface.getWantsInvert(),
-                gripper.hasHatch());
-      }
-
-      if (operatorInterface.getShift()) {
-        drivetrain.shift();
-      }
-
-      if (WantedState.STOW.equals(superman.getWantedState()) && operatorInterface.getWantUnjam()) {
-        gripper.unjam();
-      }
-
-      if ((superman.getHasHatch() || gripper.hasHatch()) && operatorInterface
-          .getWantManipulateHatch()) {
-        gripper.transitionHatch();
-      } else if (operatorInterface.getWantManipulateHatch()) {
-        gripper.transitionCargo();
-      }
-
-      if (operatorInterface.wantsToggleLimelightSteering()) {
-        limelights.cycleEnabled();
-        drivetrain.setLimelightSteering(limelights.getSystemState());
-      }
-
-      double extensionInput = operatorInterface.getArmInput().getExtensionInput();
-
-      if (Math.abs(extensionInput) > 0.05) {
-        superman.addOffset(extensionInput * 0.2);
-      }
-    }
-
-    if (spiderLegs.shouldDrive()) {
-      if (spiderLegs.shouldHoldPosition()) {
-        superman.setWantedState(WantedState.STOW, false, false);
-        drivetrain.setOpenLoop(DriveCommand.BRAKE);
-      } else {
-        drivetrain.setOpenLoop(new DriveCommand(.3, .3, true));
-      }
-    } else {
-      if(chezy){
-        drivetrain.setOpenLoop(operatorInterface.getChezyDrive());
-      } else {
-        drivetrain.setOpenLoop(operatorInterface.getTankCommand());
-      }
-    }
-  }
+	
+	private static final Logger LOG = LogManager.getLogger(Robot.class);
+	
+	public static final RobotConfiguration ROBOT_CONFIGURATION = RobotConfigurationFactory
+		.getRobotConfiguration();
+	
+	private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
+	
+	private Drivetrain drivetrain = Drivetrain.getInstance();
+	private LED led = LED.getInstance();
+	
+	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, led);
+	
+	private final Looper enabledLooper = new Looper();
+	private final Looper disabledLooper = new Looper();
+	
+	private AutoModeExecutor autoModeExecutor;
+	
+	private boolean autoRan = false;
+	
+	private Gson serializer = new Gson();
+	
+	/**
+	 * Called <i>once</i> when the robot is first started
+	 */
+	@Override
+	public void robotInit() {
+		LOG.info("robotInit()");
+		
+		// Sets up the subsystem manager
+		subsystemManager.registerEnabledLoops(enabledLooper);
+		subsystemManager.registerDisabledLoops(disabledLooper);
+		
+		// Zeroes the sensors on the drivetrain
+		drivetrain.zeroSensors();
+		
+		// Disables LiveWindow telemetry (takes lots of cpu cycles)
+		LiveWindow.disableAllTelemetry();
+		
+		// Sets up the auto mode executor and selector
+		autoModeExecutor = new AutoModeExecutor();
+		AutoModeSelector.initAutoModeSelector();
+	}
+	
+	/**
+	 * Called <i>every</i> time a control message from the driverstation is received
+	 */
+	@Override
+	public void robotPeriodic() {
+		// Get data to send to smart dashboard in single packet (saves cpu cycles)
+		SmartDashboardCollection collection = subsystemManager.outputToSmartDashboard();
+		// Send single JSON string of data
+		SmartDashboard.putString("robot.state", serializer.toJson(collection));
+	}
+	
+	/**
+	 * Called <i>once</i> when autonomous is first started
+	 */
+	@Override
+	public void autonomousInit() {
+		LOG.info("autonomousInit()");
+		
+		// set leds to enabled
+		led.setWantedState(LED.WantedState.ENABLED);
+		
+		// stop running the disabled code
+		disabledLooper.stop();
+		
+		// start running the enabled code
+		enabledLooper.start();
+		
+		// grab the selected auto mode and start it
+		autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
+		autoModeExecutor.start();
+		
+		// tell the program the auto mode has been ran
+		autoRan = true;
+	}
+	
+	/**
+	 * Called <i>every</i> time a control message from the driverstation is received during autonomous mode
+	 */
+	@Override
+	public void autonomousPeriodic() {
+		// If we're interrupted by driver's input
+		if (operatorInterface.wantsAutoStop()) {
+			// stop the auto mode
+			autoModeExecutor.stop();
+			
+			// put drivetrain into open loop state
+			drivetrain.setOpenLoop(DriveCommand.COAST);
+			
+			// clear any pressed buttons
+			operatorInterface.clear();
+		}
+		
+		// If the auto mode is not active
+		if (!autoModeExecutor.isActive()) {
+			// run standard driver control
+			driverControl();
+		}
+	}
+	
+	/**
+	 * Called <i>once</i> when teleop is first started
+	 * either after the transition from autonomous to teleop during a real/practice match
+	 * or when from disabled to teleop during testing / practice
+	 */
+	@Override
+	public void teleopInit() {
+		LOG.info("teleopInit()");
+		
+		// set leds to enabled
+		led.setWantedState(LED.WantedState.ENABLED);
+		
+		// stop running the disabled code
+		disabledLooper.stop();
+		
+		// start running the enabled code
+		enabledLooper.start();
+		
+		// set the drivetrain up for teleop
+		drivetrain.setBrakeMode(false);
+		drivetrain.setOpenLoop(DriveCommand.COAST);
+		
+		// recreate the auto mode executor to make sure auto mode is stopped
+		autoModeExecutor = new AutoModeExecutor();
+	}
+	
+	/**
+	 * Called <i>every</i> time a control message from the driverstation is received during teleop mode
+	 */
+	@Override
+	public void teleopPeriodic() {
+		// run standard drive control
+		driverControl();
+	}
+	
+	/**
+	 * Called <i>once</i> when test mode is first started
+	 */
+	@Override
+	public void testInit() {
+		LOG.info("testInit()");
+		
+		// stop running the enabled code
+		enabledLooper.stop();
+		
+		// stop running the disabled code
+		disabledLooper.stop();
+	}
+	
+	/**
+	 * Called <i>every</i> time a control message from the driverstation is received during test mode
+	 */
+	@Override
+	public void testPeriodic() {
+	}
+	
+	/**
+	 * Called <i>once</i> when disabled is first started
+	 * either during the transition from autonomous to teleop during a real/practice match
+	 * or when disabled during testing / practice
+	 */
+	@Override
+	public void disabledInit() {
+		LOG.info("disabledInit()");
+		
+		// set the leds to disabled
+		led.setWantedState(LED.WantedState.DISABLED);
+		
+		// if auto mode was running, stop it
+		if (autoModeExecutor.isActive()) {
+			autoModeExecutor.stop();
+		}
+		
+		// start running the disabled code
+		disabledLooper.start();
+		
+		// stop running the enabled code
+		enabledLooper.stop();
+		
+	}
+	
+	/**
+	 * Called <i>every</i> time a control message from the driverstation is received during disabled mode
+	 */
+	@Override
+	public void disabledPeriodic() {
+		AutoModeSelector.update();
+	}
+	
+	
+	/**
+	 * Contains standard driver controls
+	 * shared between teleop and auto (hybrid) modes
+	 */
+	private void driverControl() {
+		// open loop drivetrain control
+		drivetrain.setOpenLoop(operatorInterface.getTankCommand());
+	}
 }

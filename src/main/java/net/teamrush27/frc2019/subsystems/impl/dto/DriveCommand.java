@@ -1,15 +1,13 @@
 package net.teamrush27.frc2019.subsystems.impl.dto;
 
-import net.teamrush27.frc2019.util.motion.DriveMotionPlanner;
-
 public class DriveCommand {
-
+  
+  public static DriveCommand COAST = new DriveCommand(0.0, 0.0);
+  public static DriveCommand BRAKE = new DriveCommand(0.0, 0.0, true);
+  
   private Double leftDriveInput;
   private Double rightDriveInput;
   private Boolean brakeMode;
-
-  public static DriveCommand COAST = new DriveCommand(0.0, 0.0);
-  public static DriveCommand BRAKE = new DriveCommand(0.0, 0.0, true);
 
   public DriveCommand(Double leftDriveInput, Double rightDriveInput) {
     this(leftDriveInput, rightDriveInput, false);
@@ -19,10 +17,6 @@ public class DriveCommand {
     this.leftDriveInput = leftDriveInput;
     this.rightDriveInput = rightDriveInput;
     this.brakeMode = brakeMode;
-  }
-
-  public static DriveCommand defaultCommand() {
-    return new DriveCommand(0d, 0d);
   }
 
   public Double getLeftDriveInput() {

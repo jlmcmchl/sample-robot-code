@@ -1,56 +1,24 @@
 package net.teamrush27.frc2019.base;
 
-import net.teamrush27.frc2019.subsystems.impl.dto.ArmInput;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
 
 public interface OperatorInterface {
-    // DRIVER CONTROLS
-    DriveCommand getTankCommand();
-    boolean getShift();
-    
-    // ignore plz
 	
-	DriveCommand getChezyDrive();
-    
-    // OPERATOR CONTROLS
+	/**
+	 * @return the {@link DriveCommand} that represents the driver's joystick inputs
+	 */
+	DriveCommand getTankCommand();
 	
-	// gripper
-	Boolean getWantManipulateHatch();
-	Boolean getWantManipulateCargo();
-	
-	// arm
-	Boolean wantsStow();
-	Boolean wantsGroundPickup();
-	Boolean getWantsCargoShip();
-	Boolean wantsLevel1HumanLoad();
-	Boolean wantsLevel2();
-	Boolean wantsLevel3();
-	Boolean getWantsInvert();
-
-	Boolean wantsArmReset();
-	
-	// climb
-	Boolean wantsPreClimb();
-	Boolean wantsClimb();
-
-	// open loop
-	Double getWristInput();
-	ArmInput getArmInput();
-
-	Boolean wantsSwitchPipeline();
-
-	Boolean wantsIncreaseOffset();
-	Boolean wantsDecreaseOffset();
-
-	Boolean wantsToggleLimelightSteering();
-
-	void setRumble(double frac);
-
+	/**
+	 * @return if the driver wants to stop auto mode
+	 */
 	Boolean wantsAutoStop();
-
-	Boolean getWantStartAuton();
-
+	
+	/**
+	 * Clears joystick and gamepad button presses
+	 * so that .getButtonPressed() returns false next loop if button not actively pressed
+	 *
+	 * @return if any button pressed were suppressed
+	 */
 	Boolean clear();
-
-	Boolean getWantUnjam();
 }
