@@ -58,7 +58,7 @@ public class XboxController extends GenericHID {
         if (hand.equals(Hand.kLeft)) {
             return getRawButton(Button.kLB.value);
         } else {
-            reutrn getRawButton(Button.kRB.value);
+            return getRawButton(Button.kRB.value);
         }
     }
 
@@ -87,7 +87,7 @@ public class XboxController extends GenericHID {
     }
 
     public boolean getStickButtonPressed(Hand hand) {
-        if (hand == Hand.kleft) {
+        if (hand == Hand.kLeft) {
             return getRawButtonPressed(Button.kLeftStick.value);
         } else {
             return getRawButtonPressed(Button.kRightStick.value);
