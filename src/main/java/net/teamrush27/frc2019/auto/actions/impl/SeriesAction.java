@@ -26,7 +26,7 @@ public class SeriesAction implements Action {
     }
 
     public SeriesAction(Action... actions) {
-        mRemainingActions = new ArrayList(Arrays.asList(actions));
+        mRemainingActions = new ArrayList<Action>(Arrays.asList(actions));
         mCurAction = null;
     }
 
