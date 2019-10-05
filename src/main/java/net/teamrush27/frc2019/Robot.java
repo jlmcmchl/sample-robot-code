@@ -17,7 +17,10 @@ import net.teamrush27.frc2019.constants.RobotConfiguration;
 import net.teamrush27.frc2019.constants.RobotConfigurationFactory;
 import net.teamrush27.frc2019.loops.Looper;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
+import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.LED;
+import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,8 +33,9 @@ public class Robot extends TimedRobot {
 	private OperatorInterface operatorInterface = JoysticksAndGamepadInterface.getInstance();
 
 	private LED led = LED.getInstance();
+	private Drivetrain drivetrain = Drivetrain.getInstance();
 
-	private final SubsystemManager subsystemManager = new SubsystemManager(led);
+	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, led);
 
 	private final Looper enabledLooper = new Looper();
 	private final Looper disabledLooper = new Looper();
@@ -57,6 +61,8 @@ public class Robot extends TimedRobot {
 		// Sets up the auto mode executor and selector
 		autoModeExecutor = new AutoModeExecutor();
 		AutoModeSelector.initAutoModeSelector();
+
+		drivetrain.zeroSensors();
 	}
 
 	/**
@@ -66,6 +72,7 @@ public class Robot extends TimedRobot {
 	public void robotPeriodic() {
 		// Update the SmartDashboard
 		subsystemManager.outputToSmartDashboard();
+		AutoModeSelector.update();
 	}
 
 	/**
@@ -86,7 +93,7 @@ public class Robot extends TimedRobot {
 
 		// grab the selected auto mode and start it
 		autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
-		autoModeExecutor.start();
+		//autoModeExecutor.start();
 
 		// tell the program the auto mode has been ran
 		autoRan = true;
@@ -199,7 +206,6 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void disabledPeriodic() {
-		AutoModeSelector.update();
 	}
 
 	/**
@@ -207,5 +213,8 @@ public class Robot extends TimedRobot {
 	 * modes
 	 */
 	private void driverControl() {
+		DriveCommand command = operatorInterface.getTankCommand();
+
+		drivetrain.setOpenLoop(command.getLeftDriveInput(), command.getRightDriveInput());
 	}
 }

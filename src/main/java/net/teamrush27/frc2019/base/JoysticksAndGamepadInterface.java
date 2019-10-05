@@ -16,37 +16,34 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
     return INSTANCE;
   }
 
-  private final APEMJoystick driverLeftJoystick;
-  private final APEMJoystick driverRightJoystick;
+  //private final APEMJoystick driverLeftJoystick;
+  //private final APEMJoystick driverRightJoystick;
   private final PS4Controller gamePad;
 
   public JoysticksAndGamepadInterface() {
-    driverLeftJoystick = new APEMJoystick(0);
-    driverRightJoystick = new APEMJoystick(1);
-    gamePad = new PS4Controller(2);
+    //driverLeftJoystick = new APEMJoystick(0);
+    //driverRightJoystick = new APEMJoystick(1);
+    gamePad = new PS4Controller(0);
   }
 
   @Override
   public DriveCommand getTankCommand() {
-    double left = driverLeftJoystick.getY();
-    double right = driverRightJoystick.getY();
+    double leftInput = gamePad.getY(Hand.kLeft);
+    double rightInput = gamePad.getY(Hand.kRight);
 
-    left = Math.abs(left) < 0.01 ? 0 : left;
-    right = Math.abs(right) < 0.01 ? 0 : right;
-
-    return new DriveCommand(left, right);
+    return new DriveCommand(leftInput, rightInput);
   }
 
   @Override
   public Boolean wantsAutoStop() {
-    return driverLeftJoystick.getLeftButtonPressed() || driverLeftJoystick.getRightButtonPressed();
+    return false;
   }
 
   @Override
   public Boolean clear() {
-    return driverLeftJoystick.getLeftButtonPressed() ^ driverLeftJoystick.getRightButtonPressed()
-        ^ driverRightJoystick.getLeftButtonPressed() ^ driverRightJoystick.getRightButtonPressed()
-        ^ gamePad.getXButtonPressed() ^ gamePad.getTriangleButtonPressed()
+    return //driverLeftJoystick.getLeftButtonPressed() ^ driverLeftJoystick.getRightButtonPressed()
+        //^ driverRightJoystick.getLeftButtonPressed() ^ driverRightJoystick.getRightButtonPressed() ^ 
+        gamePad.getXButtonPressed() ^ gamePad.getTriangleButtonPressed()
         ^ gamePad.getTriggerButtonPressed(Hand.kLeft) ^ gamePad.getTriggerButtonPressed(Hand.kRight)
         ^ gamePad.getPadButtonPressed() ^ gamePad.getMiddleButtonPressed()
         ^ gamePad.getBumperPressed(Hand.kLeft) ^ gamePad.getBumperPressed(Hand.kRight)

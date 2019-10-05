@@ -9,12 +9,12 @@ public class RobotConfigurationFactory {
 		File practiceFile = new File("/home/lvuser/THIS_IS_THE_PRACTICE_BOT");
 		File compFile = new File("/home/lvuser/THIS_IS_THE_COMP_BOT");
 		if(compFile.exists()){
-			DriverStation.reportError("THIS IS THE COMP BOT", false);
+			System.err.println("THIS IS THE COMP BOT");
 			return new CompBot();
 		}
 		
 		if(practiceFile.exists()){
-			DriverStation.reportError("THIS IS THE PRACTICE BOT", false);
+			System.err.println("THIS IS THE PRACTICE BOT");
 			return new PracticeBot();
 		}
 		
