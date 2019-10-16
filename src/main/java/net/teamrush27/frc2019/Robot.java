@@ -213,7 +213,7 @@ public class Robot extends TimedRobot {
 	 * modes
 	 */
 	private void driverControl() {
-		DriveCommand command = operatorInterface.getTankCommand();
+		DriveCommand command = operatorInterface.getCheezyishDrive();
 
 		drivetrain.setOpenLoop(command.getLeftDriveInput(), command.getRightDriveInput());
 	}

@@ -8,4 +8,9 @@ public class RobotConstants {
     // Talon Parameters
     public static int TALON_CONFIG_TIMEOUT = 100; // 100ms
 
+    // Scrub Factor
+    public static double SCRUB_FACTOR = 1.0;
+
+    // c-c Track Width
+    public static int TRACK_WIDTH = 28; // 28in
 }

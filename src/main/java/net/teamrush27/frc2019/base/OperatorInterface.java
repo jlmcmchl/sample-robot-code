@@ -8,7 +8,12 @@ public interface OperatorInterface {
 	 * @return the {@link DriveCommand} that represents the driver's joystick inputs
 	 */
 	DriveCommand getTankCommand();
-	
+
+	/**
+	 * @return the {@link DriveCommand} that represents the drivers's inputs, as Cheesy-ish Drive
+	 */
+	DriveCommand getCheezyishDrive();
+
 	/**
 	 * @return if the driver wants to stop auto mode
 	 */
