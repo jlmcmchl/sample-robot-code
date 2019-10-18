@@ -2,11 +2,11 @@ package net.teamrush27.frc2019.base;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
-import net.teamrush27.frc2019.wrappers.PS4Controller;
-import net.teamrush27.frc2019.wrappers.XboxController;
 import net.teamrush27.frc2019.util.math.KinematicsUtils;
 import net.teamrush27.frc2019.util.math.MathUtils;
 import net.teamrush27.frc2019.util.math.Twist2d;
+import net.teamrush27.frc2019.wrappers.PS4Controller;
+import net.teamrush27.frc2019.wrappers.XboxController;
 
 public class JoysticksAndGamepadInterface implements OperatorInterface {
 
@@ -19,14 +19,14 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
     return INSTANCE;
   }
 
-  //private final APEMJoystick driverLeftJoystick;
-  //private final APEMJoystick driverRightJoystick;
+  // private final APEMJoystick driverLeftJoystick;
+  // private final APEMJoystick driverRightJoystick;
   private final XboxController driver;
   private final PS4Controller gamePad;
 
   public JoysticksAndGamepadInterface() {
-    //driverLeftJoystick = new APEMJoystick(0);
-    //driverRightJoystick = new APEMJoystick(1);
+    // driverLeftJoystick = new APEMJoystick(0);
+    // driverRightJoystick = new APEMJoystick(1);
     driver = new XboxController(3);
     gamePad = new PS4Controller(2);
   }
@@ -36,21 +36,29 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
     double leftInput = driver.getY(Hand.kLeft);
     double rightInput = driver.getY(Hand.kRight);
 
+    if (MathUtils.epsilonEquals(leftInput, 0, 0.05)) {
+      leftInput = 0;
+    }
+
+    if (MathUtils.epsilonEquals(rightInput, 0, 0.05)) {
+      rightInput = 0;
+    }
+
     return new DriveCommand(leftInput, rightInput);
   }
 
   @Override
   public DriveCommand getCheezyishDrive() {
-    double throttle =  driver.getY(Hand.kLeft);
+    double throttle = driver.getY(Hand.kLeft);
     double wheel = driver.getX(Hand.kRight);
     boolean quickTurn = driver.getBumper(Hand.kRight);
 
-    if (MathUtils.epsilonEquals(throttle, 0.0, 0.04)) {
+    if (MathUtils.epsilonEquals(throttle, 0.0, 0.05)) {
       throttle = 0.0;
     }
 
-    if (MathUtils.epsilonEquals(wheel, 0.0, 0.035)) {
-        wheel = 0.0;
+    if (MathUtils.epsilonEquals(wheel, 0.0, 0.05)) {
+      wheel = 0.0;
     }
 
     final double kWheelGain = 0.05;
@@ -76,13 +84,14 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 
   @Override
   public Boolean clear() {
-    return //driverLeftJoystick.getLeftButtonPressed() ^ driverLeftJoystick.getRightButtonPressed()
-        //^ driverRightJoystick.getLeftButtonPressed() ^ driverRightJoystick.getRightButtonPressed() ^ 
-        gamePad.getXButtonPressed() ^ gamePad.getTriangleButtonPressed()
-        ^ gamePad.getTriggerButtonPressed(Hand.kLeft) ^ gamePad.getTriggerButtonPressed(Hand.kRight)
-        ^ gamePad.getPadButtonPressed() ^ gamePad.getMiddleButtonPressed()
-        ^ gamePad.getBumperPressed(Hand.kLeft) ^ gamePad.getBumperPressed(Hand.kRight)
-        ^ gamePad.getCircleButtonPressed() ^ gamePad.getSquareButtonPressed()
+    return // driverLeftJoystick.getLeftButtonPressed() ^
+           // driverLeftJoystick.getRightButtonPressed()
+    // ^ driverRightJoystick.getLeftButtonPressed() ^
+    // driverRightJoystick.getRightButtonPressed() ^
+    gamePad.getXButtonPressed() ^ gamePad.getTriangleButtonPressed() ^ gamePad.getTriggerButtonPressed(Hand.kLeft)
+        ^ gamePad.getTriggerButtonPressed(Hand.kRight) ^ gamePad.getPadButtonPressed()
+        ^ gamePad.getMiddleButtonPressed() ^ gamePad.getBumperPressed(Hand.kLeft)
+        ^ gamePad.getBumperPressed(Hand.kRight) ^ gamePad.getCircleButtonPressed() ^ gamePad.getSquareButtonPressed()
         ^ gamePad.getShareButtonPressed() ^ gamePad.getOptionsButtonPressed();
   }
 }
