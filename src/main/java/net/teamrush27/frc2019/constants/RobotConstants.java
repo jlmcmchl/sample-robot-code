@@ -13,4 +13,6 @@ public class RobotConstants {
 
     // c-c Track Width
     public static int TRACK_WIDTH = 28; // 28in
+
+    public static double DT_TICKS_PER_INCH = 4096.0 / (4 * Math.PI);
 }

@@ -13,13 +13,19 @@ import net.teamrush27.frc2019.auto.AutoModeExecutor;
 import net.teamrush27.frc2019.auto.creators.AutoModeSelector;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
+import net.teamrush27.frc2019.base.RobotState;
 import net.teamrush27.frc2019.constants.RobotConfiguration;
 import net.teamrush27.frc2019.constants.RobotConfigurationFactory;
 import net.teamrush27.frc2019.loops.Looper;
+import net.teamrush27.frc2019.loops.impl.RobotStateEstimator;
 import net.teamrush27.frc2019.subsystems.SubsystemManager;
 import net.teamrush27.frc2019.subsystems.impl.Drivetrain;
 import net.teamrush27.frc2019.subsystems.impl.LED;
 import net.teamrush27.frc2019.subsystems.impl.dto.DriveCommand;
+import net.teamrush27.frc2019.util.interpolate.InterpolatingDouble;
+import net.teamrush27.frc2019.util.math.Pose2d;
+
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +40,9 @@ public class Robot extends TimedRobot {
 
 	private LED led = LED.getInstance();
 	private Drivetrain drivetrain = Drivetrain.getInstance();
+	private RobotStateEstimator rse = RobotStateEstimator.getInstance();
+
+	private RobotState robotState = RobotState.getInstance();
 
 	private final SubsystemManager subsystemManager = new SubsystemManager(drivetrain, led);
 
@@ -50,6 +59,8 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotInit() {
 		LOG.info("robotInit()");
+		enabledLooper.register(rse);
+		disabledLooper.register(rse);
 
 		// Sets up the subsystem manager
 		subsystemManager.registerEnabledLoops(enabledLooper);
@@ -73,6 +84,9 @@ public class Robot extends TimedRobot {
 		// Update the SmartDashboard
 		subsystemManager.outputToSmartDashboard();
 		AutoModeSelector.update();
+
+		Map.Entry<InterpolatingDouble, Pose2d> latest = robotState.getLatestFieldToVehicle();
+		System.out.println(String.format("%s - %s", latest.getKey().value, latest.getValue()));
 	}
 
 	/**

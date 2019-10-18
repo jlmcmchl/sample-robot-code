@@ -1,20 +1,23 @@
 package net.teamrush27.frc2019.subsystems.impl;
 
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import net.teamrush27.frc2019.loops.ILooper;
-import net.teamrush27.frc2019.loops.Loop;
-import net.teamrush27.frc2019.subsystems.Subsystem;
-import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.kauailabs.navx.frc.AHRS;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import edu.wpi.first.wpilibj.SPI.Port;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import net.teamrush27.frc2019.constants.RobotConstants;
+import net.teamrush27.frc2019.loops.ILooper;
+import net.teamrush27.frc2019.loops.Loop;
+import net.teamrush27.frc2019.subsystems.Subsystem;
+import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
+import net.teamrush27.frc2019.util.math.Rotation2d;
 
 public class Drivetrain extends Subsystem {
 
@@ -43,6 +46,8 @@ public class Drivetrain extends Subsystem {
   private TalonSRX rightMaster;
   private TalonSRX rightSlave1;
   private TalonSRX rightSlave2;
+
+  private AHRS navx;
 
   private final Loop loop = new Loop() {
     private DriveMode lastMode;
@@ -128,6 +133,7 @@ public class Drivetrain extends Subsystem {
     rightSlave2.follow(rightMaster);
     rightSlave2.setInverted(false);
 
+    navx = new AHRS(Port.kMXP);
 
     setBrakeMode(false);
   }
@@ -161,6 +167,8 @@ public class Drivetrain extends Subsystem {
   public void zeroSensors() {
     leftMaster.setSelectedSensorPosition(0);
     rightMaster.setSelectedSensorPosition(0);
+
+    navx.zeroYaw();
   }
 
   @Override
@@ -175,6 +183,12 @@ public class Drivetrain extends Subsystem {
   @Override
   public synchronized void readPeriodicInputs() {
     periodicIO.timestamp = Timer.getFPGATimestamp();
+
+    periodicIO.leftDistance = leftMaster.getSelectedSensorPosition();
+    periodicIO.rightDistance = rightMaster.getSelectedSensorPosition();
+
+    periodicIO.leftVelocity = leftMaster.getSelectedSensorVelocity();
+    periodicIO.rightVelocity = rightMaster.getSelectedSensorVelocity();
   }
 
   @Override
@@ -193,8 +207,36 @@ public class Drivetrain extends Subsystem {
 
     public double leftInput;
     public double rightInput;
+    public double leftDistance;
+    public double rightDistance;
+    public double leftVelocity;
+    public double rightVelocity;
 
     public double leftOutput;
     public double rightOutput;
+  }
+
+  public Rotation2d getHeading() {
+    return Rotation2d.fromDegrees(navx.getAngle());
+  }
+
+  public void setHeading(Rotation2d heading) {
+    navx.setAngleAdjustment(heading.getDegrees());
+  }
+
+  public double getLeftEncoderDistance() {
+    return periodicIO.leftDistance / RobotConstants.DT_TICKS_PER_INCH;
+  }
+
+  public double getRightEncoderDistance() {
+    return periodicIO.rightDistance / RobotConstants.DT_TICKS_PER_INCH;
+  }
+
+  public double getLeftLinearVelocity() {
+    return periodicIO.leftVelocity / RobotConstants.DT_TICKS_PER_INCH;
+  }
+
+  public double getRightLinearVelocity() {
+    return periodicIO.rightVelocity / RobotConstants.DT_TICKS_PER_INCH;
   }
 }
