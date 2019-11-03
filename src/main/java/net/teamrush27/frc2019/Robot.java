@@ -76,6 +76,8 @@ public class Robot extends TimedRobot {
 		AutoModeSelector.initAutoModeSelector();
 
 		drivetrain.zeroSensors();
+
+		System.out.println(String.format("Drive Mode defaulted to: %s Drive", cheesyDrive ? "Cheesy" : "Tank"));
 	}
 
 	/**
