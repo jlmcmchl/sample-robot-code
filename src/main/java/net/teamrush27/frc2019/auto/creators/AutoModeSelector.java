@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import net.teamrush27.frc2019.auto.AutoModeBase;
 import net.teamrush27.frc2019.auto.modes.DoNothing;
+import net.teamrush27.frc2019.auto.modes.DoSomething;
 
 public class AutoModeSelector {
 
@@ -57,6 +58,7 @@ public class AutoModeSelector {
 
   private static final AutoModeCreator[] ALL_MODES = {
       new AutoModeCreator("Nothing", () -> new DoNothing()),
+      new AutoModeCreator("Something", () -> new DoSomething()),
   };
 
 

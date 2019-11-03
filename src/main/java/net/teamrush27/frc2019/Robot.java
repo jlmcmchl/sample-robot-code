@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
 import net.teamrush27.frc2019.auto.creators.AutoModeSelector;
+import net.teamrush27.frc2019.auto.modes.DoSomething;
 import net.teamrush27.frc2019.base.JoysticksAndGamepadInterface;
 import net.teamrush27.frc2019.base.OperatorInterface;
 import net.teamrush27.frc2019.base.RobotState;
@@ -110,8 +111,8 @@ public class Robot extends TimedRobot {
 		enabledLooper.start();
 
 		// grab the selected auto mode and start it
-		autoModeExecutor.setAutoMode(AutoModeSelector.getSelectedAutoMode());
-		//autoModeExecutor.start();
+		autoModeExecutor.setAutoMode(new DoSomething()); // AutoModeSelector.getSelectedAutoMode());
+		autoModeExecutor.start();
 
 		// tell the program the auto mode has been ran
 		autoRan = true;
