@@ -75,6 +75,9 @@ public class Drivetrain extends Subsystem {
         case OPEN_LOOP:
           driveMode = handleOpenLoop();
           break;
+        case TURN_TO_HEADING:
+          driveMode = handleTurnToHeading();
+          break;
         case DRIVE_DISTANCE:
           driveMode = handleDriveDistance();
           break;
@@ -117,6 +120,26 @@ public class Drivetrain extends Subsystem {
     return DriveMode.OPEN_LOOP;
   }
 
+  public void setTurnToHeading(double heading) {
+    // TODO figure it out
+    if (!driveMode.equals(DriveMode.TURN_TO_HEADING)) {
+      // STUFF
+      leftMaster.selectProfileSlot(0, 0);
+      rightMaster.selectProfileSlot(0, 0);
+
+      periodicIO.clearInputs();
+      driveMode = DriveMode.TURN_TO_HEADING;
+    }
+
+    periodicIO.goalHeading = heading;
+  }
+
+  private DriveMode handleTurnToHeading() {
+    periodicIO.leftOutput = periodicIO.leftDistance;
+    periodicIO.rightOutput = periodicIO.rightDistance;
+
+    return DriveMode.TURN_TO_HEADING;
+  }
 
   public void setDriveDistance(double distance) {
     if (!driveMode.equals(DriveMode.DRIVE_DISTANCE)) {
