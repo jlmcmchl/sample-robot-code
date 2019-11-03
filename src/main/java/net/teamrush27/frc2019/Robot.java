@@ -53,6 +53,8 @@ public class Robot extends TimedRobot {
 
 	private boolean autoRan;
 
+	private boolean cheesyDrive;
+
 	/**
 	 * Called <i>once</i> when the robot is first started
 	 */
@@ -220,6 +222,11 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void disabledPeriodic() {
+		if (operatorInterface.toggleDriveStyle()) {
+			cheesyDrive = !cheesyDrive;
+
+			System.out.println(String.format("Set Drive Mode to: %s Drive", cheesyDrive ? "Cheesy" : "Tank"));
+		}
 	}
 
 	/**
@@ -227,7 +234,8 @@ public class Robot extends TimedRobot {
 	 * modes
 	 */
 	private void driverControl() {
-		DriveCommand command = operatorInterface.getCheezyishDrive();
+
+		DriveCommand command = cheesyDrive ? operatorInterface.getCheezyishDrive() : operatorInterface.getTankCommand();
 
 		drivetrain.setOpenLoop(command.getLeftDriveInput(), command.getRightDriveInput());
 	}
