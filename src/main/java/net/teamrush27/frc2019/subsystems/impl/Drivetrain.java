@@ -78,6 +78,9 @@ public class Drivetrain extends Subsystem {
         case DRIVE_DISTANCE:
           driveMode = handleDriveDistance();
           break;
+        case DRIVE_VELOCITY:
+          driveMode = handleDriveVelocity();
+          break;
         default:
           LOG.warn("Unexpected drive mode: " + driveMode);
           break;
@@ -134,6 +137,25 @@ public class Drivetrain extends Subsystem {
     periodicIO.rightOutput = periodicIO.goalRightDistance;
 
     return DriveMode.DRIVE_DISTANCE;
+  }
+
+  public void setDriveVelocity(double velocity) {
+    if (!driveMode.equals(DriveMode.DRIVE_VELOCITY)) {
+      leftMaster.selectProfileSlot(1, 0);
+      rightMaster.selectProfileSlot(1, 0);
+
+      periodicIO.clearInputs();
+      driveMode = DriveMode.DRIVE_VELOCITY;
+    }
+
+    periodicIO.goalVelocity = velocity;
+  }
+
+  private DriveMode handleDriveVelocity() {
+    periodicIO.leftOutput = periodicIO.goalVelocity;
+    periodicIO.rightOutput = periodicIO.goalVelocity;
+
+    return DriveMode.DRIVE_VELOCITY;
   }
 
   public Drivetrain() {
