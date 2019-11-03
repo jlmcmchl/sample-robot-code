@@ -17,7 +17,12 @@ public interface OperatorInterface {
 	/**
 	 * @return if the driver wants to stop auto mode
 	 */
-	Boolean wantsAutoStop();
+	Boolean wantsAutoStop(boolean cheesyDrive);
+
+	/*
+	 * @return if the operator wants to toggle between cheesy and tank drive
+	 */
+	Boolean toggleDriveStyle();
 	
 	/**
 	 * Clears joystick and gamepad button presses

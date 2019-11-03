@@ -124,7 +124,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		// If we're interrupted by driver's input
-		if (operatorInterface.wantsAutoStop()) {
+		if (operatorInterface.wantsAutoStop(cheesyDrive)) {
 			// stop the auto mode
 			autoModeExecutor.stop();
 
