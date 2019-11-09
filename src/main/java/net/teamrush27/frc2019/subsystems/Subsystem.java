@@ -21,6 +21,8 @@ public abstract class Subsystem {
     public void writePeriodicOutputs() {
     }
 
+    public abstract boolean checkSystem();
+
     public String id() {
         return "IMPLEMENT ME";
     }

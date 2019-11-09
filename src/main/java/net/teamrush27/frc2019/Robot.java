@@ -7,6 +7,7 @@
 
 package net.teamrush27.frc2019;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import net.teamrush27.frc2019.auto.AutoModeExecutor;
@@ -91,7 +92,8 @@ public class Robot extends TimedRobot {
 		AutoModeSelector.update();
 
 		Map.Entry<InterpolatingDouble, Pose2d> latest = robotState.getLatestFieldToVehicle();
-		//System.out.println(String.format("%s - %s", latest.getKey().value, latest.getValue()));
+		// System.out.println(String.format("%s - %s", latest.getKey().value,
+		// latest.getValue()));
 	}
 
 	/**
@@ -177,13 +179,22 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void testInit() {
-		LOG.info("testInit()");
+		try {
+			LOG.info("testInit()");
+			System.out.println("Starting check systems.");
 
-		// stop running the enabled code
-		enabledLooper.stop();
+			disabledLooper.stop();
+			enabledLooper.stop();
 
-		// stop running the disabled code
-		disabledLooper.stop();
+			if (subsystemManager.checkSubsystems()) {
+				System.out.println("ALL SYSTEMS PASSED");
+			} else {
+				System.out.println("CHECK ABOVE OUTPUT SOME SYSTEMS FAILED!!!");
+			}
+		} catch (Throwable t) {
+			DriverStation.reportError(t.getMessage(), t.getStackTrace());
+			throw t;
+		}
 	}
 
 	/**

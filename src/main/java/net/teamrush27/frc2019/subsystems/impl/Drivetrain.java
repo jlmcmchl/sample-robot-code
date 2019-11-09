@@ -103,6 +103,12 @@ public class Drivetrain extends Subsystem {
 
   };
 
+  @Override
+  public boolean checkSystem() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
   public void setOpenLoop(double leftInput, double rightInput) {
     if (!driveMode.equals(DriveMode.OPEN_LOOP)) {
       periodicIO.clearInputs();

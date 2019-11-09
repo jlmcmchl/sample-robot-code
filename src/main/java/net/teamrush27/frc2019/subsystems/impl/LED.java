@@ -134,4 +134,10 @@ public class LED extends Subsystem {
 	public void test() {
 	
 	}
+
+	@Override
+	public boolean checkSystem() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
