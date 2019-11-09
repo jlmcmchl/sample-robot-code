@@ -91,7 +91,7 @@ public class Robot extends TimedRobot {
 		AutoModeSelector.update();
 
 		Map.Entry<InterpolatingDouble, Pose2d> latest = robotState.getLatestFieldToVehicle();
-		System.out.println(String.format("%s - %s", latest.getKey().value, latest.getValue()));
+		//System.out.println(String.format("%s - %s", latest.getKey().value, latest.getValue()));
 	}
 
 	/**

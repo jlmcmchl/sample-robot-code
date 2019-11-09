@@ -58,7 +58,7 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
       return new DriveCommand(0.0, 0.0);
     }
 
-    double throttle = driver.getY(Hand.kLeft);
+    double throttle = -driver.getY(Hand.kLeft);
     double wheel = driver.getX(Hand.kRight);
     boolean quickTurn = driver.getBumper(Hand.kRight);
 
@@ -98,7 +98,7 @@ public class JoysticksAndGamepadInterface implements OperatorInterface {
 
   @Override
   public Boolean toggleDriveStyle() {
-    return gamePad.getOptionsButtonPressed();
+    return gamePad.getStickButtonPressed(Hand.kLeft);
   }
 
   @Override

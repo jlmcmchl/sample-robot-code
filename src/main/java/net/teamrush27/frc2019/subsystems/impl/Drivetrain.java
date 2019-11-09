@@ -186,36 +186,36 @@ public class Drivetrain extends Subsystem {
 
     leftMaster = new TalonSRX(11);
     leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-    leftMaster.setSensorPhase(false);
-    leftMaster.setInverted(true);
+    leftMaster.setSensorPhase(true);
+    leftMaster.setInverted(false);
 
     leftSlave1 = new TalonSRX(13);
     leftSlave1.follow(leftMaster);
-    leftSlave1.setInverted(true);
+    leftSlave1.setInverted(false);
 
     leftSlave2 = new TalonSRX(15);
     leftSlave2.follow(leftMaster);
-    leftSlave2.setInverted(true);
+    leftSlave2.setInverted(false);
 
     rightMaster = new TalonSRX(12);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     rightMaster.setSensorPhase(true);
-    rightMaster.setInverted(false);
+    rightMaster.setInverted(true);
 
     rightSlave1 = new TalonSRX(14);
     rightSlave1.follow(rightMaster);
-    rightSlave1.setInverted(false);
+    rightSlave1.setInverted(true);
 
     rightSlave2 = new TalonSRX(16);
     rightSlave2.follow(rightMaster);
-    rightSlave2.setInverted(false);
+    rightSlave2.setInverted(true);
 
 
     /* Drivetrain PID Constants */
     // Left Slot 0 - Motion Magic
     leftMaster.config_kP(0, 1.0);
     leftMaster.config_kI(0, 0.0);
-    leftMaster.config_kD(0, 0.0);
+    leftMaster.config_kD(0, 10.0);
     leftMaster.config_kF(0, 0.0);
 
     // Left slot 1 - Velocity
@@ -231,7 +231,7 @@ public class Drivetrain extends Subsystem {
     //
     rightMaster.config_kP(0, 1.0);
     rightMaster.config_kI(0, 0.0);
-    rightMaster.config_kD(0, 0.0);
+    rightMaster.config_kD(0, 10.0);
     rightMaster.config_kF(0, 0.0);
 
     rightMaster.config_kP(1, 1.0 / RobotConstants.DRIVE_CRUISE_VELOCITY);
