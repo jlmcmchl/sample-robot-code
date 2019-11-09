@@ -1,5 +1,7 @@
 package net.teamrush27.frc2019.subsystems.impl;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -17,6 +19,9 @@ import net.teamrush27.frc2019.loops.ILooper;
 import net.teamrush27.frc2019.loops.Loop;
 import net.teamrush27.frc2019.subsystems.Subsystem;
 import net.teamrush27.frc2019.subsystems.impl.enumerated.DriveMode;
+import net.teamrush27.frc2019.util.LazyTalonSRX;
+import net.teamrush27.frc2019.util.MotorChecker;
+import net.teamrush27.frc2019.util.TalonSRXChecker;
 import net.teamrush27.frc2019.util.math.Rotation2d;
 
 public class Drivetrain extends Subsystem {
@@ -106,7 +111,47 @@ public class Drivetrain extends Subsystem {
   @Override
   public boolean checkSystem() {
     // TODO Auto-generated method stub
-    return false;
+
+    setBrakeMode(false);
+    Drivetrain self = this;
+    
+    boolean leftSide = TalonSRXChecker.checkMotors(this, new ArrayList<MotorChecker.MotorConfig<TalonSRX>>() {
+      private static final long serialVersionUID = 10;
+
+      {
+        add(new MotorChecker.MotorConfig<>("leftMaster", leftMaster));
+        add(new MotorChecker.MotorConfig<>("leftSlave1", leftSlave1));
+        add(new MotorChecker.MotorConfig<>("leftSlave2", leftSlave2));
+      }
+    }, new MotorChecker.CheckerConfig() {
+      {
+        mCurrentFloor = 3;
+        mRPMFloor = 300;
+        mCurrentEpsilon = 1.0;
+        mRPMEpsilon = 50;
+        mRPMSupplier = self::getTestLeftVelocity;
+      }
+    });
+
+    boolean rightSide = TalonSRXChecker.checkMotors(this, new ArrayList<MotorChecker.MotorConfig<TalonSRX>>() {
+      private static final long serialVersionUID = 11;
+
+      {
+        add(new MotorChecker.MotorConfig<>("rightMaster", rightMaster));
+        add(new MotorChecker.MotorConfig<>("rightSlave1", rightSlave1));
+        add(new MotorChecker.MotorConfig<>("rightSlave2", rightSlave2));
+      }
+    }, new MotorChecker.CheckerConfig() {
+      {
+        mCurrentFloor = 3;
+        mRPMFloor = 300;
+        mCurrentEpsilon = 1.0;
+        mRPMEpsilon = 50;
+        mRPMSupplier = self::getTestRightelocity;
+      }
+    });
+
+    return leftSide && rightSide;
   }
 
   public void setOpenLoop(double leftInput, double rightInput) {
@@ -190,29 +235,29 @@ public class Drivetrain extends Subsystem {
   public Drivetrain() {
     periodicIO = new PeriodicIO();
 
-    leftMaster = new TalonSRX(11);
+    leftMaster = new LazyTalonSRX(11);
     leftMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     leftMaster.setSensorPhase(true);
     leftMaster.setInverted(false);
 
-    leftSlave1 = new TalonSRX(13);
+    leftSlave1 = new LazyTalonSRX(13);
     leftSlave1.follow(leftMaster);
     leftSlave1.setInverted(false);
 
-    leftSlave2 = new TalonSRX(15);
+    leftSlave2 = new LazyTalonSRX(15);
     leftSlave2.follow(leftMaster);
     leftSlave2.setInverted(false);
 
-    rightMaster = new TalonSRX(12);
+    rightMaster = new LazyTalonSRX(12);
     rightMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     rightMaster.setSensorPhase(true);
     rightMaster.setInverted(true);
 
-    rightSlave1 = new TalonSRX(14);
+    rightSlave1 = new LazyTalonSRX(14);
     rightSlave1.follow(rightMaster);
     rightSlave1.setInverted(true);
 
-    rightSlave2 = new TalonSRX(16);
+    rightSlave2 = new LazyTalonSRX(16);
     rightSlave2.follow(rightMaster);
     rightSlave2.setInverted(true);
 
@@ -385,5 +430,13 @@ public class Drivetrain extends Subsystem {
 
   public double getRightLinearVelocity() {
     return periodicIO.rightVelocity / RobotConstants.DT_TICKS_PER_INCH;
+  }
+
+  public double getTestLeftVelocity() {
+    return leftMaster.getSelectedSensorVelocity() / 4096.0 * 10.0 * 60.0;
+  }
+
+  public double getTestRightelocity() {
+    return rightMaster.getSelectedSensorVelocity() / 4096.0 * 10.0 * 60.0;
   }
 }
